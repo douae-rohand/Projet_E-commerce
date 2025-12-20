@@ -1,8 +1,110 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Accueil";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="gradient-hero min-vh-85 d-flex align-items-center position-relative overflow-hidden">
+    <!-- Decorative elements -->
+    <div class="shape-blob bg-ciel-30 blur-3xl position-absolute" style="top: 20px; right: 10px; width: 18rem; height: 18rem; z-index: 0;"></div>
+    <div class="shape-blob bg-sable-30 blur-3xl position-absolute" style="bottom: 20px; left: 10px; width: 24rem; height: 24rem; z-index: 0;"></div>
+    <div class="shape-blob bg-terracotta-10 blur-3xl position-absolute top-50 start-50 translate-middle" style="width: 600px; height: 600px; z-index: 0;"></div>
+
+    <!-- Geometric patterns - Moroccan zellige inspired -->
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0.03; z-index: 0;">
+        <svg class="w-100 h-100" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <pattern id="moroccan-pattern" patternUnits="userSpaceOnUse" width="20" height="20">
+                <path d="M10 0 L20 10 L10 20 L0 10 Z" fill="currentColor" />
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#moroccan-pattern)" />
+        </svg>
+    </div>
+
+    <div class="container position-relative z-1" style="z-index: 10;">
+        <div class="row align-items-center gy-5">
+            <!-- Content -->
+            <div class="col-lg-6 text-center text-lg-start">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-white border shadow-soft animate-fade-in-up mb-4">
+                    <i class="bi bi-flower1 text-terracotta"></i>
+                    <span class="small fw-medium text-muted">
+                        Produits 100% artisanaux & éco-responsables
+                    </span>
+                </div>
+
+                <h1 class="display-4 fw-bold lh-1 mb-4 animate-fade-in-up stagger-1 font-display">
+                    Coopératives
+                    <span class="text-primary position-relative d-inline-block text-terracotta">
+                        du Maroc
+                        <svg class="position-absolute start-0 w-100" style="bottom: -10px;" viewBox="0 0 200 12" fill="none">
+                            <path d="M2 8C50 2 150 2 198 8" stroke="var(--terracotta)" stroke-width="4" stroke-linecap="round" />
+                        </svg>
+                    </span>
+                    <br />
+                    Trésors Authentiques
+                </h1>
+
+                <p class="lead text-muted mb-4 animate-fade-in-up stagger-2 mx-auto mx-lg-0" style="max-width: 600px;">
+                    Découvrez les produits uniques de nos coopératives artisanales marocaines.
+                    Huile d'argan, miel, safran, tapis berbères et bien plus, directement des producteurs.
+                </p>
+
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start animate-fade-in-up stagger-3 mb-5">
+                    <a asp-controller="Catalog" asp-action="Index" class="btn btn-hero btn-lg d-flex align-items-center justify-content-center gap-2">
+                        Explorer nos coopératives
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <a asp-controller="Partners" asp-action="Join" class="btn btn-glass btn-lg">
+                        Devenir partenaire
+                    </a>
+                </div>
+
+                <!-- Stats -->
+                <div class="row g-4 pt-2 animate-fade-in-up stagger-4 justify-content-center justify-content-lg-start">
+                    <div class="col-4 col-sm-auto text-center text-lg-start">
+                        <div class="d-flex align-items-center gap-2 justify-content-center justify-content-lg-start mb-1">
+                            <i class="bi bi-people text-terracotta"></i>
+                            <span class="fs-3 fw-bold font-display">120+</span>
+                        </div>
+                        <p class="small text-muted mb-0">Coopératives</p>
+                    </div>
+                    <div class="col-4 col-sm-auto text-center text-lg-start">
+                        <div class="d-flex align-items-center gap-2 justify-content-center justify-content-lg-start mb-1">
+                            <i class="bi bi-award text-terracotta"></i>
+                            <span class="fs-3 fw-bold font-display">2500+</span>
+                        </div>
+                        <p class="small text-muted mb-0">Artisans</p>
+                    </div>
+                    <div class="col-4 col-sm-auto text-center text-lg-start">
+                        <div class="d-flex align-items-center gap-2 justify-content-center justify-content-lg-start mb-1">
+                            <i class="bi bi-emoji-smile text-terracotta"></i>
+                            <span class="fs-3 fw-bold font-display">15K+</span>
+                        </div>
+                        <p class="small text-muted mb-0">Clients satisfaits</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Image -->
+            <div class="col-lg-6 d-none d-lg-block position-relative">
+                <div class="position-relative w-100 ratio ratio-1x1 max-w-lg mx-auto" style="max-width: 500px;">
+                    <!-- Background Gradient -->
+                    <div class="position-absolute w-100 h-100 rounded-3xl" style="background: linear-gradient(135deg, rgba(129, 178, 154, 0.3), rgba(242, 204, 143, 0.3)); transform: rotate(6deg); top: 0; left: 0;"></div>
+                    
+                    <!-- Main Image -->
+                    <div class="position-absolute w-100 h-100 rounded-3xl overflow-hidden shadow-elevated animate-float bg-white">
+                        <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=600&h=600&fit=crop"
+                             alt="Femmes artisanes marocaines coopérative"
+                             class="w-100 h-100 object-fit-cover" />
+                    </div>                
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Category Section -->
+<partial name="_CategorySection" />
+
+<!-- Featured Products Section -->
+<partial name="_FeaturedProducts" />
+
+<!-- Newsletter Section -->
+<partial name="_NewsletterSection" />

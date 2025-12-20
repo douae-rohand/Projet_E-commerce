@@ -1,0 +1,95 @@
+<section class="py-5 bg-light">
+    <div class="container">
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row align-items-md-end justify-content-md-between gap-3 mb-5">
+            <div>
+                <span class="small fw-medium text-terracotta mb-2 d-block">Nos Spécialités</span>
+                <h2 class="display-5 font-display fw-bold mb-3">
+                    Trésors des Coopératives
+                </h2>
+                <p class="text-muted" style="max-width: 500px;">
+                    Des produits authentiques issus du savoir-faire ancestral des artisans marocains
+                </p>
+            </div>
+            <a asp-controller="Categories" asp-action="Index" class="category-link-all">
+                Toutes les catégories
+                <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </div>
+
+        <!-- Categories Grid -->
+        <div class="row g-3 g-md-4">
+            <!-- Category 1: Huiles & Cosmétiques -->
+            <div class="col-6 col-lg-3">
+                <a asp-controller="Catalog" asp-action="Index" asp-route-category="1" class="category-card animate-fade-in-up">
+                    <img src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&h=500&fit=crop"
+                         alt="Huiles & Cosmétiques"
+                         class="category-image" />
+                    <div class="category-overlay category-overlay-sable"></div>
+                    <div class="category-content">
+                        <h3 class="category-title">Huiles & Cosmétiques</h3>
+                        <p class="category-description">Argan, cactus, nigelle</p>
+                        <p class="category-count">85 produits</p>
+                    </div>
+                    <div class="category-hover-icon">
+                        <i class="bi bi-arrow-right"></i>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Category 2: Miel & Produits de la Ruche -->
+            <div class="col-6 col-lg-3">
+                <a asp-controller="Catalog" asp-action="Index" asp-route-category="2" class="category-card animate-fade-in-up stagger-1">
+                    <img src="https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=500&fit=crop"
+                         alt="Miel & Produits de la Ruche"
+                         class="category-image" />
+                    <div class="category-overlay category-overlay-terracotta"></div>
+                    <div class="category-content">
+                        <h3 class="category-title">Miel & Produits de la Ruche</h3>
+                        <p class="category-description">Miel, gelée royale, propolis</p>
+                        <p class="category-count">42 produits</p>
+                    </div>
+                    <div class="category-hover-icon">
+                        <i class="bi bi-arrow-right"></i>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Category 3: Épices & Safran -->
+            <div class="col-6 col-lg-3">
+                <a asp-controller="Catalog" asp-action="Index" asp-route-category="3" class="category-card animate-fade-in-up stagger-2">
+                    <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=500&fit=crop"
+                         alt="Épices & Safran"
+                         class="category-image" />
+                    <div class="category-overlay category-overlay-primary"></div>
+                    <div class="category-content">
+                        <h3 class="category-title">Épices & Safran</h3>
+                        <p class="category-description">Safran de Taliouine, Ras el Hanout</p>
+                        <p class="category-count">65 produits</p>
+                    </div>
+                    <div class="category-hover-icon">
+                        <i class="bi bi-arrow-right"></i>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Category 4: Tapis & Artisanat -->
+            <div class="col-6 col-lg-3">
+                <a asp-controller="Catalog" asp-action="Index" asp-route-category="4" class="category-card animate-fade-in-up stagger-3">
+                    <img src="https://images.unsplash.com/photo-1600166898405-da9535204843?w=400&h=500&fit=crop"
+                         alt="Tapis & Artisanat"
+                         class="category-image" />
+                    <div class="category-overlay category-overlay-ciel"></div>
+                    <div class="category-content">
+                        <h3 class="category-title">Tapis & Artisanat</h3>
+                        <p class="category-description">Tapis berbères, poterie, cuir</p>
+                        <p class="category-count">120 produits</p>
+                    </div>
+                    <div class="category-hover-icon">
+                        <i class="bi bi-arrow-right"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
