@@ -1,0 +1,140 @@
+@{
+    ViewData["Title"] = "Tapis Berbère Traditionnel - SoukDigital";
+}
+
+<!-- Breadcrumb -->
+<div class="bg-light py-3 border-bottom">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="/catalog" class="text-decoration-none text-muted">Catalogue</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Tapis Berbère</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-5">
+        <!-- Images -->
+        <div class="col-lg-6">
+            <div class="sticky-top" style="top: 100px;">
+                <div class="rounded-4 overflow-hidden shadow-soft mb-3">
+                    <img id="main-product-image" src="https://images.unsplash.com/photo-1600166898405-da9535204843?w=800&h=800&fit=crop" class="img-fluid w-100" alt="Product">
+                </div>
+                <div class="d-flex gap-2">
+                    @{
+                        var images = new[] {
+                            "https://images.unsplash.com/photo-1600166898405-da9535204843?w=800&h=800&fit=crop",
+                            "https://images.unsplash.com/photo-1531835551805-16d864c8d311?w=800&h=800&fit=crop",
+                            "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=800&fit=crop"
+                        };
+                    }
+                    @foreach (var img in images) {
+                        <button class="btn p-0 border rounded-3 overflow-hidden thumbnail-btn" style="width: 80px; height: 80px;" onclick="document.getElementById('main-product-image').src='@img'">
+                            <img src="@img" class="img-fluid h-100 w-100 object-fit-cover" alt="Thumbnail">
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Info -->
+        <div class="col-lg-6">
+            <div class="ps-lg-4">
+                <span class="text-terracotta fw-bold small text-uppercase mb-2 d-block">Tapis & Textiles</span>
+                <h1 class="font-display display-5 fw-bold mb-3">Tapis Berbère Traditionnel</h1>
+                
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="d-flex text-warning">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-half"></i>
+                    </div>
+                    <span class="fw-bold">4.8</span>
+                    <span class="text-muted small">(124 avis clients)</span>
+                </div>
+
+                <div class="d-flex align-items-baseline gap-3 mb-4">
+                    <span class="display-6 fw-bold text-dark">1,200.00 MAD</span>
+                    <span class="h4 text-muted text-decoration-line-through">1,500.00 MAD</span>
+                </div>
+
+                <p class="text-muted mb-5 lead">
+                    Magnifique tapis berbère fait main par les artisans du Haut Atlas. Chaque pièce est unique et raconte une histoire à travers ses motifs traditionnels. Tissé avec de la laine naturelle de qualité supérieure.
+                </p>
+
+                <!-- Variants -->
+                <div class="mb-4 pt-4 border-top">
+                    <label class="form-label fw-bold small text-uppercase">Taille</label>
+                    <div class="d-flex flex-wrap gap-2">
+                        <input type="radio" class="btn-check" name="size" id="size1" checked>
+                        <label class="btn btn-outline-dark px-4 rounded-3" for="size1">100x150 cm</label>
+                        
+                        <input type="radio" class="btn-check" name="size" id="size2">
+                        <label class="btn btn-outline-dark px-4 rounded-3" for="size2">150x200 cm</label>
+                        
+                        <input type="radio" class="btn-check" name="size" id="size3">
+                        <label class="btn btn-outline-dark px-4 rounded-3" for="size3">200x300 cm</label>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="form-label fw-bold small text-uppercase">Couleur</label>
+                    <div class="d-flex flex-wrap gap-2">
+                        <input type="radio" class="btn-check" name="color" id="color1" checked>
+                        <label class="btn btn-outline-dark px-4 rounded-3" for="color1">Naturel</label>
+                        
+                        <input type="radio" class="btn-check" name="color" id="color2">
+                        <label class="btn btn-outline-dark px-4 rounded-3" for="color2">Rouge & Noir</label>
+                    </div>
+                </div>
+
+                <!-- Quantity & Add to Cart -->
+                <div class="row g-3 mb-5">
+                    <div class="col-md-4">
+                        <div class="input-group border rounded-3 overflow-hidden">
+                            <button class="btn btn-light px-3 py-2 border-0" type="button"><i class="bi bi-dash"></i></button>
+                            <input type="text" class="form-control border-0 text-center fw-bold" value="1">
+                            <button class="btn btn-light px-3 py-2 border-0" type="button"><i class="bi bi-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-primary btn-lg w-100 rounded-3 shadow-soft py-3 fw-bold d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi bi-cart3"></i> Ajouter au panier
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-dark btn-lg w-100 rounded-3 shadow-soft py-3">
+                            <i class="bi bi-heart"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trust Badges -->
+                <div class="row g-3 pt-5 border-top text-center text-md-start">
+                    <div class="col-4">
+                        <i class="bi bi-truck h3 text-majorelle mb-2 d-block"></i>
+                        <p class="small text-muted mb-0">Livraison 24-48h</p>
+                    </div>
+                    <div class="col-4">
+                        <i class="bi bi-shield-check h3 text-majorelle mb-2 d-block"></i>
+                        <p class="small text-muted mb-0">Paiement Sécurisé</p>
+                    </div>
+                    <div class="col-4">
+                        <i class="bi bi-arrow-counterclockwise h3 text-majorelle mb-2 d-block"></i>
+                        <p class="small text-muted mb-0">Retour 14 Jours</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .thumbnail-btn:focus { border-color: var(--primary) !important; box-shadow: none; }
+    .btn-check:checked + .btn-outline-dark { background-color: var(--primary); border-color: var(--primary); color: white; }
+</style>

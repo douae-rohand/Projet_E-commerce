@@ -1,0 +1,99 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Inscription - SoukDigital";
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+</head>
+<body class="bg-white">
+    <div class="container-fluid p-0">
+        <div class="row g-0 min-vh-100 flex-row-reverse">
+            <!-- Right Side - Form -->
+            <div class="col-lg-6 d-flex align-items-center justify-content-center p-4 p-md-5">
+                <div class="w-100" style="max-width: 450px;">
+                    <div class="text-center mb-5">
+                        <a href="/" class="d-inline-block mb-4">
+                            <div class="rounded-4 bg-primary text-white d-flex align-items-center justify-content-center mx-auto shadow-elevated" style="width: 56px; height: 56px;">
+                                <span class="font-display h3 mb-0">S</span>
+                            </div>
+                        </a>
+                        <h1 class="font-display fw-bold h2 mb-2">Créer un compte</h1>
+                        <p class="text-muted">Rejoignez la communauté de l'artisanat marocain</p>
+                    </div>
+
+                    <form>
+                        <div class="row g-3 mb-4">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-uppercase">Prénom</label>
+                                <input type="text" class="form-control bg-light py-3 border-0 rounded-3" placeholder="Prénom" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-uppercase">Nom</label>
+                                <input type="text" class="form-control bg-light py-3 border-0 rounded-3" placeholder="Nom" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-uppercase">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0 px-3"><i class="bi bi-envelope text-muted"></i></span>
+                                <input type="email" class="form-control bg-light border-0 py-3 rounded-end-3" placeholder="votre@email.com" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-uppercase">Téléphone</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0 px-3"><i class="bi bi-telephone text-muted"></i></span>
+                                <input type="tel" class="form-control bg-light border-0 py-3 rounded-end-3" placeholder="+212 6XX XX XX XX" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-uppercase">Mot de passe</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0 px-3"><i class="bi bi-lock text-muted"></i></span>
+                                <input type="password" class="form-control bg-light border-0 py-3 rounded-end-3" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4 form-check">
+                            <input type="checkbox" class="form-check-input" id="terms" required>
+                            <label class="form-check-label small text-muted" for="terms">
+                                J'accepte les <a href="#" class="text-primary text-decoration-none fw-bold">conditions générales</a>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 py-3 rounded-3 shadow-soft fw-bold mb-4">
+                            Créer mon compte
+                        </button>
+                    </form>
+
+                    <p class="text-center mt-4 small text-muted">
+                        Déjà un compte ? <a href="/login" class="text-primary fw-bold text-decoration-none">Se connecter</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Left Side - Image -->
+            <div class="col-lg-6 d-none d-lg-block position-relative overflow-hidden">
+                <div class="position-absolute inset-0 bg-secondary opacity-75" style="z-index: 1;"></div>
+                <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1200&h=1600&fit=crop" class="position-absolute h-100 w-100 object-fit-cover" alt="Artisanat" style="filter: contrast(110%) brightness(80%);">
+                <div class="position-absolute d-flex flex-column align-items-center justify-content-center text-white text-center p-5 w-100 h-100" style="z-index: 2;">
+                    <h2 class="font-display display-4 fw-bold mb-4">Rejoignez-nous</h2>
+                    <p class="lead opacity-75 max-w-md mx-auto">Créez votre compte et profitez d'offres exclusives sur nos produits artisanaux.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
