@@ -19,7 +19,7 @@
                 <a asp-controller="Home" asp-action="Index" class="nav-link-custom">Accueil</a>
                 <a asp-controller="Catalog" asp-action="Index" class="nav-link-custom">Produits</a>
                 <a asp-controller="Cooperatives" asp-action="Index" class="nav-link-custom">Coopératives</a>
-                <a asp-controller="About" asp-action="Index" class="nav-link-custom">Notre Mission</a>
+                <a asp-controller="About" asp-action="Index" class="nav-link-custom">A propos</a>
             </nav>
 
             <!-- Actions -->
@@ -31,21 +31,38 @@
                     </button>
                 </div>
 
-                <!-- Wishlist -->
-                <a asp-controller="Wishlist" asp-action="Index" class="btn btn-ghost btn-icon d-none d-sm-flex">
-                    <i class="bi bi-heart"></i>
-                </a>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <!-- Cart (Authenticated) -->
+                    <a asp-controller="Cart" asp-action="Index" class="btn btn-ghost btn-icon position-relative">
+                        <i class="bi bi-cart3"></i>
+                        <span class="cart-badge">3</span>
+                    </a>
 
-                <!-- Cart -->
-                <a asp-controller="Cart" asp-action="Index" class="btn btn-ghost btn-icon position-relative">
-                    <i class="bi bi-cart3"></i>
-                    <span class="cart-badge">3</span>
-                </a>
+                    <!-- Account (Authenticated) -->
+                    <a asp-controller="Account" asp-action="Profile" class="btn btn-ghost btn-icon">
+                        <i class="bi bi-person"></i>
+                    </a>
+                }
+                else
+                {
+                    <!-- Login Button (Not Authenticated) -->
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary px-3 py-2 d-none d-sm-flex">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Connexion
+                    </a>
 
-                <!-- User -->
-                <a asp-controller="Account" asp-action="Login" class="btn btn-ghost btn-icon">
-                    <i class="bi bi-person"></i>
-                </a>
+                    <!-- Register Button (Not Authenticated) -->
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary px-3 py-2 d-none d-sm-flex">
+                        <i class="bi bi-person-plus me-2"></i>
+                        S'inscrire
+                    </a>
+
+                    <!-- Mobile Login Icon (Not Authenticated) -->
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-ghost btn-icon d-sm-none">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                    </a>
+                }
 
                 <!-- Mobile Menu Toggle -->
                 <button class="btn btn-ghost btn-icon d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
