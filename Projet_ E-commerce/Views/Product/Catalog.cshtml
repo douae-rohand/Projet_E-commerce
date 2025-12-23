@@ -1,0 +1,169 @@
+@{
+    ViewData["Title"] = "Catalogue - Artisanat Marocain";
+}
+
+<!-- Breadcrumb -->
+<div class="bg-light py-3 border-bottom">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Accueil</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Catalogue</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Sidebar Filters -->
+        <aside class="col-lg-3 d-none d-lg-block">
+            <div class="sticky-top" style="top: 100px;">
+                <div class="mb-5">
+                    <h5 class="font-display fw-bold mb-4">Catégories</h5>
+                    <div class="list-group list-group-flush">
+                        @{
+                            var filterCategories = new[] { "Tapis & Textiles", "Poterie & Céramique", "Bijoux & Accessoires", "Décoration", "Huiles & Cosmétiques", "Miel & Produits Bio" };
+                        }
+                        @foreach (var cat in filterCategories) {
+                            <label class="list-group-item border-0 px-0 d-flex align-items-center gap-3 bg-transparent cursor-pointer group">
+                                <input class="form-check-input mt-0 border-majorelle" type="checkbox">
+                                <span class="small text-muted group-hover-dark">@cat</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-5 border-top pt-4">
+                    <h5 class="font-display fw-bold mb-4">Prix</h5>
+                    <div class="list-group list-group-flush">
+                        @{
+                            var prices = new[] { "0 - 200 MAD", "200 - 500 MAD", "500 - 1000 MAD", "1000+ MAD" };
+                        }
+                        @foreach (var price in prices) {
+                            <label class="list-group-item border-0 px-0 d-flex align-items-center gap-3 bg-transparent cursor-pointer group">
+                                <input class="form-check-input mt-0 border-majorelle" type="checkbox">
+                                <span class="small text-muted group-hover-dark">@price</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-5 border-top pt-4">
+                    <h5 class="font-display fw-bold mb-4">Disponibilité</h5>
+                    <div class="list-group list-group-flush">
+                        <label class="list-group-item border-0 px-0 d-flex align-items-center gap-3 bg-transparent cursor-pointer group">
+                            <input class="form-check-input mt-0 border-majorelle" type="checkbox" checked>
+                            <span class="small text-muted group-hover-dark">En stock</span>
+                        </label>
+                        <label class="list-group-item border-0 px-0 d-flex align-items-center gap-3 bg-transparent cursor-pointer group">
+                            <input class="form-check-input mt-0 border-majorelle" type="checkbox">
+                            <span class="small text-muted group-hover-dark">Promo</span>
+                        </label>
+                        <label class="list-group-item border-0 px-0 d-flex align-items-center gap-3 bg-transparent cursor-pointer group">
+                            <input class="form-check-input mt-0 border-majorelle" type="checkbox">
+                            <span class="small text-muted group-hover-dark">Nouveautés</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Toolbar -->
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn btn-outline-dark d-lg-none py-2 px-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters">
+                        <i class="bi bi-sliders me-2"></i> Filtres
+                    </button>
+                    <p class="text-muted small mb-0"><span class="fw-bold text-dark">24</span> produits trouvés</p>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <div class="btn-group btn-group-sm rounded-3 overflow-hidden border">
+                        <button class="btn btn-light active py-2 px-3"><i class="bi bi-grid-3x3-gap-fill"></i></button>
+                        <button class="btn btn-light py-2 px-3"><i class="bi bi-list-ul"></i></button>
+                    </div>
+
+                    <select class="form-select form-select-sm border-0 bg-light-subtle rounded-3 py-2 px-3 fw-medium" style="width: 160px;">
+                        <option value="popular">Populaire</option>
+                        <option value="newest">Nouveautés</option>
+                        <option value="price-asc">Prix croissant</option>
+                        <option value="price-desc">Prix décroissant</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Active Filters (Example) -->
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle py-2 px-3 d-flex align-items-center gap-2">
+                    Tapis & Textiles <button class="btn btn-link p-0 text-primary small"><i class="bi bi-x-lg" style="font-size: 10px;"></i></button>
+                </span>
+                <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle py-2 px-3 d-flex align-items-center gap-2">
+                    Poterie <button class="btn btn-link p-0 text-primary small"><i class="bi bi-x-lg" style="font-size: 10px;"></i></button>
+                </span>
+                <button class="btn btn-link btn-sm text-muted text-decoration-none">Effacer tout</button>
+            </div>
+
+            <div class="row g-4 overflow-hidden">
+                @{
+                    var allProducts = new ProductViewModel[] {
+                        new ProductViewModel { Id = 1, Name = "Tapis Berbère Traditionnel", Price = 1200m, OriginalPrice = 1500m, Image = "https://images.unsplash.com/photo-1600166898405-da9535204843?w=400&h=400&fit=crop", Rating = 4.8, Reviews = 124, Category = "Tapis & Textiles", IsBestSeller = true },
+                        new ProductViewModel { Id = 2, Name = "Tajine en Céramique", Price = 350m, Image = "https://images.unsplash.com/photo-1590736969955-71cc94901144?w=400&h=400&fit=crop", Rating = 4.9, Reviews = 89, Category = "Poterie & Céramique", IsNew = true },
+                        new ProductViewModel { Id = 3, Name = "Lampe en Cuivre", Price = 890m, OriginalPrice = 1100m, Image = "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400&h=400&fit=crop", Rating = 4.7, Reviews = 67, Category = "Décoration" },
+                        new ProductViewModel { Id = 4, Name = "Collier Berbère Silver", Price = 450m, Image = "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop", Rating = 4.6, Reviews = 45, Category = "Bijoux & Accessoires", IsNew = true },
+                        new ProductViewModel { Id = 5, Name = "Pouf en Cuir Marrakech", Price = 650m, Image = "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop", Rating = 4.8, Reviews = 156, Category = "Décoration", IsBestSeller = true },
+                        new ProductViewModel { Id = 6, Name = "Service à Thé Complet", Price = 520m, OriginalPrice = 680m, Image = "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=400&h=400&fit=crop", Rating = 4.5, Reviews = 78, Category = "Poterie & Céramique" },
+                        new ProductViewModel { Id = 7, Name = "Miroir Mural Artisanal", Price = 780m, Image = "https://images.unsplash.com/photo-1618220179428-22790b461013?w=400&h=400&fit=crop", Rating = 4.7, Reviews = 92, Category = "Décoration" },
+                        new ProductViewModel { Id = 8, Name = "Panier Tressé", Price = 180m, Image = "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&h=400&fit=crop", Rating = 4.4, Reviews = 34, Category = "Tapis & Textiles", IsNew = true }
+                    };
+                }
+                @foreach (var prod in allProducts) {
+                    <div class="col-6 col-md-4">
+                        <partial name="_ProductCard" model="prod" />
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            <nav class="mt-5 pt-4">
+                <ul class="pagination justify-content-center gap-2">
+                    <li class="page-item disabled"><a class="page-link rounded-circle border-0 bg-light" href="#"><i class="bi bi-chevron-left"></i></a></li>
+                    <li class="page-item active"><a class="page-link rounded-circle border-0 shadow-soft" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link rounded-circle border-0 bg-light text-dark" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link rounded-circle border-0 bg-light text-dark" href="#">3</a></li>
+                    <li class="page-item"><a class="page-link rounded-circle border-0 bg-light text-dark" href="#"><i class="bi bi-chevron-right"></i></a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Filters Offcanvas -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasFilters">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title font-display fw-bold">Filtres</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-4">
+        <!-- Reuse filter sections here -->
+        <h6 class="fw-bold mb-3">Catégories</h6>
+        <div class="mb-4">
+            @foreach (var cat in filterCategories) {
+                <label class="d-flex align-items-center gap-3 mb-2 cursor-pointer">
+                    <input class="form-check-input mt-0 border-majorelle" type="checkbox">
+                    <span class="small text-muted">@cat</span>
+                </label>
+            }
+        </div>
+        <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold mt-4" data-bs-dismiss="offcanvas">Appliquer</button>
+    </div>
+</div>
+
+<style>
+    .group-hover-dark:hover { color: #000 !important; }
+    .page-link { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+    .bg-primary-subtle { background-color: rgba(90, 126, 184, 0.1) !important; }
+    .border-primary-subtle { border-color: rgba(90, 126, 184, 0.2) !important; }
+</style>

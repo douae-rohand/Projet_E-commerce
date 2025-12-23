@@ -1,0 +1,100 @@
+<header class="sticky-top bg-white bg-opacity-95 border-bottom shadow-soft" style="backdrop-filter: blur(12px);">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between" style="min-height: 64px;">
+            <!-- Logo -->
+            <a asp-controller="Home" asp-action="Index" class="d-flex align-items-center gap-2 text-decoration-none">
+                <div class="rounded-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--terracotta), var(--sable));">
+                    <i class="bi bi-flower1 text-white"></i>
+                </div>
+                <div class="d-none d-sm-block">
+                    <span class="font-display fs-5 fw-bold text-dark">
+                        Coop<span class="text-terracotta">Maroc</span>
+                    </span>
+                    <p class="mb-0 text-muted" style="font-size: 10px; margin-top: -4px;">Trésors des Coopératives</p>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="d-none d-md-flex align-items-center gap-4">
+                <a asp-controller="Home" asp-action="Index" class="nav-link-custom">Accueil</a>
+                <a asp-controller="Catalog" asp-action="Index" class="nav-link-custom">Produits</a>
+                <a asp-controller="Cooperatives" asp-action="Index" class="nav-link-custom">Coopératives</a>
+                <a asp-controller="About" asp-action="Index" class="nav-link-custom">A propos</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="d-flex align-items-center gap-2">
+                <!-- Search (Desktop) -->
+                <div class="d-none d-md-block">
+                    <button class="btn btn-ghost btn-icon" type="button" data-bs-toggle="collapse" data-bs-target="#searchCollapse">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <!-- Cart (Authenticated) -->
+                    <a asp-controller="Cart" asp-action="Index" class="btn btn-ghost btn-icon position-relative">
+                        <i class="bi bi-cart3"></i>
+                        <span class="cart-badge">3</span>
+                    </a>
+
+                    <!-- Account (Authenticated) -->
+                    <a asp-controller="Account" asp-action="Profile" class="btn btn-ghost btn-icon">
+                        <i class="bi bi-person"></i>
+                    </a>
+                }
+                else
+                {
+                    <!-- Login Button (Not Authenticated) -->
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary px-3 py-2 d-none d-sm-flex">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Connexion
+                    </a>
+
+                    <!-- Register Button (Not Authenticated) -->
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary px-3 py-2 d-none d-sm-flex">
+                        <i class="bi bi-person-plus me-2"></i>
+                        S'inscrire
+                    </a>
+
+                    <!-- Mobile Login Icon (Not Authenticated) -->
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-ghost btn-icon d-sm-none">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                    </a>
+                }
+
+                <!-- Mobile Menu Toggle -->
+                <button class="btn btn-ghost btn-icon d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Search Collapse (Desktop) -->
+        <div class="collapse" id="searchCollapse">
+            <div class="d-flex align-items-center gap-2 py-3">
+                <input type="text" class="form-control" placeholder="Huile d'argan, safran..." />
+                <button class="btn btn-ghost btn-icon" type="button" data-bs-toggle="collapse" data-bs-target="#searchCollapse">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="collapse d-md-none" id="mobileMenu">
+            <div class="py-3 border-top">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-search text-muted"></i>
+                    <input type="text" class="form-control" placeholder="Rechercher un produit..." />
+                </div>
+                <nav class="d-flex flex-column gap-2">
+                    <a asp-controller="Home" asp-action="Index" class="mobile-nav-link">Accueil</a>
+                    <a asp-controller="Catalog" asp-action="Index" class="mobile-nav-link">Produits</a>
+                    <a asp-controller="Cooperatives" asp-action="Index" class="mobile-nav-link">Coopératives</a>
+                    <a asp-controller="About" asp-action="Index" class="mobile-nav-link">Notre Mission</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
