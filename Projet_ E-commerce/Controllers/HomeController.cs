@@ -23,6 +23,11 @@ namespace Projet__E_commerce.Controllers
             return View();
         }
 
+        public IActionResult Terms()
+        {
+            return Content("Coming soon");
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
