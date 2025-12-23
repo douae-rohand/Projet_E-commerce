@@ -160,22 +160,23 @@ namespace Projet__E_commerce.Data
 
             // Configuration des contraintes CHECK
             modelBuilder.Entity<Categorie>()
-                .HasCheckConstraint("CK_Categorie_Nom", "nom IN ('cosmetique', 'nutritive', 'medical', 'artisanat', 'agricole')");
+                .ToTable(t => t.HasCheckConstraint("CK_Categorie_Nom", "nom IN ('cosmetique', 'nutritive', 'medical', 'artisanat', 'agricole')"));
 
             modelBuilder.Entity<Produit>()
-                .HasCheckConstraint("CK_Produit_Statut", "statut IN ('active', 'inactive')");
+                .ToTable(t => t.HasCheckConstraint("CK_Produit_Statut", "statut IN ('active', 'inactive')"));
 
             modelBuilder.Entity<Commande>()
-                .HasCheckConstraint("CK_Commande_Statut", "statut IN ('en_attente', 'valide', 'annule')");
+                .ToTable(t => t.HasCheckConstraint("CK_Commande_Statut", "statut IN ('en_attente', 'valide', 'annule')"));
 
             modelBuilder.Entity<Livraison>()
-                .HasCheckConstraint("CK_Livraison_Statut", "statut IN ('livre', 'non_livre', 'en_cours')");
-
-            modelBuilder.Entity<Livraison>()
-                .HasCheckConstraint("CK_Livraison_ModeLivraison", "mode_livraison IN ('Standard', 'Express')");
+                .ToTable(t =>
+                {
+                    t.HasCheckConstraint("CK_Livraison_Statut", "statut IN ('livre', 'non_livre', 'en_cours')");
+                    t.HasCheckConstraint("CK_Livraison_ModeLivraison", "mode_livraison IN ('Standard', 'Express')");
+                });
 
             modelBuilder.Entity<Avis>()
-                .HasCheckConstraint("CK_Avis_Note", "note BETWEEN 1 AND 5");
+                .ToTable(t => t.HasCheckConstraint("CK_Avis_Note", "note BETWEEN 1 AND 5"));
 
             // Seed data (données initiales)
             modelBuilder.Entity<Categorie>().HasData(

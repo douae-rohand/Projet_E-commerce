@@ -25,9 +25,9 @@
             </span>
         }
 
-        <button class="product-wishlist-btn" type="button" onclick="event.preventDefault(); toggleWishlist(@productId);">
+        <span class="product-wishlist-btn" role="button" tabindex="0" onclick="event.preventDefault(); toggleWishlist(@productId);">
             <i class="bi bi-heart"></i>
-        </button>
+        </span>
     </div>
 
     <div class="product-card-content">
@@ -56,9 +56,9 @@
                     <span class="product-price-original">@originalPrice DH</span>
                 }
             </div>
-            <button class="product-add-btn" type="button" onclick="event.preventDefault(); addToCart(@productId);">
+            <span class="product-add-btn" role="button" tabindex="0" onclick="event.preventDefault(); addToCart(@productId);">
                 <i class="bi bi-cart-plus"></i>
-            </button>
+            </span>
         </div>
     </div>
 </a>
