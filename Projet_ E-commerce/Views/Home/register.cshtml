@@ -1,5 +1,4 @@
-﻿@
-{
+﻿@{
 
     ViewData
 [
@@ -194,14 +193,12 @@
                                 <i class="bi bi-person input-icon"></i>
                                 <input type="text" class="form-control with-icon" id="FirstName" 
                                        name="FirstName" placeholder="Prénom" required />
-                                <span asp-validation-for="FirstName" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <label for="LastName" class="form-label fw-medium">Nom</label>
                             <input type="text" class="form-control" id="LastName" 
                                    name="LastName" placeholder="Nom" required />
-                            <span asp-validation-for="LastName" class="text-danger"></span>
                         </div>
                     </div>
                     
@@ -212,7 +209,6 @@
                             <i class="bi bi-envelope input-icon"></i>
                             <input type="email" class="form-control with-icon" id="Email" 
                                    name="Email" placeholder="votre@email.com" required />
-                            <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
                     </div>
                     
@@ -223,7 +219,6 @@
                             <i class="bi bi-telephone input-icon"></i>
                             <input type="tel" class="form-control with-icon" id="Phone" 
                                    name="Phone" placeholder="+212 6XX XX XX XX" required />
-                            <span asp-validation-for="Phone" class="text-danger"></span>
                         </div>
                     </div>
                     
@@ -237,7 +232,6 @@
                             <button type="button" class="password-toggle" onclick="togglePassword()">
                                 <i class="bi bi-eye" id="eyeIcon"></i>
                             </button>
-                            <span asp-validation-for="Password" class="text-danger"></span>
                         </div>
                     </div>
                     
@@ -248,7 +242,6 @@
                             <i class="bi bi-lock input-icon"></i>
                             <input type="password" class="form-control with-icon" id="ConfirmPassword" 
                                    name="ConfirmPassword" placeholder="••••••••" required />
-                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                         </div>
                     </div>
                     
@@ -263,7 +256,6 @@
                                 et la 
                                 <a asp-controller="Home" asp-action="Privacy">politique de confidentialité</a>
                             </label>
-                            <span asp-validation-for="AcceptTerms" class="text-danger"></span>
                         </div>
                     </div>
                     
@@ -273,7 +265,7 @@
                     <!-- Login Link -->
                     <p class="text-center text-muted small mb-0">
                         Déjà un compte ? 
-                        <a asp-controller="Account" asp-action="Login" class="fw-medium">Se connecter</a>
+                        <a asp-controller="Auth" asp-action="Login" class="fw-medium">Se connecter</a>
                     </p>
                 </form>
             </div>

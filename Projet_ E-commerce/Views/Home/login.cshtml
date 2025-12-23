@@ -1,6 +1,17 @@
 ﻿@{
-    ViewData["Title"] = "Login";
+
+    ViewData
+[
+"Title"
+]
+ 
+=
+ 
+"Connexion"
+;
+
 }
+
 
 @section Styles {
     <style>
@@ -186,8 +197,8 @@
                     <p class="text-muted">Connectez-vous à votre compte</p>
                 </div>
 
-                <form asp-controller="Account" asp-action="Login" method="post">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <form asp-controller="Auth" asp-action="Login" method="post">
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                     <!-- Email Field -->
                     <div class="mb-3">
@@ -196,7 +207,6 @@
                             <i class="bi bi-envelope input-icon"></i>
                             <input type="email" class="form-control" id="Email" name="Email"
                                    placeholder="votre@email.com" required />
-                            <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
                     </div>
 
@@ -204,7 +214,7 @@
                     <div class="mb-3">
                         <div class="d-flex justify-content-between mb-2">
                             <label for="Password" class="form-label fw-medium">Mot de passe</label>
-                            <a asp-controller="Account" asp-action="ForgotPassword" class="small">Mot de passe oublié ?</a>
+                            <a asp-controller="Auth" asp-action="ForgotPassword" class="small">Mot de passe oublié ?</a>
                         </div>
                         <div class="position-relative">
                             <i class="bi bi-lock input-icon"></i>
@@ -213,7 +223,6 @@
                             <button type="button" class="password-toggle" onclick="togglePassword()">
                                 <i class="bi bi-eye" id="eyeIcon"></i>
                             </button>
-                            <span asp-validation-for="Password" class="text-danger"></span>
                         </div>
                     </div>
 
@@ -257,7 +266,7 @@
                     <!-- Register Link -->
                     <p class="text-center text-muted small mb-0">
                         Pas encore de compte ?
-                        <a asp-controller="Account" asp-action="Register" class="fw-medium">S'inscrire</a>
+                        <a asp-controller="Auth" asp-action="Register" class="fw-medium">S'inscrire</a>
                     </p>
                 </form>
             </div>
