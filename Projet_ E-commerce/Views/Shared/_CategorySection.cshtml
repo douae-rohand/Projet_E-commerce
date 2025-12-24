@@ -1,3 +1,33 @@
+@model IEnumerable<Projet__E_commerce.Models.Categorie>
+
+@{
+    var defaultStyles = new[]
+    {
+        new { Image = "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&h=500&fit=crop", Overlay = "category-overlay-sable" },
+        new { Image = "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=500&fit=crop", Overlay = "category-overlay-terracotta" },
+        new { Image = "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=500&fit=crop", Overlay = "category-overlay-primary" },
+        new { Image = "https://images.unsplash.com/photo-1600166898405-da9535204843?w=400&h=500&fit=crop", Overlay = "category-overlay-ciel" }
+    };
+
+    (string Image, string Overlay) GetCategoryStyle(string name)
+    {
+        var n = name.ToLowerInvariant();
+        if (n.Contains("huile") || n.Contains("argan") || n.Contains("cosmétique") || n.Contains("beauté"))
+            return ("https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&h=500&fit=crop", "category-overlay-sable");
+        
+        if (n.Contains("miel") || n.Contains("ruche") || n.Contains("abeille") || n.Contains("alimentaire"))
+            return ("https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=500&fit=crop", "category-overlay-terracotta");
+            
+        if (n.Contains("épice") || n.Contains("epice") || n.Contains("safran") || n.Contains("cuisine"))
+            return ("https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=500&fit=crop", "category-overlay-primary");
+            
+        if (n.Contains("tapis") || n.Contains("artisanat") || n.Contains("decor") || n.Contains("maison"))
+            return ("https://images.unsplash.com/photo-1600166898405-da9535204843?w=400&h=500&fit=crop", "category-overlay-ciel");
+
+        return ("", ""); // Return empty to signal usage of default rotation
+    }
+}
+
 <section class="py-5 bg-light">
     <div class="container">
         <!-- Header -->
@@ -19,77 +49,49 @@
 
         <!-- Categories Grid -->
         <div class="row g-3 g-md-4">
-            <!-- Category 1: Huiles & Cosmétiques -->
-            <div class="col-6 col-lg-3">
-                <a asp-controller="Catalog" asp-action="Index" asp-route-category="1" class="category-card animate-fade-in-up">
-                    <img src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&h=500&fit=crop"
-                         alt="Huiles & Cosmétiques"
-                         class="category-image" />
-                    <div class="category-overlay category-overlay-sable"></div>
-                    <div class="category-content">
-                        <h3 class="category-title">Huiles & Cosmétiques</h3>
-                        <p class="category-description">Argan, cactus, nigelle</p>
-                        <p class="category-count">85 produits</p>
-                    </div>
-                    <div class="category-hover-icon">
-                        <i class="bi bi-arrow-right"></i>
-                    </div>
-                </a>
-            </div>
+            @if (Model != null && Model.Any())
+            {
+                int i = 0;
+                foreach (var category in Model)
+                {
+                    var (image, overlay) = GetCategoryStyle(category.nom);
+                    
+                    // Fallback to rotation if no keyword match
+                    if (string.IsNullOrEmpty(image))
+                    {
+                        var defaultStyle = defaultStyles[i % defaultStyles.Length];
+                        image = defaultStyle.Image;
+                        overlay = defaultStyle.Overlay;
+                    }
 
-            <!-- Category 2: Miel & Produits de la Ruche -->
-            <div class="col-6 col-lg-3">
-                <a asp-controller="Catalog" asp-action="Index" asp-route-category="2" class="category-card animate-fade-in-up stagger-1">
-                    <img src="https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=500&fit=crop"
-                         alt="Miel & Produits de la Ruche"
-                         class="category-image" />
-                    <div class="category-overlay category-overlay-terracotta"></div>
-                    <div class="category-content">
-                        <h3 class="category-title">Miel & Produits de la Ruche</h3>
-                        <p class="category-description">Miel, gelée royale, propolis</p>
-                        <p class="category-count">42 produits</p>
-                    </div>
-                    <div class="category-hover-icon">
-                        <i class="bi bi-arrow-right"></i>
-                    </div>
-                </a>
-            </div>
+                    // Stagger animation delay
+                    var delay = i > 0 ? $"stagger-{Math.Min(i, 3)}" : "";
 
-            <!-- Category 3: Épices & Safran -->
-            <div class="col-6 col-lg-3">
-                <a asp-controller="Catalog" asp-action="Index" asp-route-category="3" class="category-card animate-fade-in-up stagger-2">
-                    <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=500&fit=crop"
-                         alt="Épices & Safran"
-                         class="category-image" />
-                    <div class="category-overlay category-overlay-primary"></div>
-                    <div class="category-content">
-                        <h3 class="category-title">Épices & Safran</h3>
-                        <p class="category-description">Safran de Taliouine, Ras el Hanout</p>
-                        <p class="category-count">65 produits</p>
+                    <div class="col-6 col-lg-3">
+                        <a asp-controller="Catalog" asp-action="Index" asp-route-category="@category.idC" class="category-card animate-fade-in-up @delay">
+                            <img src="@image"
+                                 alt="@category.nom"
+                                 class="category-image" />
+                            <div class="category-overlay @overlay"></div>
+                            <div class="category-content">
+                                <h3 class="category-title">@category.nom</h3>
+                                <p class="category-description">@(category.description ?? "Découvrez nos produits")</p>
+                                <p class="category-count">@category.Produits?.Count produits</p>
+                            </div>
+                            <div class="category-hover-icon">
+                                <i class="bi bi-arrow-right"></i>
+                            </div>
+                        </a>
                     </div>
-                    <div class="category-hover-icon">
-                        <i class="bi bi-arrow-right"></i>
-                    </div>
-                </a>
-            </div>
-
-            <!-- Category 4: Tapis & Artisanat -->
-            <div class="col-6 col-lg-3">
-                <a asp-controller="Catalog" asp-action="Index" asp-route-category="4" class="category-card animate-fade-in-up stagger-3">
-                    <img src="https://images.unsplash.com/photo-1600166898405-da9535204843?w=400&h=500&fit=crop"
-                         alt="Tapis & Artisanat"
-                         class="category-image" />
-                    <div class="category-overlay category-overlay-ciel"></div>
-                    <div class="category-content">
-                        <h3 class="category-title">Tapis & Artisanat</h3>
-                        <p class="category-description">Tapis berbères, poterie, cuir</p>
-                        <p class="category-count">120 produits</p>
-                    </div>
-                    <div class="category-hover-icon">
-                        <i class="bi bi-arrow-right"></i>
-                    </div>
-                </a>
-            </div>
+                    i++;
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center">
+                    <p class="text-muted">Aucune catégorie disponible pour le moment.</p>
+                </div>
+            }
         </div>
     </div>
 </section>
