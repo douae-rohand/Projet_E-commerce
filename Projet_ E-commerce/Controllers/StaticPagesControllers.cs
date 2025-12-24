@@ -18,45 +18,9 @@ namespace Projet__E_commerce.Controllers
         }
     }
 
-    public class AccountController : Controller
-    {
-        public IActionResult Login()
-        {
-            return View();
-        }
-
-        public IActionResult Register()
-        {
-            return View();
-        }
-
-        public IActionResult Profile()
-        {
-            return View("UserDashboard");
-        }
-
-        public IActionResult UserDashboard()
-        {
-            return View();
-        }
-    }
-
     public class CartController : Controller
     {
         public IActionResult Index()
-        {
-            return View();
-        }
-    }
-
-    public class AdminController : Controller
-    {
-        public IActionResult Dashboard()
-        {
-            return View();
-        }
-
-        public IActionResult SuperAdminDashboard()
         {
             return View();
         }

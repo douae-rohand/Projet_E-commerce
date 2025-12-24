@@ -155,6 +155,20 @@
                 </button>
             </div>
 
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success small">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger small">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
+
             <form asp-controller="Auth" asp-action="Register" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
@@ -261,20 +275,36 @@
         function toggleType(type) {
             document.getElementById('userType').value = type;
             
+            // Gestion des boutons
             document.getElementById('btn-client').classList.toggle('active', type === 'client');
             document.getElementById('btn-admin').classList.toggle('active', type === 'admin');
 
-            document.getElementById('clientFields').classList.toggle('active', type === 'client');
-            document.getElementById('adminFields').classList.toggle('active', type === 'admin');
+            // Gestion de la visibilité des sections
+            const clientSection = document.getElementById('clientFields');
+            const adminSection = document.getElementById('adminFields');
+
+            clientSection.classList.toggle('active', type === 'client');
+            adminSection.classList.toggle('active', type === 'admin');
+
+            // Gestion des attributs required et disabled
+            // Si type est 'client', on active les champs client et on désactive les champs admin
+            const isClient = type === 'client';
+
+            // Champs Client
+            clientSection.querySelectorAll('input').forEach(input => {
+                input.disabled = !isClient;
+            });
+
+            // Champs Admin
+            adminSection.querySelectorAll('input').forEach(input => {
+                input.disabled = isClient;
+            });
         }
+
+        // Initialisation au chargement pour être sûr de l'état correct
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleType('client');
+        });
     </script>
 </body>
 </html>
-
-// Stored Procedure (Admin): <mcfile name="sp_inscription_admin.sql" path="c:/Users/hp/Documents/Projet_E-commerce/Projet_ E-commerce/StoredProcedures/sp_inscription_admin.sql"></mcfile>
-// Stored Procedure (Client): <mcfile name="sp_inscription_client.sql" path="c:/Users/hp/Documents/Projet_E-commerce/Projet_ E-commerce/StoredProcedures/sp_inscription_client.sql"></mcfile>
-// Stored Procedure (Login): <mcfile name="sp_login_utilisateur.sql" path="c:/Users/hp/Documents/Projet_E-commerce/Projet_ E-commerce/StoredProcedures/sp_login_utilisateur.sql"></mcfile>
-// Migration: <mcfile name="20251221142340_InitialCreate.cs" path="c:/Users/hp/Documents/Projet_E-commerce/Projet_ E-commerce/Migrations/20251221142340_InitialCreate.cs"></mcfile>
-// Migration Designer: <mcfile name="20251221142340_InitialCreate.Designer.cs" path="c:/Users/hp/Documents/Projet_E-commerce/Projet_ E-commerce/Migrations/20251221142340_InitialCreate.Designer.cs"></mcfile>
-// Model Snapshot: <mcfile name="ApplicationDbContextModelSnapshot.cs" path="c:/Users/hp/Documents/Projet_E-commerce/Projet_ E-commerce/Migrations/ApplicationDbContextModelSnapshot.cs"></mcfile>
-// View (this file): <mcfile name="Register.cshtml" path="c:/Users/hp/Documents/Projet_E-commerce/Projet_ E-commerce/Views/Account/Register.cshtml"></mcfile>

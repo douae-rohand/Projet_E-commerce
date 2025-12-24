@@ -1,14 +1,15 @@
+﻿// SuperAdminController.cs
 using Microsoft.AspNetCore.Mvc;
 using Projet__E_commerce.Filters;
 
 namespace Projet__E_commerce.Controllers
 {
-    [AuthorizeRole("ADMIN")]
-    public class AdminController : Controller
+    [AuthorizeRole("SUPER_ADMIN")]
+    public class SuperAdminController : Controller
     {
-        private readonly ILogger<AdminController> _logger;
+        private readonly ILogger<SuperAdminController> _logger;
 
-        public AdminController(ILogger<AdminController> logger)
+        public SuperAdminController(ILogger<SuperAdminController> logger)
         {
             _logger = logger;
         }
@@ -20,21 +21,21 @@ namespace Projet__E_commerce.Controllers
             return View();
         }
 
-        public IActionResult Products()
+        public IActionResult ManageUsers()
         {
             ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
             ViewBag.UserId = HttpContext.Session.GetInt32("UserId");
             return View();
         }
 
-        public IActionResult Orders()
+        public IActionResult ManageCooperatives()
         {
             ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
             ViewBag.UserId = HttpContext.Session.GetInt32("UserId");
             return View();
         }
 
-        public IActionResult Profile()
+        public IActionResult Statistics()
         {
             ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
             ViewBag.UserId = HttpContext.Session.GetInt32("UserId");
