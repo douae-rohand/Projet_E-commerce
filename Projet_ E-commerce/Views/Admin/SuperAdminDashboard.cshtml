@@ -1,0 +1,156 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Super Admin - CoopMaroc";
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+</head>
+<body class="bg-dark shadow-inset">
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <aside class="bg-dark vh-100 sticky-top d-none d-lg-block border-end border-secondary border-opacity-25" style="width: 280px;">
+            <div class="p-4 mb-4">
+                <a href="/" class="d-flex align-items-center gap-3 text-decoration-none">
+                    <div class="rounded-3 bg-terracotta d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="bi bi-shield-lock text-white h4 mb-0"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-white font-display">CoopMaroc</h5>
+                        <p class="small text-white-50 mb-0" style="font-size: 10px; letter-spacing: 1px;">SUPER ADMIN</p>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="nav flex-column p-3 gap-2 admin-nav">
+                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-3 px-3" href="#"><i class="bi bi-activity"></i> Vue Globale</a>
+                <a class="nav-link text-white-50 rounded-3 d-flex align-items-center gap-3 py-3 px-3" href="#"><i class="bi bi-shop"></i> Coopératives</a>
+                <a class="nav-link text-white-50 rounded-3 d-flex align-items-center gap-3 py-3 px-3" href="#"><i class="bi bi-people"></i> Utilisateurs</a>
+                <a class="nav-link text-white-50 rounded-3 d-flex align-items-center gap-3 py-3 px-3" href="#"><i class="bi bi-pie-chart"></i> Analytique</a>
+                <a class="nav-link text-white-50 rounded-3 d-flex align-items-center gap-3 py-3 px-3" href="#"><i class="bi bi-exclamation-triangle"></i> Alertes</a>
+                <a class="nav-link text-white-50 rounded-3 d-flex align-items-center gap-3 py-3 px-3" href="#"><i class="bi bi-hdd-network"></i> Configuration</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-grow-1 bg-white rounded-start-5 overflow-hidden shadow-lg" style="margin-top: 10px; margin-bottom: 10px; margin-right: 10px; min-height: calc(100vh - 20px);">
+            <div class="p-4 p-md-5">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                <header class="d-flex justify-content-between align-items-center mb-5 pb-4 border-bottom">
+                    <h1 class="font-display fw-bold h3 mb-0">Tableau de bord Plateforme</h1>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="text-end d-none d-sm-block">
+                            <h6 class="fw-bold mb-0">Admin Principal</h6>
+                            <p class="small text-muted mb-0">Système Global</p>
+                        </div>
+                        <div class="rounded-circle bg-terracotta d-flex align-items-center justify-content-center text-white shadow-soft" style="width: 44px; height: 44px;">
+                            <i class="bi bi-person-check h5 mb-0"></i>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="row g-4 mb-5">
+                    @{
+                        var stats = new dynamic[] {
+                            new { Label = "Coopératives actives", Value = "124", Icon = "bi-shop", Color = "bg-primary" },
+                            new { Label = "Artisanes inscrites", Value = "2,856", Icon = "bi-people", Color = "bg-terracotta" },
+                            new { Label = "Commandes ce mois", Value = "3,247", Icon = "bi-box", Color = "bg-info" },
+                            new { Label = "Revenus distribués", Value = "856K MAD", Icon = "bi-graph-up", Color = "bg-warning" }
+                        };
+                    }
+                    @foreach (var s in stats) {
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
+                                <div class="d-flex align-items-center gap-4">
+                                    <div class="@s.Color text-white rounded-3 shadow-soft d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                                        <i class="bi @s.Icon h4 mb-0"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-muted small fw-bold text-uppercase mb-1">@s.Label</p>
+                                        <h3 class="fw-bold mb-0">@s.Value</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="row g-4 mb-5">
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
+                            <h5 class="fw-bold mb-4">Répartition par Région</h5>
+                            <div class="d-flex flex-column gap-4">
+                                @{
+                                    var regions = new RegionViewModel[] {
+                                        new RegionViewModel { Name = "Souss-Massa", Coops = 32, Percent = 90, Color = "#D87A4F" },
+                                        new RegionViewModel { Name = "Marrakech-Safi", Coops = 28, Percent = 80, Color = "#5A7EB8" },
+                                        new RegionViewModel { Name = "Fès-Meknès", Coops = 22, Percent = 65, Color = "#E5C888" },
+                                        new RegionViewModel { Name = "Drâa-Tafilalet", Coops = 18, Percent = 50, Color = "#9DD1E6" }
+                                    };
+                                }
+                                @foreach (var r in regions) {
+                                    <div>
+                                        <div class="d-flex justify-content-between mb-2 small">
+                                            <span class="fw-bold">@r.Name</span>
+                                            <span class="text-muted">@r.Coops coops</span>
+                                        </div>
+                                        <div class="progress rounded-pill" style="height: 8px;">
+                                            <div class="progress-bar rounded-pill" style="width: @r.Percent%; background-color: @r.Color;"></div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
+                            <h5 class="fw-bold mb-4">Activité Récente</h5>
+                            <div class="d-flex flex-column gap-3">
+                                @{
+                                    var activities = new ActivityViewModel[] {
+                                        new ActivityViewModel { Title = "Nouvelle coopérative", Detail = "Coopérative Nour - Guelmim", Time = "2h", Type = "success" },
+                                        new ActivityViewModel { Title = "Certification Bio", Detail = "Coopérative Annahal - Azrou", Time = "4h", Type = "info" },
+                                        new ActivityViewModel { Title = "Alerte stock faible", Detail = "Coop. Tissaliwine", Time = "6h", Type = "warning" }
+                                    };
+                                }
+                                @foreach (var a in activities) {
+                                    <div class="d-flex gap-3 align-items-start">
+                                        <div class="mt-2 rounded-circle bg-@a.Type" style="width: 8px; height: 8px;"></div>
+                                        <div>
+                                            <h6 class="small fw-bold mb-1">@a.Title</h6>
+                                            <p class="small text-muted mb-0">@a.Detail • Il y a @a.Time</p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <style>
+        .rounded-start-5 { border-top-left-radius: 2.5rem !important; border-bottom-left-radius: 2.5rem !important; }
+        .admin-nav .nav-link { color: rgba(255,255,255,0.6) !important; font-weight: 500; transition: 0.3s; }
+        .admin-nav .nav-link:hover { color: white !important; background: rgba(255,255,255,0.05); }
+        .admin-nav .nav-link.active { color: white !important; background: var(--terracotta); box-shadow: 0 4px 15px rgba(216, 122, 79, 0.4); }
+        .shadow-inset { box-shadow: inset 0 0 100px rgba(0,0,0,0.5); }
+    </style>
+</body>
+</html>

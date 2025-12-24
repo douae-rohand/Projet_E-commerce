@@ -1,0 +1,113 @@
+@{
+    ViewData["Title"] = "Mon Panier - SoukDigital";
+}
+
+<div class="container py-5 mt-4">
+    <h1 class="font-display display-5 fw-bold mb-5">Mon Panier</h1>
+
+    <div class="row g-5">
+        <!-- Cart Items -->
+        <div class="col-lg-8">
+            @{
+                var cartItems = new CartItemViewModel[] {
+                    new CartItemViewModel { Id = 1, Name = "Tapis Berbère Traditionnel", Price = 1200m, Quantity = 1, Size = "150x200 cm", Color = "Naturel", Image = "https://images.unsplash.com/photo-1600166898405-da9535204843?w=200&h=200&fit=crop" },
+                    new CartItemViewModel { Id = 2, Name = "Tajine en Céramique", Price = 350m, Quantity = 2, Size = "Medium", Color = "Bleu", Image = "https://images.unsplash.com/photo-1590736969955-71cc94901144?w=200&h=200&fit=crop" },
+                    new CartItemViewModel { Id = 3, Name = "Lampe en Cuivre", Price = 890m, Quantity = 1, Size = "Grande", Color = "Or", Image = "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=200&h=200&fit=crop" }
+                };
+            }
+
+            @if (cartItems.Length == 0) {
+                <div class="text-center py-5 bg-light rounded-4">
+                    <i class="bi bi-bag-x display-1 text-muted mb-4 d-block"></i>
+                    <h2 class="h4 fw-bold mb-3">Votre panier est vide</h2>
+                    <p class="text-muted mb-4">Découvrez nos produits et commencez votre shopping</p>
+                    <a href="/catalog" class="btn btn-primary btn-lg rounded-3 px-5 fw-bold">Explorer le catalogue</a>
+                </div>
+            } else {
+                <div class="d-flex flex-column gap-4">
+                    @foreach (var item in cartItems) {
+                        <div class="card border-0 shadow-soft rounded-4 overflow-hidden">
+                            <div class="row g-0 align-items-center">
+                                <div class="col-4 col-md-3">
+                                    <img src="@item.Image" class="img-fluid object-fit-cover w-100" style="aspect-ratio: 1/1;" alt="@item.Name">
+                                </div>
+                                <div class="col-8 col-md-9">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between gap-3 mb-3">
+                                            <div>
+                                                <h5 class="fw-bold mb-1">@item.Name</h5>
+                                                <p class="small text-muted mb-0">@item.Size • @item.Color</p>
+                                            </div>
+                                            <button class="btn btn-link text-muted p-0 hover-danger"><i class="bi bi-trash h5"></i></button>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="input-group input-group-sm border rounded-3 overflow-hidden" style="max-width: 120px;">
+                                                <button class="btn btn-light px-2 border-0"><i class="bi bi-dash"></i></button>
+                                                <input type="text" class="form-control border-0 text-center fw-bold small" value="@item.Quantity">
+                                                <button class="btn btn-light px-2 border-0"><i class="bi bi-plus"></i></button>
+                                            </div>
+                                            <p class="h5 fw-bold mb-0">@((item.Price * item.Quantity).ToString("N2")) MAD</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-soft rounded-4 p-4 sticky-top" style="top: 100px;">
+                <h2 class="h4 fw-bold mb-4 font-display">Récapitulatif</h2>
+
+                <div class="input-group mb-4">
+                    <input type="text" class="form-control border-end-0 py-2 rounded-start-3" placeholder="Code promo">
+                    <button class="btn btn-outline-dark px-3 rounded-end-3" type="button">Appliquer</button>
+                </div>
+
+                @{
+                    decimal subtotal = 0;
+                    foreach(var item in cartItems) subtotal += item.Price * item.Quantity;
+                    decimal shipping = subtotal >= 500 ? 0 : 50;
+                    decimal total = subtotal + shipping;
+                }
+
+                <div class="d-flex justify-content-between mb-3 small">
+                    <span class="text-muted">Sous-total</span>
+                    <span class="fw-bold">@subtotal.ToString("N2") MAD</span>
+                </div>
+                <div class="d-flex justify-content-between mb-4 small pb-3 border-bottom">
+                    <span class="text-muted">Livraison</span>
+                    <span class="fw-bold">@(shipping == 0 ? "Gratuite" : shipping.ToString("N2") + " MAD")</span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="h5 fw-bold">Total</span>
+                    <span class="h5 fw-bold text-dark">@total.ToString("N2") MAD</span>
+                </div>
+
+                @if (shipping > 0) {
+                    <div class="alert alert-light border-0 rounded-3 small d-flex align-items-center gap-2 mb-4 bg-light">
+                        <i class="bi bi-truck text-muted"></i>
+                        <span>Livraison gratuite dès <strong>500 MAD</strong></span>
+                    </div>
+                }
+
+                <button class="btn btn-primary btn-lg w-100 rounded-3 shadow-soft py-3 fw-bold d-flex align-items-center justify-content-center gap-3">
+                    Passer la commande <i class="bi bi-arrow-right"></i>
+                </button>
+
+                <div class="mt-4 text-center opacity-50 small">
+                    <p class="mb-0 text-muted"><i class="bi bi-shield-lock-fill me-1"></i> Paiement 100% sécurisé</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-danger:hover { color: var(--bs-danger) !important; }
+</style>

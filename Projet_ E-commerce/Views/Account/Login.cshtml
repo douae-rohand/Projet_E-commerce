@@ -1,0 +1,239 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Connexion - SoukDigital";
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gold: #C5A059;
+            --dark-gold: #A68043;
+            --soft-white: #FDFDFD;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0a0a0a;
+            overflow-x: hidden;
+        }
+
+        .login-container {
+            min-vh: 100vh;
+            background: url('https://images.unsplash.com/photo-1590736969955-71cc94901144?w=1600&h=1200&fit=crop') center/cover no-repeat;
+            position: relative;
+        }
+
+        .login-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+            backdrop-filter: blur(2px);
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            z-index: 10;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @@keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .btn-premium {
+            background: linear-gradient(135deg, var(--primary-gold) 0%, var(--dark-gold) 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px -5px rgba(197, 160, 89, 0.4);
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px rgba(197, 160, 89, 0.5);
+            color: white;
+        }
+
+        .form-control {
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            background: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            background: white;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1);
+        }
+
+        .logo-box {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary-gold) 0%, var(--dark-gold) 100%);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .social-btn {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 10px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .social-btn:hover {
+            background: #f5f5f5;
+            border-color: #ccc;
+        }
+
+        .divider {
+            position: relative;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #eee;
+            z-index: 1;
+        }
+
+        .divider span {
+            position: relative;
+            z-index: 2;
+            background: var(--glass-bg);
+            padding: 0 15px;
+            color: #999;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container d-flex align-items-center justify-content-center p-3">
+        <div class="login-overlay"></div>
+        
+        <div class="glass-card">
+            <div class="text-center">
+                <div class="logo-box font-display">S</div>
+                <h1 class="font-display fw-bold h2 mb-2">Bienvenue</h1>
+                <p class="text-muted mb-4">Accédez à l'excellence de l'artisanat</p>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success border-0 rounded-3 small mb-4">
+                    <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger border-0 rounded-3 small mb-4">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i> @TempData["ErrorMessage"]
+                </div>
+            }
+
+            <form asp-controller="Auth" asp-action="Login" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                        <input type="email" name="email" class="form-control border-start-0" placeholder="votre@email.com" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label small fw-bold text-uppercase text-muted mb-0">Mot de passe</label>
+                        <a href="#" class="small text-primary text-decoration-none fw-semibold">Oublié ?</a>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-lock"></i></span>
+                        <input type="password" name="password" class="form-control border-start-0" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <div class="mb-4 d-flex justify-content-between align-items-center">
+                    <div class="form-check">
+                        <input type="checkbox" name="rememberMe" class="form-check-input" id="remember" value="true">
+                        <label class="form-check-label small text-muted" for="remember">Rester connecté</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-premium w-100 mb-3">
+                    Se connecter
+                </button>
+
+                <div class="divider">
+                    <span>Ou continuer avec</span>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-6">
+                        <button type="button" class="social-btn w-100 d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi bi-google text-danger"></i> Google
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button type="button" class="social-btn w-100 d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi bi-facebook text-primary"></i> Facebook
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <p class="text-center mt-4 mb-0 small text-muted">
+                Nouveau ici ? <a href="/Auth/Register" class="text-primary fw-bold text-decoration-none">Créer un compte</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

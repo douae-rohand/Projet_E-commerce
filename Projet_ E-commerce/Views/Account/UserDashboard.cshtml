@@ -1,0 +1,138 @@
+@{
+    ViewData["Title"] = "Mon Compte - SoukDigital";
+}
+
+<div class="container py-5 mt-4">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <aside class="col-lg-3">
+            <div class="card border-0 shadow-soft rounded-4 p-3 sticky-top" style="top: 100px;">
+                <div class="d-flex align-items-center gap-3 p-2 mb-4">
+                    <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                        <i class="bi bi-person h4 mb-0 text-primary"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0">Ahmed Benali</h6>
+                        <p class="small text-muted mb-0">ahmed.benali@email.com</p>
+                    </div>
+                </div>
+                
+                <nav class="nav flex-column gap-2 dashboard-nav">
+                    <a class="nav-link active rounded-3 px-3 py-2 d-flex align-items-center gap-3" href="#profile"><i class="bi bi-person-badge"></i> Mon Profil</a>
+                    <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center gap-3" href="#orders"><i class="bi bi-box-seam"></i> Mes Commandes</a>
+                    <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center gap-3" href="#wishlist"><i class="bi bi-heart"></i> Ma Wishlist</a>
+                    <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center gap-3" href="#addresses"><i class="bi bi-geo-alt"></i> Mes Adresses</a>
+                    <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center gap-3" href="#payment"><i class="bi bi-credit-card"></i> Paiement</a>
+                    <div class="border-top my-2"></div>
+                    <a class="nav-link text-danger rounded-3 px-3 py-2 d-flex align-items-center gap-3" href="#"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="col-lg-9">
+            <!-- Profile Section -->
+            <div id="profile" class="dashboard-section card border-0 shadow-soft rounded-4 p-4 p-md-5 mb-4">
+                <h2 class="font-display fw-bold mb-4">Mon Profil</h2>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Prénom</label>
+                        <input type="text" class="form-control" value="Ahmed">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Nom</label>
+                        <input type="text" class="form-control" value="Benali">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Email</label>
+                        <input type="email" class="form-control" value="ahmed.benali@email.com">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Téléphone</label>
+                        <input type="tel" class="form-control" value="+212 612 345 678">
+                    </div>
+                </div>
+                <button class="btn btn-primary px-5 py-3 rounded-pill fw-bold">Sauvegarder</button>
+            </div>
+
+            <!-- Orders Section -->
+            <div id="orders" class="dashboard-section card border-0 shadow-soft rounded-4 p-4 p-md-5 mb-4 d-none">
+                <h2 class="font-display fw-bold mb-4">Mes Commandes</h2>
+                @{
+                    var orders = new OrderViewModel[] {
+                        new OrderViewModel { Id = "CMD-2024-001", Date = "15 Jan 2025", Status = "Livré", Total = 1550, Items = 2, StatusClass = "bg-success-subtle text-success" },
+                        new OrderViewModel { Id = "CMD-2024-002", Date = "10 Jan 2025", Status = "En cours", Total = 890, Items = 1, StatusClass = "bg-primary-subtle text-primary" },
+                        new OrderViewModel { Id = "CMD-2024-003", Date = "5 Jan 2025", Status = "Préparation", Total = 450, Items = 3, StatusClass = "bg-warning-subtle text-warning" }
+                    };
+                }
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var order in orders) {
+                        <div class="card bg-light border-0 rounded-4 p-4 d-flex flex-row justify-content-between align-items-center">
+                            <div>
+                                <h6 class="fw-bold mb-1">@order.Id</h6>
+                                <p class="small text-muted mb-0">@order.Date • @order.Items article(s)</p>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge rounded-pill @order.StatusClass px-3 py-2 mb-2">@order.Status</span>
+                                <h6 class="fw-bold mb-0">@order.Total.ToString("N2") MAD</h6>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- More sections can be added or handled via JS -->
+        </main>
+    </div>
+</div>
+
+<style>
+    .dashboard-nav .nav-link { 
+        color: var(--bs-gray-600);
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .dashboard-nav .nav-link:hover { 
+        background-color: var(--bs-gray-100);
+        color: var(--primary);
+    }
+    .dashboard-nav .nav-link.active { 
+        background-color: var(--primary);
+        color: white;
+    }
+    .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1) !important; }
+    .bg-primary-subtle { background-color: rgba(90, 126, 184, 0.1) !important; }
+    .bg-warning-subtle { background-color: rgba(255, 193, 7, 0.1) !important; }
+</style>
+
+<script>
+    // Simple logic to switch between dashboard sections
+    document.querySelectorAll('.dashboard-nav .nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const targetId = this.getAttribute('href').substring(1);
+            if (!targetId) return;
+            
+            e.preventDefault();
+            
+            // Update active link
+            document.querySelectorAll('.dashboard-nav .nav-link').forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Show target section
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                if (section.id === targetId) {
+                    section.classList.remove('d-none');
+                } else {
+                    section.classList.add('d-none');
+                }
+            });
+        });
+    });
+</script>
