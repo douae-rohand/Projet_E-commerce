@@ -1,15 +1,18 @@
+@model ProductViewModel?
 @{
-    var productId = (int)(ViewData["Id"] ?? 0);
-    var productName = (string)(ViewData["Name"] ?? "Produit");
-    var price = (int)(ViewData["Price"] ?? 0);
-    var originalPrice = (int)(ViewData["OriginalPrice"] ?? 0);
-    var image = (string)(ViewData["Image"] ?? "");
-    var rating = (double)(ViewData["Rating"] ?? 0.0);
-    var reviews = (int)(ViewData["Reviews"] ?? 0);
-    var category = (string)(ViewData["Category"] ?? "");
-    var cooperative = (string)(ViewData["Cooperative"] ?? "");
-    var isBestSeller = (bool)(ViewData["IsBestSeller"] ?? false);
-    var isNew = (bool)(ViewData["IsNew"] ?? false);
+    var productId = Model?.Id ?? (int)(ViewData["Id"] ?? 0);
+    var productName = Model?.Name ?? (string)(ViewData["Name"] ?? "Produit");
+
+    var price = Model?.Price ?? (ViewData["Price"] as decimal? ?? System.Convert.ToDecimal(ViewData["Price"] ?? 0));
+    var originalPrice = Model?.OriginalPrice ?? (ViewData["OriginalPrice"] as decimal? ?? System.Convert.ToDecimal(ViewData["OriginalPrice"] ?? 0));
+
+    var image = Model?.Image ?? (string)(ViewData["Image"] ?? "");
+    var rating = Model?.Rating ?? (double)(ViewData["Rating"] ?? 0.0);
+    var reviews = Model?.Reviews ?? (int)(ViewData["Reviews"] ?? 0);
+    var category = Model?.Category ?? (string)(ViewData["Category"] ?? "");
+    var cooperative = Model?.Cooperative ?? (string)(ViewData["Cooperative"] ?? "");
+    var isBestSeller = Model?.IsBestSeller ?? (bool)(ViewData["IsBestSeller"] ?? false);
+    var isNew = Model?.IsNew ?? (bool)(ViewData["IsNew"] ?? false);
     var hasDiscount = originalPrice > 0;
 }
 

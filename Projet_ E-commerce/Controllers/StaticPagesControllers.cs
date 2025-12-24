@@ -2,14 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Projet__E_commerce.Controllers
 {
-    public class CatalogController : Controller
-    {
-        public IActionResult Index()
-        {
-            return View("~/Views/Product/Catalog.cshtml");
-        }
-    }
-
     public class ProductsController : Controller
     {
         public IActionResult Details(int? id)
