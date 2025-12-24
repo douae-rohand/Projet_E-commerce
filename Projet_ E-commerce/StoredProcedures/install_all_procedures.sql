@@ -141,7 +141,7 @@ BEGIN
         RAISERROR(@ErrorMessage, 16, 1);
     END CATCH
 END;
-GO
+
 
 -- ============================================
 -- Procédure: sp_login_utilisateur
