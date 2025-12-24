@@ -1,117 +1,200 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
+using Projet__E_commerce.Data;
+using System.Data;
+using System.Globalization;
 
 namespace Projet__E_commerce.Controllers
 {
     public class AuthController : Controller
     {
-        // Page de connexion (par défaut)
+        private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
+        public AuthController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
+        {
+            _context = context;
+            _webHostEnvironment = webHostEnvironment;
+        }
+
+        private class LoginResult
+        {
+            public int id { get; set; }
+            public string email { get; set; } = string.Empty;
+            public string role { get; set; } = string.Empty;
+        }
+
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        // Traitement de la connexion
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Login(string email, string password, bool rememberMe = false)
+        public async Task<IActionResult> Login(string email, string password, bool rememberMe = false)
         {
-            if (ModelState.IsValid)
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
-                // TODO: Ajouter votre logique d'authentification ici
-                // Exemple : vérifier email/password dans la base de données
-
-                // Si la connexion réussit :
-                // return RedirectToAction("Index", "Home");
-
-                // Pour le moment, redirection temporaire
-                TempData["SuccessMessage"] = "Connexion réussie !";
-                return RedirectToAction("Index", "Home");
+                ModelState.AddModelError("", "Email et mot de passe sont requis.");
+                return View();
             }
 
-            // Si échec, retourner à la page de connexion avec erreur
+            try
+            {
+                var emailParam = new SqlParameter("@email", email);
+                var passwordParam = new SqlParameter("@password", password);
+
+                var loginResults = await _context.Database
+                    .SqlQueryRaw<LoginResult>("EXEC sp_login_utilisateur @email, @password", emailParam, passwordParam)
+                    .ToListAsync();
+
+                var userResult = loginResults.FirstOrDefault();
+
+                if (userResult != null)
+                {
+                    HttpContext.Session.SetInt32("UserId", userResult.id);
+                    HttpContext.Session.SetString("UserRole", userResult.role);
+                    HttpContext.Session.SetString("UserEmail", userResult.email);
+
+                    TempData["SuccessMessage"] = "Connexion réussie !";
+
+                    return userResult.role switch
+                    {
+                        "SUPER_ADMIN" => RedirectToAction("SuperAdminDashboard", "Admin"),
+                        "ADMIN" => RedirectToAction("Dashboard", "Admin"),
+                        _ => RedirectToAction("UserDashboard", "Account"),
+                    };
+                }
+            }
+            catch (SqlException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View();
+            }
+
             ModelState.AddModelError("", "Email ou mot de passe incorrect");
             return View();
         }
 
-        // Page d'inscription
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
-        // Traitement de l'inscription
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Register(string firstName, string lastName, string email,
-                                     string phone, string password, string confirmPassword,
-                                     bool acceptTerms = false)
+        public async Task<IActionResult> Register(
+            string userType,
+            string email,
+            string password,
+            string confirmPassword,
+            string? prenom,
+            string? nom,
+            string? telephone,
+            DateTime? date_naissance,
+            string? nom_cooperative,
+            string? localisation,
+            string? ville,
+            IFormFile? logo,
+            bool acceptTerms = false)
         {
-            if (ModelState.IsValid)
+            if (password != confirmPassword)
             {
-                // Vérifier que les mots de passe correspondent
-                if (password != confirmPassword)
-                {
-                    ModelState.AddModelError("", "Les mots de passe ne correspondent pas");
-                    return View();
-                }
-
-                // Vérifier que les termes sont acceptés
-                if (!acceptTerms)
-                {
-                    ModelState.AddModelError("", "Vous devez accepter les conditions générales");
-                    return View();
-                }
-
-                // TODO: Ajouter votre logique d'inscription ici
-                // Exemple : créer un nouvel utilisateur dans la base de données
-
-                // Si l'inscription réussit, rediriger vers la page de connexion
-                TempData["SuccessMessage"] = "Inscription réussie ! Connectez-vous maintenant.";
-                return RedirectToAction("Login");
+                ModelState.AddModelError("", "Les mots de passe ne correspondent pas.");
+                return View();
             }
 
-            return View();
-        }
-
-        // Page mot de passe oublié
-        [HttpGet]
-        public IActionResult ForgotPassword()
-        {
-            return View();
-        }
-
-        // Traitement mot de passe oublié
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult ForgotPassword(string email)
-        {
-            if (ModelState.IsValid)
+            if (!acceptTerms)
             {
-                // TODO: Envoyer un email de réinitialisation
-
-                TempData["SuccessMessage"] = "Un email de réinitialisation a été envoyé.";
-                return RedirectToAction("Login");
+                ModelState.AddModelError("", "Vous devez accepter les conditions générales.");
+                return View();
             }
 
-            return View();
+            // Parsing robuste de la date de naissance
+            if (!date_naissance.HasValue)
+            {
+                var birthDateStr = Request.Form["date_naissance"];
+                if (!string.IsNullOrWhiteSpace(birthDateStr))
+                {
+                    if (DateTime.TryParse(birthDateStr, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
+                    {
+                        date_naissance = parsed;
+                    }
+                }
+            }
+
+            try
+            {
+                string? logoPath = null;
+                if (logo != null && logo.Length > 0)
+                {
+                    string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "logos");
+                    if (!Directory.Exists(uploadsFolder)) 
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + logo.FileName;
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await logo.CopyToAsync(fileStream);
+                    }
+                    
+                    logoPath = "/uploads/logos/" + uniqueFileName;
+                }
+
+                if (userType == "admin")
+                {
+                    var parameters = new[]
+                    {
+                        new SqlParameter("@email", email),
+                        new SqlParameter("@password", password),
+                        new SqlParameter("@nom_cooperative", nom_cooperative ?? (object)DBNull.Value),
+                        new SqlParameter("@localisation", localisation ?? (object)DBNull.Value),
+                        new SqlParameter("@ville", ville ?? (object)DBNull.Value),
+                        new SqlParameter("@logo", logoPath ?? (object)DBNull.Value),
+                        new SqlParameter("@telephone", telephone ?? (object)DBNull.Value)
+                    };
+
+                    await _context.Database.ExecuteSqlRawAsync(
+                        "EXEC sp_inscription_admin @email, @password, @nom_cooperative, @localisation, @ville, @logo, @telephone",
+                        parameters);
+                }
+                else
+                {
+                    var parameters = new[]
+                    {
+                        new SqlParameter("@email", email),
+                        new SqlParameter("@password", password),
+                        new SqlParameter("@prenom", prenom ?? (object)DBNull.Value),
+                        new SqlParameter("@nom", nom ?? (object)DBNull.Value),
+                        new SqlParameter("@telephone", telephone ?? (object)DBNull.Value),
+                        new SqlParameter("@date_naissance", date_naissance ?? (object)DBNull.Value)
+                    };
+
+                    await _context.Database.ExecuteSqlRawAsync(
+                        "EXEC sp_inscription_client @email, @password, @prenom, @nom, @telephone, @date_naissance",
+                        parameters);
+                }
+
+                // Auto-login après inscription réussie
+                return await Login(email, password);
+            }
+            catch (SqlException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View();
+            }
         }
 
-        // Déconnexion
         [HttpPost]
         public IActionResult Logout()
         {
-            // TODO: Ajouter votre logique de déconnexion ici
-            // Exemple : effacer la session, les cookies, etc.
-
+            HttpContext.Session.Clear();
             TempData["SuccessMessage"] = "Vous êtes déconnecté.";
-            return RedirectToAction("Login");
-        }
-
-        // Redirection depuis Index vers Login
-        public IActionResult Index()
-        {
             return RedirectToAction("Login");
         }
     }

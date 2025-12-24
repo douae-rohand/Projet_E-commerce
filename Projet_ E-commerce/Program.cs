@@ -34,6 +34,6 @@ app.UseAuthorization();
 // Route par défaut - redirige vers Login
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Auth}/{action=/Home/Login}/{id?}");
+    pattern: "{controller=Home}/{action=index}/{id?}");
 
 app.Run();
