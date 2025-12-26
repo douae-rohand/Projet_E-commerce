@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Projet__E_commerce.Filters;
 
-namespace Projet__E_commerce.Controllers
+namespace Projet__E_commerce
 {
     [AuthorizeRole("ADMIN")]
     public class AdminController : Controller
