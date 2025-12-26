@@ -22,7 +22,6 @@ namespace Projet__E_commerce.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            // Correction : on pointe explicitement vers la vue dans le dossier Account
             return View("~/Views/Account/Login.cshtml");
         }
 
@@ -31,10 +30,19 @@ namespace Projet__E_commerce.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string email, string password, bool rememberMe = false)
         {
+            // Nettoyage des entrées
+            email = email?.Trim();
+            password = password?.Trim();
+
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                TempData["ErrorMessage"] = "Email et mot de passe requis.";
+                return View("~/Views/Account/Login.cshtml");
+            }
+
             try
             {
                 string connectionString = _configuration.GetConnectionString("DefaultConnection");
-                string hashedPassword = HashPassword(password);
 
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
@@ -42,7 +50,7 @@ namespace Projet__E_commerce.Controllers
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@email", email);
-                        command.Parameters.AddWithValue("@password", hashedPassword);
+                        command.Parameters.AddWithValue("@password", password);
 
                         await connection.OpenAsync();
 
@@ -94,12 +102,12 @@ namespace Projet__E_commerce.Controllers
                 return View("~/Views/Account/Login.cshtml");
             }
         }
+        
 
         // GET: /Auth/Register
         [HttpGet]
         public IActionResult Register()
         {
-            // Correction : on pointe explicitement vers la vue dans le dossier Account
             return View("~/Views/Account/Register.cshtml");
         }
 
@@ -124,6 +132,10 @@ namespace Projet__E_commerce.Controllers
             string? telephone,
             bool acceptTerms = false)
         {
+            email = email?.Trim();
+            password = password?.Trim();
+            confirmPassword = confirmPassword?.Trim();
+
             try
             {
                 if (!acceptTerms)
@@ -138,7 +150,8 @@ namespace Projet__E_commerce.Controllers
                     return View("~/Views/Account/Register.cshtml");
                 }
 
-                string hashedPassword = HashPassword(password);
+                // Hachage standard pour l'inscription (UTF8, minuscule)
+                string hashedPassword = HashPassword(password, Encoding.UTF8).ToLower();
                 string connectionString = _configuration.GetConnectionString("DefaultConnection");
 
                 if (userType == "client")
@@ -148,10 +161,8 @@ namespace Projet__E_commerce.Controllers
                         using (SqlCommand command = new SqlCommand("sp_inscription_client", connection))
                         {
                             command.CommandType = CommandType.StoredProcedure;
-                            // Utilisation de Parameters.Add pour gérer correctement les types et les NULLs
                             command.Parameters.Add("@email", SqlDbType.NVarChar, 100).Value = email;
                             command.Parameters.Add("@password", SqlDbType.NVarChar, 255).Value = hashedPassword;
-                            // Correction : Utilisation de string.Empty pour les champs NOT NULL
                             command.Parameters.Add("@prenom", SqlDbType.NVarChar, 255).Value = prenom ?? string.Empty;
                             command.Parameters.Add("@nom", SqlDbType.NVarChar, 255).Value = nom ?? string.Empty;
                             command.Parameters.Add("@telephone", SqlDbType.NVarChar, 100).Value = telephone ?? (object)DBNull.Value;
@@ -168,13 +179,11 @@ namespace Projet__E_commerce.Controllers
 
                                     if (message == "INSCRIPTION_CLIENT_OK")
                                     {
-                                        // Connexion automatique
                                         HttpContext.Session.SetInt32("UserId", newUserId);
                                         HttpContext.Session.SetString("UserEmail", email);
                                         HttpContext.Session.SetString("UserRole", "CLIENT");
 
                                         TempData["SuccessMessage"] = "Inscription réussie ! Bienvenue.";
-                                        // Redirection vers le dashboard Client
                                         return RedirectToAction("UserDashboard", "Account");
                                     }
                                 }
@@ -222,13 +231,11 @@ namespace Projet__E_commerce.Controllers
 
                                     if (message == "INSCRIPTION_ADMIN_OK")
                                     {
-                                        // Connexion automatique
                                         HttpContext.Session.SetInt32("UserId", newUserId);
                                         HttpContext.Session.SetString("UserEmail", email);
                                         HttpContext.Session.SetString("UserRole", "ADMIN");
 
                                         TempData["SuccessMessage"] = "Inscription réussie ! Bienvenue.";
-                                        // Redirection vers le dashboard Admin (Coopérative)
                                         return RedirectToAction("Dashboard", "Admin");
                                     }
                                 }
@@ -259,11 +266,12 @@ namespace Projet__E_commerce.Controllers
             return RedirectToAction("Login");
         }
 
-        private string HashPassword(string password)
+        // Méthode utilitaire de hachage
+        private string HashPassword(string password, Encoding encoding)
         {
             using (SHA256 sha256 = SHA256.Create())
             {
-                byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                byte[] bytes = sha256.ComputeHash(encoding.GetBytes(password));
                 StringBuilder builder = new StringBuilder();
                 foreach (byte b in bytes)
                 {
