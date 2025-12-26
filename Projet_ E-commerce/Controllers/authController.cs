@@ -119,6 +119,7 @@ namespace Projet__E_commerce.Controllers
             string? nom_cooperative,
             string? ville,
             string? localisation,
+            string? description,
             IFormFile? logo,
             // Commun
             string? telephone,
@@ -210,6 +211,7 @@ namespace Projet__E_commerce.Controllers
                             command.Parameters.AddWithValue("@ville", ville ?? (object)DBNull.Value);
                             command.Parameters.AddWithValue("@logo", logoPath ?? (object)DBNull.Value);
                             command.Parameters.AddWithValue("@telephone", telephone ?? (object)DBNull.Value);
+                            command.Parameters.AddWithValue("@description", description ?? (object)DBNull.Value);
 
                             await connection.OpenAsync();
 

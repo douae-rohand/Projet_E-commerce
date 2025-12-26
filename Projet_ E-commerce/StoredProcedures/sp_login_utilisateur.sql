@@ -1,4 +1,8 @@
-CREATE OR ALTER PROCEDURE sp_login_utilisateur
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'sp_login_utilisateur')
+    DROP PROCEDURE sp_login_utilisateur;
+GO
+
+CREATE PROCEDURE sp_login_utilisateur
     @email NVARCHAR(100),
     @password NVARCHAR(255)
 AS

@@ -24,6 +24,9 @@ namespace Projet__E_commerce.Models
         [StringLength(100)]
         public string? telephone { get; set; }
 
+        // Description de la coopérative (nullable, mappée en NVARCHAR(MAX))
+        public string? description { get; set; }
+
         public DateTime created_at { get; set; } = DateTime.Now;
 
         public DateTime updated_at { get; set; } = DateTime.Now;
