@@ -1,0 +1,154 @@
+@model IEnumerable<Projet__E_commerce.Models.Avis>
+
+@{
+    ViewData["Title"] = "Témoignages Clients";
+}
+
+<section class="py-5 bg-light min-vh-100 position-relative overflow-hidden">
+    <!-- Parallax Blobs -->
+    <div class="parallax-bg">
+        <div class="blob-large" style="top: 10%; left: -5%; background: var(--terracotta-10);"></div>
+        <div class="blob-large" style="bottom: 10%; right: -5%; background: var(--sable-30);"></div>
+    </div>
+
+    <div class="container position-relative z-1 py-4">
+        <!-- Header with Back Link -->
+        <div class="mb-5">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-link text-muted p-0 text-decoration-none mb-3 d-flex align-items-center gap-2 hover-terracotta">
+                <i class="bi bi-arrow-left"></i>
+                Retour à l'accueil
+            </a>
+            <h1 class="display-4 font-display fw-bold mb-3">Témoignages & Avis</h1>
+            <p class="lead text-muted">
+                Découvrez pourquoi nos clients choisissent l'authenticité et la qualité de nos coopératives partenaires.
+                <span class="d-block small mt-2"><i class="bi bi-shield-check text-terracotta"></i> Avis vérifiés avec une note de 4/5 ou plus.</span>
+            </p>
+        </div>
+
+        <!-- Reviews Masonry Layout (approx with columns) -->
+        <div class="row g-4 grid-reviews">
+            @if (Model != null && Model.Any())
+            {
+                int i = 0;
+                foreach (var avis in Model)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="review-page-card bg-white rounded-4 p-4 shadow-soft h-100 border-0 animate-fade-in-up" style="animation-delay: @(i * 0.05)s">
+                            <div class="d-flex justify-content-between align-items-start mb-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="avatar-large">
+                                        @(avis.Client?.prenom?.Substring(0, 1).ToUpper() ?? "U")
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">@avis.Client?.prenom @avis.Client?.nom</h6>
+                                        <small class="text-muted">Client vérifié</small>
+                                    </div>
+                                </div>
+                                <div class="text-warning">
+                                    @for (int n = 1; n <= 5; n++)
+                                    {
+                                        <i class="bi @(n <= (avis.note ?? 0) ? "bi-star-fill" : "bi-star") small"></i>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="product-mini-badge mb-3 d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-light">
+                                <i class="bi bi-bag-check text-terracotta small"></i>
+                                <span class="small fw-medium text-dark">@avis.Produit?.nomP</span>
+                            </div>
+
+                            <blockquote class="blockquote mb-4">
+                                <p class="review-full-text">
+                                    "@avis.commentaire"
+                                </p>
+                            </blockquote>
+
+                            <div class="mt-auto pt-3 border-top">
+                                <span class="small text-muted">
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    @avis.created_at.ToString("MMM yyyy")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    i++;
+                }
+            }
+            else
+            {
+                <div class="col-12 py-5 text-center">
+                    <img src="~/images/empty-reviews.svg" alt="No reviews" style="max-width: 200px;" class="mb-4 opacity-50" />
+                    <h3 class="text-muted">Pas encore d'avis filtrés</h3>
+                    <p class="text-muted">Revenez bientôt pour plus de témoignages passionnants.</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<style>
+    .parallax-bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 0;
+        overflow: hidden;
+    }
+    .blob-large {
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        border-radius: 50%;
+        filter: blur(120px);
+        opacity: 0.5;
+    }
+
+    .avatar-large {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: var(--terracotta);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.25rem;
+        box-shadow: 0 8px 16px rgba(224, 122, 95, 0.2);
+    }
+
+    .review-page-card {
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid rgba(0,0,0,0.02) !important;
+    }
+    .review-page-card:hover {
+        transform: scale(1.02);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.06) !important;
+        background: #fff !important;
+    }
+
+    .review-full-text {
+        font-size: 1.05rem;
+        color: #4a5568;
+        line-height: 1.8;
+        font-style: italic;
+    }
+
+    .hover-terracotta:hover {
+        color: var(--terracotta) !important;
+        transform: translateX(-5px);
+    }
+
+    .bg-light { background-color: #f8fafc !important; }
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s both;
+    }
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>

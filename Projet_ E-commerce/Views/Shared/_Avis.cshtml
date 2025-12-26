@@ -1,0 +1,256 @@
+@model IEnumerable<Projet__E_commerce.Models.Avis>
+
+    <!-- Trust Badges -->
+    <div class="row g-4 mb-5 pb-4">
+        <div class="col-6 col-md-3">
+            <div class="d-flex align-items-center gap-3 p-3 px-4 rounded-pill badge-card shadow-sm transition-all hover-lift-sm">
+                <div class="flex-shrink-0 badge-icon-box">
+                    <i class="bi bi-flower1"></i>
+                </div>
+                <div>
+                    <p class="mb-0 fw-bold small">100% Naturel</p>
+                    <p class="mb-0 extra-small">Produits bio certifiés</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="d-flex align-items-center gap-3 p-3 px-4 rounded-pill badge-card shadow-sm transition-all hover-lift-sm">
+                <div class="flex-shrink-0 badge-icon-box">
+                    <i class="bi bi-award"></i>
+                </div>
+                <div>
+                    <p class="mb-0 fw-bold small">Commerce Équitable</p>
+                    <p class="mb-0 extra-small">Juste rémunération</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="d-flex align-items-center gap-3 p-3 px-4 rounded-pill badge-card shadow-sm transition-all hover-lift-sm">
+                <div class="flex-shrink-0 badge-icon-box">
+                    <i class="bi bi-truck"></i>
+                </div>
+                <div>
+                    <p class="mb-0 fw-bold small">Livraison Rapide</p>
+                    <p class="mb-0 extra-small">24-48h au Maroc</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="d-flex align-items-center gap-3 p-3 px-4 rounded-pill badge-card shadow-sm transition-all hover-lift-sm">
+                <div class="flex-shrink-0 badge-icon-box">
+                    <i class="bi bi-patch-check"></i>
+                </div>
+                <div>
+                    <p class="mb-0 fw-bold small">Qualité Garantie</p>
+                    <p class="mb-0 extra-small">Satisfait ou remboursé</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<section class="py-5 bg-white position-relative overflow-hidden">
+    <!-- Dynamic Background Elements -->
+    <div class="background-decor">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="container position-relative z-1">
+        <div class="text-center mb-5 animate-on-scroll">
+            <span class="badge bg-terracotta-10 text-terracotta px-3 py-2 rounded-pill mb-3 fw-bold tracking-wider">TÉMOIGNAGES</span>
+            <h2 class="display-5 font-display fw-bold mb-3">L'excellence au service de l'authenticité</h2>
+            <p class="text-muted mx-auto lead-sm" style="max-width: 600px;">
+                Ce que nos clients disent de leur voyage gustatif et artisanal avec nos coopératives.
+            </p>
+        </div>
+
+        <div class="row g-4 justify-content-center mb-5">
+            @if (Model != null && Model.Any())
+            {
+                int i = 0;
+                foreach (var avis in Model)
+                {
+                    <div class="col-md-6 col-lg-3">
+                        <div class="review-card h-100 p-4 rounded-4 shadow-soft bg-white border border-light-subtle d-flex flex-column animate-fade-in-up" style="animation-delay: @(i * 0.1)s">
+                            <div class="card-quote-icon mb-3">
+                                <i class="bi bi-quote text-terracotta opacity-25" style="font-size: 2rem;"></i>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex gap-1 text-warning mb-2 h6">
+                                    @for (int n = 1; n <= 5; n++)
+                                    {
+                                        <i class="bi @(n <= (avis.note ?? 0) ? "bi-star-fill" : "bi-star")"></i>
+                                    }
+                                </div>
+                                <p class="review-text text-muted mb-0 italic">
+                                    "@avis.commentaire"
+                                </p>
+                            </div>
+                            
+                            <div class="mt-auto pt-3 border-top d-flex align-items-center gap-3">
+                                <div class="avatar-circle-dynamic">
+                                    @(avis.Client?.prenom?.Substring(0, 1).ToUpper() ?? "U")
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 small fw-bold text-dark">@avis.Client?.prenom @avis.Client?.nom</h6>
+                                    <span class="text-xs text-terracotta fw-medium">@avis.Produit?.nomP</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    i++;
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center text-muted py-5">
+                    <div class="empty-state-icon mb-3 animate-float">
+                        <i class="bi bi-chat-heart display-4 opacity-25"></i>
+                    </div>
+                    <p class="lead-sm">Aucun avis pour le moment. Soyez le premier à partager votre expérience !</p>
+                </div>
+            }
+        </div>
+
+        <!-- Bouton Voir Tous les Avis -->
+        <div class="text-center mt-4">
+            <a asp-controller="Home" asp-action="Reviews" class="btn btn-hero-outline px-4 rounded-pill shadow-sm transition-all hover-lift">
+                <span class="d-flex align-items-center gap-2">
+                    Afficher tous les avis 
+                    <i class="bi bi-arrow-right"></i>
+                </span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Review Card Styling */
+    .review-card {
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    .review-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 4px;
+        background: var(--terracotta);
+        transition: width 0.4s ease;
+    }
+    .review-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08) !important;
+        border-color: rgba(224, 122, 95, 0.2) !important;
+    }
+    .review-card:hover::after {
+        width: 100%;
+    }
+
+    /* Dynamic Avatar */
+    .avatar-circle-dynamic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--terracotta);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+
+    /* Trust Badges Styling from Image */
+    .badge-card {
+        background: #fdfbf7; /* Light cream */
+        border: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        border-radius: 50px !important; /* Pill style */
+    }
+    .badge-icon-box {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        border-radius: 50%; /* Fully rounded */
+        background: #ebf0f7; /* Light blue-gray */
+        color: #4a72b2 !important; /* Medium blue */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .badge-icon-box i, .badge-icon-box i::before {
+        font-size: 1.4rem !important;
+        color: #4a72b2 !important;
+        display: block !important;
+    }
+    .extra-small {
+        font-size: 0.75rem;
+        color: #718096;
+    }
+    .hover-lift-sm:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.03) !important;
+    }
+    .review-card:hover .avatar-circle-dynamic {
+        transform: rotate(10deg) scale(1.1);
+    }
+
+    /* Background Decoration */
+    .background-decor {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 0;
+    }
+    .blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.15;
+        animation: float-slow 20s infinite alternate;
+    }
+    .blob-1 { width: 300px; height: 300px; top: -100px; right: -50px; background: var(--terracotta); }
+    .blob-2 { width: 400px; height: 400px; bottom: -150px; left: -100px; background: var(--sable); animation-delay: -5s; }
+    .blob-3 { width: 250px; height: 250px; top: 40%; left: 10%; background: var(--primary); animation-delay: -10s; }
+
+    /* Animations */
+    @@keyframes float-slow {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(30px, 40px); }
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-5px);
+    }
+    .btn-hero-outline {
+        border: 2px solid var(--terracotta);
+        color: var(--terracotta);
+        background: transparent;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-hero-outline:hover {
+        background: var(--terracotta);
+        color: white;
+        box-shadow: 0 10px 20px rgba(224, 122, 95, 0.2);
+    }
+
+    .review-text {
+        font-style: italic;
+        line-height: 1.7;
+        font-size: 0.95rem;
+    }
+    .text-xs { font-size: 0.75rem; }
+</style>

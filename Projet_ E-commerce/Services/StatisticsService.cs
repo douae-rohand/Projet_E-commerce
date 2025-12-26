@@ -36,6 +36,14 @@ namespace Projet__E_commerce.Services
             var productsCount = await GetTotalProductsAsync();
             var clientsCount = await GetTotalClientsAsync();
             var categories = await _context.Categories
+                .Include(c => c.Produits.Where(p => p.statut == "active"))
+                .Take(4)
+                .ToListAsync();
+
+            var reviews = await _context.Avis
+                .Include(a => a.Client)
+                .Include(a => a.Produit)
+                .OrderByDescending(a => a.created_at)
                 .Take(4)
                 .ToListAsync();
 
@@ -44,8 +52,18 @@ namespace Projet__E_commerce.Services
                 TotalCooperatives = cooperativesCount,
                 TotalProducts = productsCount,
                 TotalClients = clientsCount,
-                Categories = categories
+                Categories = categories,
+                RecentReviews = reviews
             };
+        }
+        public async Task<List<Avis>> GetTopReviewsAsync()
+        {
+            return await _context.Avis
+                .Include(a => a.Client)
+                .Include(a => a.Produit)
+                .Where(a => a.note >= 4)
+                .OrderByDescending(a => a.created_at)
+                .ToListAsync();
         }
     }
 }

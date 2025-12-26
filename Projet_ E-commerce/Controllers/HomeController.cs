@@ -24,6 +24,13 @@ namespace Projet__E_commerce.Controllers
             return View(stats);
         }
 
+        // Page de tous les avis (4+ étoiles)
+        public async Task<IActionResult> Reviews()
+        {
+            var reviews = await _statisticsService.GetTopReviewsAsync();
+            return View(reviews);
+        }
+
         // Page de confidentialité
         public IActionResult Privacy()
         {
