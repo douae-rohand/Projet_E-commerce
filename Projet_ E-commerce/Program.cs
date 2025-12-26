@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Projet__E_commerce.Data;
+using Projet__E_commerce.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,9 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+// Configuration Services
+builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 
 var app = builder.Build();
 

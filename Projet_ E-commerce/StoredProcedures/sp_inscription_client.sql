@@ -1,4 +1,8 @@
-CREATE OR ALTER PROCEDURE sp_inscription_client
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'sp_inscription_client')
+    DROP PROCEDURE sp_inscription_client;
+GO
+
+CREATE PROCEDURE sp_inscription_client
     @email NVARCHAR(100),
     @password NVARCHAR(255),
     @prenom NVARCHAR(255),
@@ -24,7 +28,8 @@ BEGIN
         INSERT INTO Utilisateurs (email, password, est_actif, created_at, updated_at)
         VALUES (@email, @password, 1, GETDATE(), GETDATE());
 
-        DECLARE @userId INT = SCOPE_IDENTITY();
+        DECLARE @userId INT;
+        SET @userId = SCOPE_IDENTITY();
 
         -- Insertion dans la table Clients
         INSERT INTO Clients (
@@ -55,7 +60,8 @@ BEGIN
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
         
-        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        SET @ErrorMessage = ERROR_MESSAGE();
         RAISERROR(@ErrorMessage, 16, 1);
     END CATCH
 END;
