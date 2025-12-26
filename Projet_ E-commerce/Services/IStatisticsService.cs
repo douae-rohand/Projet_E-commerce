@@ -8,6 +8,6 @@ namespace Projet__E_commerce.Services
         Task<int> GetTotalProductsAsync();
         Task<int> GetTotalClientsAsync();
         Task<Models.DashboardStats> GetDashboardStatsAsync();
+        Task<List<Avis>> GetTopReviewsAsync();
     }
-
 }
