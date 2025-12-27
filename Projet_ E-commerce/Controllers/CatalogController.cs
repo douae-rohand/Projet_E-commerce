@@ -14,15 +14,23 @@ namespace Projet__E_commerce.Controllers
             _db = db;
         }
 
-        public async Task<IActionResult> Index(int? category)
+        public async Task<IActionResult> Index(int? category, int? cooperative, string search)
         {
             var categories = await _db.Categories
                 .AsNoTracking()
                 .OrderBy(c => c.nom)
                 .ToListAsync();
 
+            var cooperatives = await _db.Admins
+                .AsNoTracking()
+                .OrderBy(a => a.nom_cooperative)
+                .ToListAsync();
+
             ViewBag.Categories = categories;
             ViewBag.SelectedCategory = category;
+            ViewBag.Cooperatives = cooperatives;
+            ViewBag.SelectedCooperative = cooperative;
+            ViewBag.SearchTerm = search;
 
             var query = _db.Produits
                 .AsNoTracking()
@@ -32,6 +40,19 @@ namespace Projet__E_commerce.Controllers
             if (category.HasValue)
             {
                 query = query.Where(p => p.idC == category.Value);
+            }
+
+            if (cooperative.HasValue)
+            {
+                query = query.Where(p => p.idAdmin == cooperative.Value);
+            }
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.ToLower();
+                query = query.Where(p => p.nomP.ToLower().Contains(search) || 
+                                         p.Categorie.nom.ToLower().Contains(search) || 
+                                         p.Admin.nom_cooperative.ToLower().Contains(search));
             }
 
             var products = await query

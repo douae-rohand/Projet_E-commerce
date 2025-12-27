@@ -62,7 +62,7 @@
     </section>
 
     <!-- Cooperatives Grid -->
-    <section class="py-10 bg-light-soft">
+    <section class="py-5 bg-light-soft">
         <div class="container">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-4 mb-5 pb-4 border-bottom border-light-subtle">
                 <div>
@@ -97,21 +97,14 @@
                         var mainCategory = coop.Produits.FirstOrDefault()?.Categorie?.nom ?? "Artisanat";
                         
                         <div class="col-md-6 col-lg-4 animate-fade-in-up coop-item" data-category="@mainCategory.ToLower()">
-                            <div class="coop-card group h-100 bg-white rounded-4 overflow-hidden shadow-soft border border-light-subtle transition-all hover-lift">
-                                <div class="coop-img-wrapper position-relative" style="height: 220px;">
+                            <div class="coop-card group h-100 bg-white rounded-5 overflow-hidden shadow-soft border border-light-subtle transition-all hover-lift">
+                                <div class="coop-img-wrapper position-relative" style="height: 180px;">
                                     <img src="@(string.IsNullOrEmpty(coop.logo) ? "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=600&h=400&fit=crop" : coop.logo)" 
                                          class="w-100 h-100 object-fit-cover transition-transform" alt="@coop.nom_cooperative">
                                     <div class="coop-overlay position-absolute inset-0"></div>
-                                    <div class="position-absolute bottom-0 left-0 p-4 w-100">
-                                        <div class="d-flex align-items-center gap-2 text-white opacity-90 small mb-1">
-                                            <i class="bi bi-geo-alt"></i>
-                                            <span>@(coop.ville ?? "Maroc")</span>
-                                        </div>
-                                        <h3 class="h5 font-display fw-bold text-white mb-0">@coop.nom_cooperative</h3>
-                                    </div>
                                 </div>
                                 
-                                <div class="p-4">
+                                <div class="p-3">
                                     <div class="d-flex align-items-center gap-2 mb-3">
                                         <span class="badge bg-terracotta-10 text-terracotta rounded-pill px-3 py-1 fw-bold">
                                             @mainCategory
@@ -121,6 +114,15 @@
                                             <span class="fw-bold text-dark">@avgRating.ToString("F1")</span>
                                         </div>
                                     </div>
+
+                                    <h3 class="h5 font-display fw-bold mb-1">@coop.nom_cooperative</h3>
+                                    <div class="d-flex align-items-center gap-2 text-muted small mb-3">
+                                        <i class="bi bi-geo-alt text-terracotta"></i>
+                                        <span>
+                                            @(string.IsNullOrEmpty(coop.localisation) ? "" : coop.localisation + ", ")
+                                            @(coop.ville ?? "Maroc")
+                                        </span>
+                                    </div>
                                     
                                     <p class="text-muted small mb-4 line-clamp-2">@(coop.description ?? "Découvrez le savoir-faire authentique de cette coopérative partenaire engagée.")</p>
                                     
@@ -128,8 +130,8 @@
                                         <div class="d-flex align-items-center gap-3 text-muted" style="font-size: 0.8rem;">
                                             <span><i class="bi bi-calendar-check me-1"></i> Partenaire depuis @coop.created_at.Year</span>
                                         </div>
-                                        <a asp-controller="Catalog" asp-action="Index" asp-route-cooperative="@coop.id" class="btn btn-link text-terracotta p-0 text-decoration-none small fw-bold hover-translate-x">
-                                            Produits <i class="bi bi-arrow-right icon-sm"></i>
+                                        <a asp-controller="Catalog" asp-action="Index" asp-route-cooperative="@coop.id" class="btn btn-link text-majorelle p-0 text-decoration-none small fw-bold hover-translate-x">
+                                            Voir produits <i class="bi bi-arrow-right icon-sm"></i>
                                         </a>
                                     </div>
                                 </div>
@@ -164,7 +166,7 @@
                             Nous vous accompagnons dans la digitalisation de votre activité.
                         </p>
                         <div class="d-flex justify-content-center">
-                            <a href="/register?type=cooperative" class="btn btn-hero btn-lg px-5 rounded-pill shadow-sm transition-all hover-lift">
+                            <a asp-controller="Auth" asp-action="Register" asp-route-type="cooperative" class="btn btn-hero btn-lg px-5 rounded-pill shadow-sm transition-all hover-lift">
                                 Devenir partenaire
                             </a>
                         </div>
@@ -214,6 +216,9 @@
 </div>
 
 <style>
+    .rounded-5 {
+        border-radius: 1.5rem !important;
+    }
     .stat-badge {
         width: 56px;
         height: 56px;
