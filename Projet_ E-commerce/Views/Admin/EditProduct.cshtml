@@ -1,0 +1,162 @@
+@model Projet__E_commerce.Models.ProductManagementViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Modifier Produit";
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+</head>
+<body class="bg-light">
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block" style="width: 280px;">
+            <div class="p-4 border-bottom">
+                <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
+                    <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-flower1 text-white h5 mb-0"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">CoopMaroc</h6>
+                        <p class="small text-muted mb-0" style="font-size: 10px;">ESPACE ADMIN</p>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="nav flex-column p-3 gap-1">
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Dashboard", "Admin")"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
+                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Products", "Admin")"><i class="bi bi-box-seam"></i> Produits</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Orders", "Admin")"><i class="bi bi-cart3"></i> Commandes</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Profile", "Admin")"><i class="bi bi-gear"></i> Profil</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-grow-1 p-4 p-md-5">
+            <header class="mb-5">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <a href="@Url.Action("Products", "Admin")" class="btn btn-light rounded-circle">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h1 class="font-display fw-bold mb-1">Modifier Produit</h1>
+                        <p class="text-muted mb-0 small">@Model.NomP</p>
+                    </div>
+                </div>
+            </header>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-soft rounded-4 p-4 mb-4">
+                        <form method="post" asp-action="EditProduct">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" asp-for="IdP" />
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3"></div>
+
+                            <h5 class="fw-bold mb-4">Informations du produit</h5>
+
+                            <div class="mb-3">
+                                <label asp-for="NomP" class="form-label fw-bold">Nom du produit *</label>
+                                <input asp-for="NomP" class="form-control" />
+                                <span asp-validation-for="NomP" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Description" class="form-label fw-bold">Description</label>
+                                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="IdC" class="form-label fw-bold">Catégorie *</label>
+                                    <select asp-for="IdC" class="form-select">
+                                        @foreach (var cat in Model.Categories)
+                                        {
+                                            <option value="@cat.idC">@cat.nom</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="IdC" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="SeuilAlerte" class="form-label fw-bold">Seuil d'alerte stock</label>
+                                    <input asp-for="SeuilAlerte" type="number" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Statut" class="form-label fw-bold">Statut</label>
+                                <select asp-for="Statut" class="form-select">
+                                    <option value="active">Actif</option>
+                                    <option value="inactive">Inactif</option>
+                                </select>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-check-lg me-2"></i>Enregistrer
+                                </button>
+                                <a href="@Url.Action("Products", "Admin")" class="btn btn-outline-secondary px-4">Annuler</a>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Variantes Section -->
+                    @if (Model.Variantes.Any())
+                    {
+                        <div class="card border-0 shadow-soft rounded-4 p-4">
+                            <h5 class="fw-bold mb-4">Variantes existantes</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Prix</th>
+                                            <th>Taille</th>
+                                            <th>Couleur</th>
+                                            <th>Stock</th>
+                                            <th>Poids</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var v in Model.Variantes)
+                                        {
+                                            <tr>
+                                                <td>@v.prix.ToString("N2") MAD</td>
+                                                <td>@(v.taille ?? "-")</td>
+                                                <td>@(v.couleur ?? "-")</td>
+                                                <td>@v.quantite</td>
+                                                <td>@(v.poids ?? "-")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="small text-muted mb-0"><i class="bi bi-info-circle me-1"></i>La gestion des variantes sera disponible prochainement</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #5A7EB8;
+            --terracotta: #D87A4F;
+        }
+        .nav-link { font-weight: 500; font-size: 14px; transition: all 0.2s; }
+        .nav-link.active { background: var(--primary); color: white !important; box-shadow: 0 4px 12px rgba(90, 126, 184, 0.3); }
+        .nav-link:hover:not(.active) { background: #f8f9fa; color: var(--primary) !important; }
+    </style>
+</body>
+</html>
