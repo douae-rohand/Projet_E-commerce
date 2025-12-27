@@ -19,7 +19,7 @@
 
         <!-- Products Grid -->
         <div class="row g-3 g-md-4">
-            @{
+            @{ 
                 var products = new[]
                 {
                     new { Id = 1, Name = "Huile d'Argan Bio - 100ml", Price = 180, OriginalPrice = 220, Image = "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&h=400&fit=crop", Rating = 4.9, Reviews = 234, Category = "Coopérative Tissaliwine", Cooperative = "Souss-Massa", IsBestSeller = true, IsNew = false },
@@ -37,20 +37,23 @@
 
             @foreach (var product in products)
             {
-                ViewData["Id"] = product.Id;
-                ViewData["Name"] = product.Name;
-                ViewData["Price"] = product.Price;
-                ViewData["OriginalPrice"] = product.OriginalPrice;
-                ViewData["Image"] = product.Image;
-                ViewData["Rating"] = product.Rating;
-                ViewData["Reviews"] = product.Reviews;
-                ViewData["Category"] = product.Category;
-                ViewData["Cooperative"] = product.Cooperative;
-                ViewData["IsBestSeller"] = product.IsBestSeller;
-                ViewData["IsNew"] = product.IsNew;
-                
+                var vm = new Projet__E_commerce.Models.ProductViewModel
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Price = System.Convert.ToDecimal(product.Price),
+                    OriginalPrice = System.Convert.ToDecimal(product.OriginalPrice),
+                    Image = product.Image,
+                    Rating = product.Rating,
+                    Reviews = product.Reviews,
+                    Category = product.Category,
+                    Cooperative = product.Cooperative,
+                    IsBestSeller = product.IsBestSeller,
+                    IsNew = product.IsNew
+                };
+
                 <div class="col-6 col-md-4 col-lg-3 animate-fade-in-up" style="animation-delay: @(index * 0.05)s;">
-                    <partial name="_ProductCard" />
+                    <partial name="_ProductCard" model="vm" />
                 </div>
                 index++;
             }

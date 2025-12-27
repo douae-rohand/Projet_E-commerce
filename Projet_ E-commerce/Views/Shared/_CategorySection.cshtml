@@ -3,26 +3,31 @@
 @{
     var defaultStyles = new[]
     {
-        new { Image = "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&h=500&fit=crop", Overlay = "category-overlay-sable" },
-        new { Image = "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=500&fit=crop", Overlay = "category-overlay-terracotta" },
-        new { Image = "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=500&fit=crop", Overlay = "category-overlay-primary" },
-        new { Image = "https://images.unsplash.com/photo-1600166898405-da9535204843?w=400&h=500&fit=crop", Overlay = "category-overlay-ciel" }
+        new { Image = "~/images/categories/alimentaire.jpg", Overlay = "category-overlay-sable" },
+        new { Image = "~/images/categories/cosmetique.jpg", Overlay = "category-overlay-terracotta" },
+        new { Image = "~/images/categories/huile.jpg", Overlay = "category-overlay-primary" },
+        new { Image = "~/images/categories/artisanat.jpg", Overlay = "category-overlay-ciel" }
     };
 
     (string Image, string Overlay) GetCategoryStyle(string name)
     {
         var n = name.ToLowerInvariant();
-        if (n.Contains("huile") || n.Contains("argan") || n.Contains("cosmétique") || n.Contains("beauté"))
-            return ("https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&h=500&fit=crop", "category-overlay-sable");
         
-        if (n.Contains("miel") || n.Contains("ruche") || n.Contains("abeille") || n.Contains("alimentaire"))
-            return ("https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=500&fit=crop", "category-overlay-terracotta");
+        // Nutritive / Alimentaire
+        if (n.Contains("nutritive") || n.Contains("miel") || n.Contains("alimentaire") || n.Contains("cuisine"))
+            return ("~/images/categories/alimentaire.jpg", "category-overlay-terracotta");
+
+        // Cosmétique / Beauté
+        if (n.Contains("cosmétique") || n.Contains("cosmetique") || n.Contains("soin") || n.Contains("beauté"))
+            return ("~/images/categories/huile.jpg", "category-overlay-primary");
             
-        if (n.Contains("épice") || n.Contains("epice") || n.Contains("safran") || n.Contains("cuisine"))
-            return ("https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=500&fit=crop", "category-overlay-primary");
+        // Médicale / Huile pure
+        if (n.Contains("medical") || n.Contains("médical") || n.Contains("huile") || n.Contains("argan"))
+            return ("~/images/categories/cosmetique.jpg", "category-overlay-sable");
             
-        if (n.Contains("tapis") || n.Contains("artisanat") || n.Contains("decor") || n.Contains("maison"))
-            return ("https://images.unsplash.com/photo-1600166898405-da9535204843?w=400&h=500&fit=crop", "category-overlay-ciel");
+        // Artisanat
+        if (n.Contains("artisanat") || n.Contains("tapis") || n.Contains("decor"))
+            return ("~/images/categories/artisanat.jpg", "category-overlay-ciel");
 
         return ("", ""); // Return empty to signal usage of default rotation
     }
@@ -69,7 +74,7 @@
 
                     <div class="col-6 col-lg-3">
                         <a asp-controller="Catalog" asp-action="Index" asp-route-category="@category.idC" class="category-card animate-fade-in-up @delay">
-                            <img src="@image"
+                            <img src="@Url.Content(image)"
                                  alt="@category.nom"
                                  class="category-image" />
                             <div class="category-overlay @overlay"></div>

@@ -1,0 +1,113 @@
+@model Projet__E_commerce.Models.ViewModels.AnalyticsViewModel
+
+<header class="d-flex justify-content-between align-items-center mb-5 pb-4 border-bottom">
+    <div>
+        <h1 class="font-display fw-bold h3 mb-0">Analytique & Statistiques</h1>
+        <p class="text-muted mb-0">Vue d'ensemble des performances</p>
+    </div>
+</header>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-soft rounded-4 p-4">
+            <h5 class="fw-bold mb-4">Revenus Mensuels</h5>
+            @if (Model.MonthlyRevenue.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mois</th>
+                                <th>Commandes</th>
+                                <th>Revenus</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var month in Model.MonthlyRevenue)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@month.Month</td>
+                                    <td><span class="badge bg-info">@month.Orders</span></td>
+                                    <td class="fw-bold text-success">@month.Revenue.ToString("N0") MAD</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted text-center py-4">Aucune donnée disponible</p>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-soft rounded-4 p-4">
+            <h5 class="fw-bold mb-4">Ventes par Catégorie</h5>
+            @if (Model.CategorySales.Any())
+            {
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var category in Model.CategorySales)
+                    {
+                        var percentage = Model.CategorySales.Sum(c => c.Revenue) > 0 
+                            ? (int)((category.Revenue / Model.CategorySales.Sum(c => c.Revenue)) * 100) 
+                            : 0;
+                        
+                        <div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="fw-semibold text-capitalize">@category.CategoryName</span>
+                                <span class="text-muted small">@category.TotalSales ventes</span>
+                            </div>
+                            <div class="progress rounded-pill" style="height: 8px;">
+                                <div class="progress-bar bg-terracotta" style="width: @percentage%"></div>
+                            </div>
+                            <p class="small text-muted mt-1 mb-0">@category.Revenue.ToString("N0") MAD</p>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted text-center py-4">Aucune donnée disponible</p>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-soft rounded-4 p-4">
+            <h5 class="fw-bold mb-4">Performance par Catégorie</h5>
+            @if (Model.CategorySales.Any())
+            {
+                <div class="row g-3">
+                    @foreach (var category in Model.CategorySales)
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="p-4 bg-light rounded-3">
+                                <h6 class="fw-bold text-capitalize mb-3">@category.CategoryName</h6>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="small text-muted">Produits</span>
+                                    <span class="fw-semibold">@category.TotalProducts</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="small text-muted">Ventes</span>
+                                    <span class="fw-semibold">@category.TotalSales</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="small text-muted">Revenus</span>
+                                    <span class="fw-bold text-success">@category.Revenue.ToString("N0") MAD</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted text-center py-4">Aucune donnée disponible</p>
+            }
+        </div>
+    </div>
+</div>

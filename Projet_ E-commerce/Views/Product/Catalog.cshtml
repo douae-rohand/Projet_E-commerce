@@ -1,5 +1,9 @@
+@model IReadOnlyList<ProductViewModel>
 @{
     ViewData["Title"] = "Catalogue - Artisanat Marocain";
+
+    var categories = ViewBag.Categories as List<Categorie> ?? new List<Categorie>();
+    int? selectedCategory = ViewBag.SelectedCategory as int?;
 }
 
 <!-- Breadcrumb -->
@@ -22,13 +26,10 @@
                 <div class="mb-5">
                     <h5 class="font-display fw-bold mb-4">Catégories</h5>
                     <div class="list-group list-group-flush">
-                        @{
-                            var filterCategories = new[] { "Tapis & Textiles", "Poterie & Céramique", "Bijoux & Accessoires", "Décoration", "Huiles & Cosmétiques", "Miel & Produits Bio" };
-                        }
-                        @foreach (var cat in filterCategories) {
+                        @foreach (var cat in categories) {
                             <label class="list-group-item border-0 px-0 d-flex align-items-center gap-3 bg-transparent cursor-pointer group">
                                 <input class="form-check-input mt-0 border-majorelle" type="checkbox">
-                                <span class="small text-muted group-hover-dark">@cat</span>
+                                <a asp-controller="Catalog" asp-action="Index" asp-route-category="@cat.idC" class="small text-muted group-hover-dark text-decoration-none">@cat.nom</a>
                             </label>
                         }
                     </div>
@@ -77,7 +78,7 @@
                     <button class="btn btn-outline-dark d-lg-none py-2 px-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters">
                         <i class="bi bi-sliders me-2"></i> Filtres
                     </button>
-                    <p class="text-muted small mb-0"><span class="fw-bold text-dark">24</span> produits trouvés</p>
+                    <p class="text-muted small mb-0"><span class="fw-bold text-dark">@Model.Count</span> produits trouvés</p>
                 </div>
 
                 <div class="d-flex align-items-center gap-3">
@@ -107,19 +108,7 @@
             </div>
 
             <div class="row g-4 overflow-hidden">
-                @{
-                    var allProducts = new ProductViewModel[] {
-                        new ProductViewModel { Id = 1, Name = "Tapis Berbère Traditionnel", Price = 1200m, OriginalPrice = 1500m, Image = "https://images.unsplash.com/photo-1600166898405-da9535204843?w=400&h=400&fit=crop", Rating = 4.8, Reviews = 124, Category = "Tapis & Textiles", IsBestSeller = true },
-                        new ProductViewModel { Id = 2, Name = "Tajine en Céramique", Price = 350m, Image = "https://images.unsplash.com/photo-1590736969955-71cc94901144?w=400&h=400&fit=crop", Rating = 4.9, Reviews = 89, Category = "Poterie & Céramique", IsNew = true },
-                        new ProductViewModel { Id = 3, Name = "Lampe en Cuivre", Price = 890m, OriginalPrice = 1100m, Image = "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400&h=400&fit=crop", Rating = 4.7, Reviews = 67, Category = "Décoration" },
-                        new ProductViewModel { Id = 4, Name = "Collier Berbère Silver", Price = 450m, Image = "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop", Rating = 4.6, Reviews = 45, Category = "Bijoux & Accessoires", IsNew = true },
-                        new ProductViewModel { Id = 5, Name = "Pouf en Cuir Marrakech", Price = 650m, Image = "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop", Rating = 4.8, Reviews = 156, Category = "Décoration", IsBestSeller = true },
-                        new ProductViewModel { Id = 6, Name = "Service à Thé Complet", Price = 520m, OriginalPrice = 680m, Image = "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=400&h=400&fit=crop", Rating = 4.5, Reviews = 78, Category = "Poterie & Céramique" },
-                        new ProductViewModel { Id = 7, Name = "Miroir Mural Artisanal", Price = 780m, Image = "https://images.unsplash.com/photo-1618220179428-22790b461013?w=400&h=400&fit=crop", Rating = 4.7, Reviews = 92, Category = "Décoration" },
-                        new ProductViewModel { Id = 8, Name = "Panier Tressé", Price = 180m, Image = "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&h=400&fit=crop", Rating = 4.4, Reviews = 34, Category = "Tapis & Textiles", IsNew = true }
-                    };
-                }
-                @foreach (var prod in allProducts) {
+                @foreach (var prod in Model) {
                     <div class="col-6 col-md-4">
                         <partial name="_ProductCard" model="prod" />
                     </div>
@@ -150,10 +139,10 @@
         <!-- Reuse filter sections here -->
         <h6 class="fw-bold mb-3">Catégories</h6>
         <div class="mb-4">
-            @foreach (var cat in filterCategories) {
+            @foreach (var cat in categories) {
                 <label class="d-flex align-items-center gap-3 mb-2 cursor-pointer">
                     <input class="form-check-input mt-0 border-majorelle" type="checkbox">
-                    <span class="small text-muted">@cat</span>
+                    <a asp-controller="Catalog" asp-action="Index" asp-route-category="@cat.idC" class="small text-muted text-decoration-none">@cat.nom</a>
                 </label>
             }
         </div>

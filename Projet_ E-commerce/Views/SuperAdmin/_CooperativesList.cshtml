@@ -1,0 +1,176 @@
+@model List<Projet__E_commerce.Models.ViewModels.CooperativeStatsViewModel>
+
+<header class="d-flex justify-content-between align-items-center mb-4 pb-4 border-bottom">
+    <div>
+        <h1 class="font-display fw-bold h3 mb-0">Gestion des Coopératives</h1>
+        <p class="text-muted mb-0">@Model.Count coopératives enregistrées</p>
+    </div>
+</header>
+
+<!-- Search and Filters -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0" id="searchInput" placeholder="Rechercher par nom ou ville...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="filterVille">
+                    <option value="">Toutes les villes</option>
+                    @foreach (var ville in Model.Where(c => !string.IsNullOrEmpty(c.Ville)).Select(c => c.Ville).Distinct().OrderBy(v => v))
+                    {
+                        <option value="@ville">@ville</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="sortBy">
+                    <option value="nom">Trier par nom</option>
+                    <option value="date">Plus récent</option>
+                    <option value="produits">Plus de produits</option>
+                    <option value="revenus">Plus de revenus</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4" id="cooperativesList">
+    @foreach (var coop in Model)
+    {
+        <div class="col-md-6 col-xl-4 cooperative-card" 
+             data-nom="@coop.NomCooperative.ToLower()" 
+             data-ville="@(coop.Ville ?? "")">
+            <div class="card border-0 shadow-sm rounded-4 h-100 hover-lift" style="cursor: pointer;" 
+                 onclick="window.location.href='@Url.Action("CooperativeDetails", "SuperAdmin", new { id = coop.Id })'">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        @if (!string.IsNullOrEmpty(coop.Logo))
+                        {
+                            <img src="@coop.Logo" alt="@coop.NomCooperative" class="rounded-3" style="width: 64px; height: 64px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="rounded-3 bg-light d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                                <i class="bi bi-shop text-muted h3 mb-0"></i>
+                            </div>
+                        }
+                        <div class="flex-grow-1">
+                            <h5 class="fw-bold mb-1">@coop.NomCooperative</h5>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-geo-alt"></i> @coop.Ville
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <p class="small text-muted mb-1">Produits</p>
+                                <h4 class="fw-bold mb-0">@coop.TotalProduits</h4>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <p class="small text-muted mb-1">Commandes</p>
+                                <h4 class="fw-bold mb-0">@coop.TotalCommandes</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <div>
+                            <p class="small text-muted mb-0">Revenus générés</p>
+                            <h5 class="fw-bold text-success mb-0">@coop.Revenue.ToString("N0") MAD</h5>
+                        </div>
+                        <span class="badge bg-light text-dark">
+                            <i class="bi bi-calendar"></i> @coop.CreatedAt.ToString("dd/MM/yyyy")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="text-center py-5">
+        <i class="bi bi-shop text-muted" style="font-size: 4rem;"></i>
+        <h4 class="mt-3 text-muted">Aucune coopérative enregistrée</h4>
+    </div>
+}
+
+<style>
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const filterVille = document.getElementById('filterVille');
+        const sortBy = document.getElementById('sortBy');
+        const cooperativesList = document.getElementById('cooperativesList');
+        const cards = Array.from(document.querySelectorAll('.cooperative-card'));
+
+        function filterAndSort() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedVille = filterVille.value;
+            const sortOption = sortBy.value;
+
+            // Filter
+            let filteredCards = cards.filter(card => {
+                const nom = card.dataset.nom;
+                const ville = card.dataset.ville;
+                
+                const matchesSearch = nom.includes(searchTerm) || ville.toLowerCase().includes(searchTerm);
+                const matchesVille = !selectedVille || ville === selectedVille;
+                
+                return matchesSearch && matchesVille;
+            });
+
+            // Sort
+            filteredCards.sort((a, b) => {
+                switch(sortOption) {
+                    case 'nom':
+                        return a.dataset.nom.localeCompare(b.dataset.nom);
+                    case 'date':
+                        // Already sorted by date in descending order
+                        return 0;
+                    case 'produits':
+                        const produitsA = parseInt(a.querySelector('.col-6:first-child h4').textContent);
+                        const produitsB = parseInt(b.querySelector('.col-6:first-child h4').textContent);
+                        return produitsB - produitsA;
+                    case 'revenus':
+                        const revenusA = parseFloat(a.querySelector('.text-success').textContent.replace(/[^\d.]/g, ''));
+                        const revenusB = parseFloat(b.querySelector('.text-success').textContent.replace(/[^\d.]/g, ''));
+                        return revenusB - revenusA;
+                }
+            });
+
+            // Hide all cards
+            cards.forEach(card => card.style.display = 'none');
+
+            // Show filtered and sorted cards
+            filteredCards.forEach(card => {
+                card.style.display = 'block';
+                cooperativesList.appendChild(card);
+            });
+        }
+
+        searchInput.addEventListener('input', filterAndSort);
+        filterVille.addEventListener('change', filterAndSort);
+        sortBy.addEventListener('change', filterAndSort);
+    });
+</script>

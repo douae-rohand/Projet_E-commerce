@@ -5,7 +5,7 @@ using Projet__E_commerce.Data;
 using Projet__E_commerce.Filters;
 using Projet__E_commerce.Models;
 
-namespace Projet__E_commerce.Controllers
+namespace Projet__E_commerce
 {
     [AuthorizeRole("ADMIN")]
     public class AdminController : Controller
