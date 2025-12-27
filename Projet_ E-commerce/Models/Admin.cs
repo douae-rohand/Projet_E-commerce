@@ -24,6 +24,8 @@ namespace Projet__E_commerce.Models
         [StringLength(100)]
         public string? telephone { get; set; }
 
+        public string? description { get; set; }
+
         public DateTime created_at { get; set; } = DateTime.Now;
 
         public DateTime updated_at { get; set; } = DateTime.Now;

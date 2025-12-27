@@ -303,7 +303,14 @@
 
         // Initialisation au chargement pour être sûr de l'état correct
         document.addEventListener('DOMContentLoaded', function() {
-            toggleType('client');
+            const urlParams = new URLSearchParams(window.location.search);
+            const typeParam = urlParams.get('type');
+            
+            if (typeParam === 'admin' || typeParam === 'cooperative') {
+                toggleType('admin');
+            } else {
+                toggleType('client');
+            }
         });
     </script>
 </body>

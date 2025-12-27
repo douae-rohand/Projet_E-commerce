@@ -29,12 +29,18 @@ namespace Projet__E_commerce.Services
         {
             return await _context.Clients.CountAsync();
         }
+        
+        public async Task<int> GetTotalOrdersAsync()
+        {
+            return await _context.Commandes.CountAsync();
+        }
 
         public async Task<Models.DashboardStats> GetDashboardStatsAsync()
         {
             var cooperativesCount = await GetTotalCooperativesAsync();
             var productsCount = await GetTotalProductsAsync();
             var clientsCount = await GetTotalClientsAsync();
+            var ordersCount = await GetTotalOrdersAsync();
             var categories = await _context.Categories
                 .Include(c => c.Produits.Where(p => p.statut == "active"))
                 .Take(4)
@@ -47,13 +53,17 @@ namespace Projet__E_commerce.Services
                 .Take(4)
                 .ToListAsync();
 
+            var cooperatives = await GetAllCooperativesAsync();
+
             return new DashboardStats
             {
                 TotalCooperatives = cooperativesCount,
                 TotalProducts = productsCount,
                 TotalClients = clientsCount,
+                TotalOrders = ordersCount,
                 Categories = categories,
-                RecentReviews = reviews
+                RecentReviews = reviews,
+                Cooperatives = cooperatives
             };
         }
         public async Task<List<Avis>> GetTopReviewsAsync()
@@ -63,6 +73,16 @@ namespace Projet__E_commerce.Services
                 .Include(a => a.Produit)
                 .Where(a => a.note >= 4)
                 .OrderByDescending(a => a.created_at)
+                .ToListAsync();
+        }
+
+        public async Task<List<Admin>> GetAllCooperativesAsync()
+        {
+            return await _context.Admins
+                .Include(a => a.Produits)
+                    .ThenInclude(p => p.Categorie)
+                .Include(a => a.Produits)
+                    .ThenInclude(p => p.Avis)
                 .ToListAsync();
         }
     }
