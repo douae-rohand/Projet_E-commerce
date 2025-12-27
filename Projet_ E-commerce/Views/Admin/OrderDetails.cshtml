@@ -1,0 +1,265 @@
+@model Projet__E_commerce.Models.OrderManagementViewModel
+
+@{
+    Layout = null; // Standalone layout as per other admin pages
+    ViewData["Title"] = "Détails de la commande " + Model.NumeroCommande;
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+</head>
+<body class="bg-light">
+    <div class="d-flex">
+        <!-- Sidebar Copy from Orders.cshtml -->
+        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block" style="width: 280px;">
+            <div class="p-4 border-bottom">
+                <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
+                    <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-flower1 text-white h5 mb-0"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">CoopMaroc</h6>
+                        <p class="small text-muted mb-0" style="font-size: 10px;">ESPACE ADMIN</p>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="nav flex-column p-3 gap-1">
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Dashboard", "Admin")"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Products", "Admin")"><i class="bi bi-box-seam"></i> Produits</a>
+                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Orders", "Admin")"><i class="bi bi-cart3"></i> Commandes</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Profile", "Admin")"><i class="bi bi-gear"></i> Profil</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-grow-1 p-4 p-md-5">
+            <div class="container-fluid p-0">
+                <!-- En-tête -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-1">
+                                <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Admin")" class="text-decoration-none text-muted">Tableau de bord</a></li>
+                                <li class="breadcrumb-item"><a href="@Url.Action("Orders", "Admin")" class="text-decoration-none text-muted">Commandes</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">@Model.NumeroCommande</li>
+                            </ol>
+                        </nav>
+                        <h1 class="h3 mb-0 text-gray-800">Détails de la commande</h1>
+                    </div>
+                    <div>
+                        @if (Model.Statut == "en_attente")
+                        {
+                            <form asp-action="AcceptOrder" asp-controller="Admin" method="post" class="d-inline" id="acceptForm-@Model.IdCommande">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.IdCommande" />
+                                <button type="button" class="btn btn-success me-2" onclick="confirmAccept('@Model.IdCommande', '@Model.NumeroCommande')">
+                                    <i class="bi bi-check-lg me-1"></i>Accepter la commande
+                                </button>
+                            </form>
+                        }
+                        <a href="@Url.Action("Orders", "Admin")" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Retour à la liste
+                        </a>
+                    </div>
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <div class="row">
+                    <!-- Informations générales -->
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm mb-4 rounded-4 overflow-hidden">
+                            <div class="card-header bg-white py-3 border-bottom border-light d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 text-primary fw-bold">Articles commandés</h5>
+                                <span class="badge bg-light text-dark border">
+                                    @Model.LignesCommande.Count articles
+                                </span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="bg-light">
+                                            <tr>
+                                                <th class="ps-4">Produit</th>
+                                                <th>Variante</th>
+                                                <th class="text-center">Prix unitaire</th>
+                                                <th class="text-center">Quantité</th>
+                                                <th class="text-end pe-4">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.LignesCommande)
+                                            {
+                                                <tr>
+                                                    <td class="ps-4">
+                                                        <div class="fw-bold text-dark">@item.NomProduit</div>
+                                                    </td>
+                                                    <td>
+                                                        @if (!string.IsNullOrEmpty(item.Taille))
+                                                        {
+                                                            <span class="badge bg-light text-secondary border me-1">Taille: @item.Taille</span>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(item.Couleur))
+                                                        {
+                                                            <span class="badge bg-light text-secondary border">Couleur: @item.Couleur</span>
+                                                        }
+                                                        @if (string.IsNullOrEmpty(item.Taille) && string.IsNullOrEmpty(item.Couleur))
+                                                        {
+                                                            <span class="text-muted small">-</span>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center">@item.PrixUnitaire.ToString("N2") DH</td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3">
+                                                            x @item.Quantite
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-end pe-4 fw-bold">@item.SousTotal.ToString("N2") DH</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                        <tfoot class="bg-light">
+                                            <tr>
+                                                <td colspan="4" class="text-end fw-bold py-3">Total de la commande:</td>
+                                                <td class="text-end pe-4 fw-bold text-primary fs-5 py-3">@Model.PrixTotal.ToString("N2") DH</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar Infos -->
+                    <div class="col-lg-4">
+                        <!-- État de la commande -->
+                        <div class="card border-0 shadow-sm mb-4 rounded-4">
+                            <div class="card-header bg-white py-3 border-bottom border-light">
+                                <h5 class="mb-0 text-primary fw-bold">Information Commande</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <small class="text-muted d-block mb-1">Statut</small>
+                                    <span class="badge @Model.StatusClass px-3 py-2 rounded-pill">
+                                        @Model.StatusLabel
+                                    </span>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted d-block mb-1">Date de commande</small>
+                                    <div class="fw-medium">@Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")</div>
+                                </div>
+                                @if (Model.UpdatedAt != Model.CreatedAt)
+                                {
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Dernière mise à jour</small>
+                                        <div class="text-muted small">@Model.UpdatedAt.ToString("dd MMM yyyy, HH:mm")</div>
+                                    </div>
+                                }
+                                
+                                <hr class="my-3 border-light" />
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted d-block mb-1">Livraison</small>
+                                    @if (!string.IsNullOrEmpty(Model.StatutLivraison))
+                                    {
+                                        <div class="fw-medium mb-1">@Model.StatutLivraison</div>
+                                        <div class="small text-muted">@Model.ModeLivraison</div>
+                                        @if (Model.DateDebutEstimation.HasValue)
+                                        {
+                                            <div class="small text-muted mt-1">
+                                                Estimation: @Model.DateDebutEstimation.Value.ToString("dd/MM") 
+                                                @if(Model.DateFinEstimation.HasValue) 
+                                                { 
+                                                    <span> - @Model.DateFinEstimation.Value.ToString("dd/MM")</span>
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">En attente d'expédition</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Client Info -->
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white py-3 border-bottom border-light">
+                                <h5 class="mb-0 text-primary fw-bold">Client</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-light rounded-circle p-3 me-3 text-primary">
+                                        <i class="bi bi-person-fill fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">@Model.NomClient</div>
+                                        <div class="small text-muted">Client ID: #@Model.IdClient</div>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <i class="bi bi-telephone text-muted me-2"></i>
+                                    @if (!string.IsNullOrEmpty(Model.TelephoneClient))
+                                    {
+                                        <a href="tel:@Model.TelephoneClient" class="text-decoration-none text-dark">@Model.TelephoneClient</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">Non renseigné</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function confirmAccept(id, number) {
+            if(confirm('Êtes-vous sûr de vouloir accepter la commande ' + number + ' ?\nCette action est irréversible.')) {
+                // Submit form
+                document.getElementById('acceptForm-' + id).submit();
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --primary: #5A7EB8;
+            --terracotta: #D87A4F;
+        }
+        .nav-link { font-weight: 500; font-size: 14px; transition: all 0.2s; }
+        .nav-link.active { background: var(--primary); color: white !important; box-shadow: 0 4px 12px rgba(90, 126, 184, 0.3); }
+        .nav-link:hover:not(.active) { background: #f8f9fa; color: var(--primary) !important; }
+        .bg-warning-subtle { background-color: rgba(255, 193, 7, 0.1) !important; }
+        .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1) !important; }
+        .bg-danger-subtle { background-color: rgba(220, 53, 69, 0.1) !important; }
+    </style>
+</body>
+</html>

@@ -1,0 +1,185 @@
+@model List<Projet__E_commerce.Models.OrderManagementViewModel>
+@{
+    Layout = null;
+    ViewData["Title"] = "Gestion des Commandes";
+    var currentFilter = ViewBag.CurrentFilter as string;
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+</head>
+<body class="bg-light">
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block" style="width: 280px;">
+            <div class="p-4 border-bottom">
+                <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
+                    <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-flower1 text-white h5 mb-0"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">CoopMaroc</h6>
+                        <p class="small text-muted mb-0" style="font-size: 10px;">ESPACE ADMIN</p>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="nav flex-column p-3 gap-1">
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Dashboard", "Admin")"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Products", "Admin")"><i class="bi bi-box-seam"></i> Produits</a>
+                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Orders", "Admin")"><i class="bi bi-cart3"></i> Commandes</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Profile", "Admin")"><i class="bi bi-gear"></i> Profil</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-grow-1 p-4 p-md-5">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <header class="mb-5">
+                <h1 class="font-display fw-bold mb-1">Gestion des Commandes</h1>
+                <p class="text-muted mb-0 small">Visualisez et gérez les commandes contenant vos produits</p>
+            </header>
+
+            <!-- Filter Buttons -->
+            <div class="mb-4">
+                <div class="btn-group" role="group">
+                    <a href="@Url.Action("Orders", "Admin")" class="btn @(string.IsNullOrEmpty(currentFilter) ? "btn-primary" : "btn-outline-primary")">
+                        Toutes
+                    </a>
+                    <a href="@Url.Action("Orders", "Admin", new { statut = "en_attente" })" class="btn @(currentFilter == "en_attente" ? "btn-warning" : "btn-outline-warning")">
+                        En attente
+                    </a>
+                    <a href="@Url.Action("Orders", "Admin", new { statut = "valide" })" class="btn @(currentFilter == "valide" ? "btn-success" : "btn-outline-success")">
+                        Validées
+                    </a>
+                    <a href="@Url.Action("Orders", "Admin", new { statut = "annule" })" class="btn @(currentFilter == "annule" ? "btn-danger" : "btn-outline-danger")">
+                        Annulées
+                    </a>
+                </div>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="card border-0 shadow-soft rounded-4 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr class="small text-muted text-uppercase fw-bold border-0">
+                                <th class="border-0 px-4 py-3">N° Commande</th>
+                                <th class="border-0 px-4 py-3">Client</th>
+                                <th class="border-0 px-4 py-3">Date</th>
+                                <th class="border-0 px-4 py-3">Statut</th>
+                                <th class="border-0 px-4 py-3">Total</th>
+                                <th class="border-0 px-4 py-3 text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Any())
+                            {
+                                @foreach (var order in Model)
+                                {
+                                    <tr>
+                                        <td class="px-4 py-3 fw-bold">@order.NumeroCommande</td>
+                                        <td class="px-4 py-3">
+                                            <div>
+                                                <h6 class="fw-bold mb-0">@order.NomClient</h6>
+                                                @if (!string.IsNullOrEmpty(order.TelephoneClient))
+                                                {
+                                                    <p class="small text-muted mb-0">@order.TelephoneClient</p>
+                                                }
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="small">@order.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="badge @order.StatusClass px-3 py-2">@order.StatusLabel</span>
+                                        </td>
+                                        <td class="px-4 py-3 fw-bold">@order.PrixTotal.ToString("N2") MAD</td>
+                                        <td class="px-4 py-3 text-end">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <a href="@Url.Action("OrderDetails", "Admin", new { id = order.IdCommande })" class="btn btn-sm btn-outline-primary" title="Voir détails">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                @if (order.Statut == "en_attente")
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-success" onclick="acceptOrder(@order.IdCommande, '@order.NumeroCommande')" title="Accepter la commande">
+                                                        <i class="bi bi-check-lg"></i>
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <span class="d-inline-block" style="width: 32px;"></span> <!-- Spacer for alignment -->
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-cart3 display-4 d-block mb-3"></i>
+                                        <p class="mb-0">Aucune commande trouvée</p>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Accept Order Form -->
+    <form id="acceptForm" method="post" action="@Url.Action("AcceptOrder", "Admin")" style="display: none;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" id="acceptOrderId" />
+    </form>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function acceptOrder(orderId, orderNumber) {
+            if (confirm(`Êtes-vous sûr de vouloir accepter la commande ${orderNumber} ?`)) {
+                document.getElementById('acceptOrderId').value = orderId;
+                document.getElementById('acceptForm').submit();
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --primary: #5A7EB8;
+            --terracotta: #D87A4F;
+        }
+        .nav-link { font-weight: 500; font-size: 14px; transition: all 0.2s; }
+        .nav-link.active { background: var(--primary); color: white !important; box-shadow: 0 4px 12px rgba(90, 126, 184, 0.3); }
+        .nav-link:hover:not(.active) { background: #f8f9fa; color: var(--primary) !important; }
+        .bg-warning-subtle { background-color: rgba(255, 193, 7, 0.1) !important; }
+        .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1) !important; }
+        .bg-danger-subtle { background-color: rgba(220, 53, 69, 0.1) !important; }
+    </style>
+</body>
+</html>
