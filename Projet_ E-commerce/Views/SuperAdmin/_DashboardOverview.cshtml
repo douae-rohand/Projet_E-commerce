@@ -1,0 +1,196 @@
+@model Projet__E_commerce.Models.ViewModels.SuperAdminDashboardViewModel
+
+<header class="d-flex justify-content-between align-items-center mb-5 pb-4 border-bottom">
+    <h1 class="font-display fw-bold h3 mb-0">Tableau de bord Plateforme</h1>
+    <div class="d-flex align-items-center gap-3">
+        <div class="text-end d-none d-sm-block">
+            <h6 class="fw-bold mb-0">@ViewBag.UserEmail</h6>
+            <p class="small text-muted mb-0">Super Administrateur</p>
+        </div>
+        <div class="rounded-circle bg-terracotta d-flex align-items-center justify-content-center text-white shadow-soft" style="width: 44px; height: 44px;">
+            <i class="bi bi-person-check h5 mb-0"></i>
+        </div>
+    </div>
+</header>
+
+<div class="row g-4 mb-5">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
+            <div class="d-flex align-items-center gap-4">
+                <div class="bg-primary text-white rounded-3 shadow-soft d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                    <i class="bi bi-shop h4 mb-0"></i>
+                </div>
+                <div>
+                    <p class="text-muted small fw-bold text-uppercase mb-1">Coopératives actives</p>
+                    <h3 class="fw-bold mb-0">@Model.TotalCooperativesActives / @Model.TotalCooperatives</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
+            <div class="d-flex align-items-center gap-4">
+                <div class="bg-terracotta text-white rounded-3 shadow-soft d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                    <i class="bi bi-people h4 mb-0"></i>
+                </div>
+                <div>
+                    <p class="text-muted small fw-bold text-uppercase mb-1">Utilisateurs actifs</p>
+                    <h3 class="fw-bold mb-0">@Model.TotalUsersActifs / @Model.TotalUsers</h3>
+                    <small class="text-muted">@Model.TotalClients clients</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
+            <div class="d-flex align-items-center gap-4">
+                <div class="bg-info text-white rounded-3 shadow-soft d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                    <i class="bi bi-box h4 mb-0"></i>
+                </div>
+                <div>
+                    <p class="text-muted small fw-bold text-uppercase mb-1">Produits en stock</p>
+                    <h3 class="fw-bold mb-0">@Model.ProduitsEnStock / @Model.TotalProduits</h3>
+                    @if (Model.ProduitsStockFaible > 0 || Model.ProduitsRupture > 0)
+                    {
+                        <small class="text-warning">@Model.ProduitsStockFaible faible</small>
+                        <small class="text-danger">@Model.ProduitsRupture rupture</small>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
+            <div class="d-flex align-items-center gap-4">
+                <div class="bg-warning text-white rounded-3 shadow-soft d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                    <i class="bi bi-graph-up h4 mb-0"></i>
+                </div>
+                <div>
+                    <p class="text-muted small fw-bold text-uppercase mb-1">Revenus totaux</p>
+                    <h3 class="fw-bold mb-0">@Model.TotalRevenue.ToString("N0") MAD</h3>
+                    <small class="text-muted">@Model.TotalOrders commandes</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
+            <h5 class="fw-bold mb-4">Top Coopératives</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Coopérative</th>
+                            <th>Ville</th>
+                            <th>Produits</th>
+                            <th>Commandes</th>
+                            <th>Revenus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var coop in Model.TopCooperatives)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if (!string.IsNullOrEmpty(coop.Logo))
+                                        {
+                                            <img src="@coop.Logo" alt="@coop.NomCooperative" class="rounded" style="width: 32px; height: 32px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                                <i class="bi bi-shop text-muted"></i>
+                                            </div>
+                                        }
+                                        <span class="fw-semibold">@coop.NomCooperative</span>
+                                    </div>
+                                </td>
+                                <td>@coop.Ville</td>
+                                <td><span class="badge bg-primary">@coop.TotalProduits</span></td>
+                                <td><span class="badge bg-info">@coop.TotalCommandes</span></td>
+                                <td class="fw-bold text-success">@coop.Revenue.ToString("N0") MAD</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
+            <h5 class="fw-bold mb-4">Top Produits</h5>
+            <div class="d-flex flex-column gap-3">
+                @foreach (var produit in Model.TopProduits)
+                {
+                    <div class="d-flex gap-3 align-items-start">
+                        @if (!string.IsNullOrEmpty(produit.ImageUrl))
+                        {
+                            <img src="@produit.ImageUrl" alt="@produit.NomProduit" class="rounded" style="width: 48px; height: 48px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                <i class="bi bi-image text-muted"></i>
+                            </div>
+                        }
+                        <div class="flex-grow-1">
+                            <h6 class="small fw-bold mb-1">@produit.NomProduit</h6>
+                            <p class="small text-muted mb-1">@produit.NomCooperative</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-primary fw-semibold">@produit.Prix.ToString("N0") MAD</small>
+                                <small class="text-success">@produit.NombreVentes ventes</small>
+                            </div>
+                            @if (produit.MoyenneAvis.HasValue)
+                            {
+                                <div class="d-flex align-items-center gap-1 mt-1">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="bi bi-star-fill small @(i <= produit.MoyenneAvis.Value ? "text-warning" : "text-muted")"></i>
+                                    }
+                                    <small class="text-muted ms-1">@produit.MoyenneAvis.Value.ToString("F1")</small>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                @if (!Model.TopProduits.Any())
+                {
+                    <div class="text-center py-3">
+                        <i class="bi bi-graph-up text-muted h4 mb-2"></i>
+                        <p class="small text-muted mb-0">Aucun produit vendu pour le moment</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
+            <h5 class="fw-bold mb-4">Activité Récente</h5>
+            <div class="d-flex flex-column gap-3">
+                @foreach (var activity in Model.RecentActivities)
+                {
+                    <div class="d-flex gap-3 align-items-start">
+                        <div class="mt-2 rounded-circle bg-@activity.Color" style="width: 8px; height: 8px;"></div>
+                        <div class="flex-grow-1">
+                            <h6 class="small fw-bold mb-1">@activity.Title</h6>
+                            <p class="small text-muted mb-0">@activity.Detail • Il y a @activity.Time</p>
+                        </div>
+                    </div>
+                }
+                @if (!Model.RecentActivities.Any())
+                {
+                    <div class="text-center py-3">
+                        <i class="bi bi-activity text-muted h4 mb-2"></i>
+                        <p class="small text-muted mb-0">Aucune activité récente</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

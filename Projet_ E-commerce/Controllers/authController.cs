@@ -22,7 +22,6 @@ namespace Projet__E_commerce.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            // Correction : on pointe explicitement vers la vue dans le dossier Account
             return View("~/Views/Account/Login.cshtml");
         }
 
@@ -31,10 +30,22 @@ namespace Projet__E_commerce.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string email, string password, bool rememberMe = false)
         {
+            // Nettoyage des entrées
+            email = email?.Trim();
+            password = password?.Trim();
+
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                TempData["ErrorMessage"] = "Email et mot de passe requis.";
+                return View("~/Views/Account/Login.cshtml");
+            }
+
             try
             {
+                // Hachage du mot de passe pour la vérification (même méthode que l'inscription)
+                // Utilisation de majuscules pour correspondre au style SQL Server (CONVERT(..., 2))
+                string hashedPassword = HashPassword(password, Encoding.UTF8);
                 string connectionString = _configuration.GetConnectionString("DefaultConnection");
-                string hashedPassword = HashPassword(password);
 
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
@@ -59,17 +70,15 @@ namespace Projet__E_commerce.Controllers
                                 HttpContext.Session.SetString("UserEmail", userEmail);
                                 HttpContext.Session.SetString("UserRole", role);
 
-                                TempData["SuccessMessage"] = "Connexion réussie !";
-
                                 // Redirection selon le rôle
                                 switch (role)
                                 {
                                     case "SUPER_ADMIN":
-                                        return RedirectToAction("SuperAdminDashboard", "Admin");
+                                        return RedirectToAction("Dashboard", "SuperAdmin");
                                     case "ADMIN":
-                                        return RedirectToAction("Dashboard", "Admin"); // Coopérative
+                                        return RedirectToAction("Dashboard", "Admin");
                                     case "CLIENT":
-                                        return RedirectToAction("UserDashboard", "Account"); // Client
+                                        return RedirectToAction("UserDashboard", "Account");
                                     default:
                                         return RedirectToAction("UserDashboard", "Account");
                                 }
@@ -94,12 +103,12 @@ namespace Projet__E_commerce.Controllers
                 return View("~/Views/Account/Login.cshtml");
             }
         }
+        
 
         // GET: /Auth/Register
         [HttpGet]
         public IActionResult Register()
         {
-            // Correction : on pointe explicitement vers la vue dans le dossier Account
             return View("~/Views/Account/Register.cshtml");
         }
 
@@ -119,26 +128,39 @@ namespace Projet__E_commerce.Controllers
             string? nom_cooperative,
             string? ville,
             string? localisation,
+            string? description,
             IFormFile? logo,
             // Commun
-            string? telephone,
-            bool acceptTerms = false)
+            string? telephone)
         {
+            email = email?.Trim();
+            password = password?.Trim();
+            confirmPassword = confirmPassword?.Trim();
+
+            // Sauvegarder les données pour réaffichage en cas d'erreur
+            ViewData["UserType"] = userType;
+            ViewData["Email"] = email;
+            ViewData["Prenom"] = prenom;
+            ViewData["Nom"] = nom;
+            ViewData["DateNaissance"] = date_naissance;
+            ViewData["NomCooperative"] = nom_cooperative;
+            ViewData["Ville"] = ville;
+            ViewData["Localisation"] = localisation;
+            ViewData["Description"] = description;
+            ViewData["Telephone"] = telephone;
+            ViewData["Password"] = password;
+            ViewData["ConfirmPassword"] = confirmPassword;
+
             try
             {
-                if (!acceptTerms)
-                {
-                    TempData["ErrorMessage"] = "Vous devez accepter les conditions d'utilisation.";
-                    return View("~/Views/Account/Register.cshtml");
-                }
-
                 if (password != confirmPassword)
                 {
                     TempData["ErrorMessage"] = "Les mots de passe ne correspondent pas.";
                     return View("~/Views/Account/Register.cshtml");
                 }
 
-                string hashedPassword = HashPassword(password);
+                // Hachage standard pour l'inscription (UTF8, majuscule pour correspondre à SQL Server)
+                string hashedPassword = HashPassword(password, Encoding.UTF8);
                 string connectionString = _configuration.GetConnectionString("DefaultConnection");
 
                 if (userType == "client")
@@ -148,10 +170,8 @@ namespace Projet__E_commerce.Controllers
                         using (SqlCommand command = new SqlCommand("sp_inscription_client", connection))
                         {
                             command.CommandType = CommandType.StoredProcedure;
-                            // Utilisation de Parameters.Add pour gérer correctement les types et les NULLs
                             command.Parameters.Add("@email", SqlDbType.NVarChar, 100).Value = email;
                             command.Parameters.Add("@password", SqlDbType.NVarChar, 255).Value = hashedPassword;
-                            // Correction : Utilisation de string.Empty pour les champs NOT NULL
                             command.Parameters.Add("@prenom", SqlDbType.NVarChar, 255).Value = prenom ?? string.Empty;
                             command.Parameters.Add("@nom", SqlDbType.NVarChar, 255).Value = nom ?? string.Empty;
                             command.Parameters.Add("@telephone", SqlDbType.NVarChar, 100).Value = telephone ?? (object)DBNull.Value;
@@ -168,13 +188,11 @@ namespace Projet__E_commerce.Controllers
 
                                     if (message == "INSCRIPTION_CLIENT_OK")
                                     {
-                                        // Connexion automatique
                                         HttpContext.Session.SetInt32("UserId", newUserId);
                                         HttpContext.Session.SetString("UserEmail", email);
                                         HttpContext.Session.SetString("UserRole", "CLIENT");
 
                                         TempData["SuccessMessage"] = "Inscription réussie ! Bienvenue.";
-                                        // Redirection vers le dashboard Client
                                         return RedirectToAction("UserDashboard", "Account");
                                     }
                                 }
@@ -210,6 +228,7 @@ namespace Projet__E_commerce.Controllers
                             command.Parameters.AddWithValue("@ville", ville ?? (object)DBNull.Value);
                             command.Parameters.AddWithValue("@logo", logoPath ?? (object)DBNull.Value);
                             command.Parameters.AddWithValue("@telephone", telephone ?? (object)DBNull.Value);
+                            command.Parameters.AddWithValue("@description", description ?? (object)DBNull.Value);
 
                             await connection.OpenAsync();
 
@@ -222,13 +241,11 @@ namespace Projet__E_commerce.Controllers
 
                                     if (message == "INSCRIPTION_ADMIN_OK")
                                     {
-                                        // Connexion automatique
                                         HttpContext.Session.SetInt32("UserId", newUserId);
                                         HttpContext.Session.SetString("UserEmail", email);
                                         HttpContext.Session.SetString("UserRole", "ADMIN");
 
                                         TempData["SuccessMessage"] = "Inscription réussie ! Bienvenue.";
-                                        // Redirection vers le dashboard Admin (Coopérative)
                                         return RedirectToAction("Dashboard", "Admin");
                                     }
                                 }
@@ -259,15 +276,16 @@ namespace Projet__E_commerce.Controllers
             return RedirectToAction("Login");
         }
 
-        private string HashPassword(string password)
+        // Méthode utilitaire de hachage
+        private string HashPassword(string password, Encoding encoding)
         {
             using (SHA256 sha256 = SHA256.Create())
             {
-                byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                byte[] bytes = sha256.ComputeHash(encoding.GetBytes(password));
                 StringBuilder builder = new StringBuilder();
                 foreach (byte b in bytes)
                 {
-                    builder.Append(b.ToString("x2"));
+                    builder.Append(b.ToString("X2"));
                 }
                 return builder.ToString();
             }

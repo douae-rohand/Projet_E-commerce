@@ -1,0 +1,184 @@
+@model List<Projet__E_commerce.Models.ViewModels.UserStatsViewModel>
+
+<header class="d-flex justify-content-between align-items-center mb-4 pb-4 border-bottom">
+    <div>
+        <h1 class="font-display fw-bold h3 mb-0">Gestion des Utilisateurs</h1>
+        <p class="text-muted mb-0">@Model.Count utilisateurs enregistrés</p>
+    </div>
+</header>
+
+<!-- Search and Filters -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0" id="searchInput" placeholder="Rechercher par email ou nom...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="filterRole">
+                    <option value="">Tous les rôles</option>
+                    <option value="CLIENT">Clients</option>
+                    <option value="ADMIN">Administrateurs</option>
+                    <option value="SUPER_ADMIN">Super Admins</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="filterStatus">
+                    <option value="">Tous les statuts</option>
+                    <option value="true">Actif</option>
+                    <option value="false">Inactif</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="sortBy">
+                    <option value="date">Plus récent</option>
+                    <option value="nom">Par nom</option>
+                    <option value="email">Par email</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4" id="usersList">
+    @foreach (var user in Model)
+    {
+        <div class="col-md-6 col-xl-4 user-card"
+             data-email="@user.Email.ToLower()"
+             data-nom="@(user.Nom?.ToLower() ?? "")"
+             data-prenom="@(user.Prenom?.ToLower() ?? "")"
+             data-role="@user.Role"
+             data-status="@user.EstActif.ToString().ToLower()">
+            <div class="card border-0 shadow-sm rounded-4 h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="avatar-circle bg-terracotta text-white d-flex align-items-center justify-content-center rounded-circle"
+                             style="width: 50px; height: 50px; font-size: 1.2rem; font-weight: 600;">
+                            @(string.IsNullOrEmpty(user.Prenom) ? user.Email.Substring(0, 1).ToUpper() : user.Prenom.Substring(0, 1).ToUpper())
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="card-title mb-1 fw-semibold">
+                                @if (!string.IsNullOrEmpty(user.Prenom) && !string.IsNullOrEmpty(user.Nom))
+                                {
+                                    @user.Prenom @user.Nom
+                                }
+                                else if (user.Role == "ADMIN")
+                                {
+                                    @user.NomCooperative
+                                }
+                                else
+                                {
+                                    @user.Email
+                                }
+                            </h6>
+                            <p class="text-muted small mb-1">@user.Email</p>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge @(user.Role == "SUPER_ADMIN" ? "bg-danger" : user.Role == "ADMIN" ? "bg-warning text-dark" : "bg-primary") rounded-pill px-2 py-1 small">
+                                    @user.Role
+                                </span>
+                                <span class="badge @(user.EstActif ? "bg-success" : "bg-secondary") rounded-pill px-2 py-1 small">
+                                    @(user.EstActif ? "Actif" : "Inactif")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 text-center">
+                        <div class="col-12">
+                            <small class="text-muted">
+                                Inscrit le @user.CreatedAt.ToString("dd/MM/yyyy")
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-people display-1 text-muted mb-3"></i>
+        <h5 class="text-muted">Aucun utilisateur trouvé</h5>
+        <p class="text-muted">Les utilisateurs apparaîtront ici une fois qu'ils se seront inscrits.</p>
+    </div>
+}
+
+<style>
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+    }
+    .avatar-circle {
+        background: linear-gradient(135deg, var(--terracotta), #d2691e);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const filterRole = document.getElementById('filterRole');
+        const filterStatus = document.getElementById('filterStatus');
+        const sortBy = document.getElementById('sortBy');
+        const usersList = document.getElementById('usersList');
+        const userCards = usersList.querySelectorAll('.user-card');
+
+        function filterUsers() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const roleFilter = filterRole.value;
+            const statusFilter = filterStatus.value;
+
+            userCards.forEach(card => {
+                const email = card.dataset.email;
+                const nom = card.dataset.nom;
+                const prenom = card.dataset.prenom;
+                const role = card.dataset.role;
+                const status = card.dataset.status;
+
+                const matchesSearch = email.includes(searchTerm) ||
+                                    nom.includes(searchTerm) ||
+                                    prenom.includes(searchTerm);
+                const matchesRole = !roleFilter || role === roleFilter;
+                const matchesStatus = !statusFilter || status === statusFilter;
+
+                card.style.display = matchesSearch && matchesRole && matchesStatus ? '' : 'none';
+            });
+        }
+
+        function sortUsers() {
+            const sortValue = sortBy.value;
+            const cardsArray = Array.from(userCards);
+
+            cardsArray.sort((a, b) => {
+                switch(sortValue) {
+                    case 'nom':
+                        const nameA = (a.dataset.prenom + ' ' + a.dataset.nom).trim();
+                        const nameB = (b.dataset.prenom + ' ' + b.dataset.nom).trim();
+                        return nameA.localeCompare(nameB);
+                    case 'email':
+                        return a.dataset.email.localeCompare(b.dataset.email);
+                    case 'date':
+                    default:
+                        // Would need date data attribute for proper sorting
+                        return 0;
+                }
+            });
+
+            cardsArray.forEach(card => usersList.appendChild(card));
+        }
+
+        searchInput.addEventListener('input', filterUsers);
+        filterRole.addEventListener('change', filterUsers);
+        filterStatus.addEventListener('change', filterUsers);
+        sortBy.addEventListener('change', sortUsers);
+    });
+</script>

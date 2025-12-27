@@ -1,6 +1,6 @@
 @{
     Layout = null;
-    ViewData["Title"] = "Inscription - SoukDigital";
+    ViewData["Title"] = "Inscription - CoopMaroc";
 }
 
 <!DOCTYPE html>
@@ -13,59 +13,123 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Moroccan Palette */
         :root {
-            --primary-gold: #C5A059;
-            --dark-gold: #A68043;
-            --glass-bg: rgba(255, 255, 255, 0.92);
+            --ciel: #A3C6D3;
+            --sable: #FFB35B;
+            --blush: #FDE2D2;
+            --terracotta: #C05522;
+            --majorelle: #003D8E;
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --text-muted: #6c757d;
         }
+
+        /* Animations */
+        @@keyframes fadeInUp {
+            from { opacity: 0; transform: translate3d(0, 40px, 0); }
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+
+        @@keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @@keyframes slideIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out both; }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-slide-in { animation: slideIn 0.4s ease-out both; }
 
         body {
             font-family: 'Outfit', sans-serif;
-            background: #0a0a0a;
+            background: linear-gradient(135deg, var(--ciel) 0%, var(--sable) 50%, var(--terracotta) 100%);
+            min-height: 100vh;
+            position: relative;
             overflow-x: hidden;
         }
 
-        .reg-container {
-            min-height: 100vh;
-            background: url('https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1600&h=1200&fit=crop') center/cover no-repeat;
-            position: relative;
-            padding: 2rem 0;
-        }
-
-        .reg-overlay {
+        /* Decorative elements */
+        .shape-blob {
             position: absolute;
-            inset: 0;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.5));
-            backdrop-filter: blur(3px);
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.1;
         }
 
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 32px;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
-            padding: 3rem;
+        .bg-ciel-30 { background-color: rgba(163, 198, 211, 0.3); }
+        .bg-sable-30 { background-color: rgba(255, 179, 91, 0.3); }
+        .bg-terracotta-10 { background-color: rgba(192, 85, 34, 0.1); }
+
+        /* Moroccan pattern */
+        .moroccan-pattern-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 600px;
+            height: 100%;
+            opacity: 0.03;
+            z-index: 0;
+        }
+
+        .moroccan-pattern-bg svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .container-fluid-custom {
             position: relative;
             z-index: 10;
-            animation: fadeIn 0.8s ease-out;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
         }
 
-        @@keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+        .auth-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            padding: 2rem 1.5rem;
+            max-width: 550px;
+            width: 100%;
+            animation: fadeInUp 0.8s ease-out;
         }
 
-        .font-display { font-family: 'Playfair Display', serif; }
+        .logo-section {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .logo-section img {
+            height: 80px;
+            width: auto;
+            margin-bottom: 0.5rem;
+        }
+
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .text-terracotta {
+            color: var(--terracotta) !important;
+        }
 
         .type-toggle {
-            background: #f0f0f0;
-            padding: 6px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 4px;
             border-radius: 16px;
             display: inline-flex;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             width: 100%;
+            border: 2px solid rgba(192, 85, 34, 0.1);
         }
 
         .type-btn {
@@ -75,78 +139,185 @@
             border: none;
             background: transparent;
             font-weight: 600;
-            color: #666;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-muted);
+            transition: all 0.3s ease;
         }
 
         .type-btn.active {
             background: white;
-            color: var(--dark-gold);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            color: var(--terracotta);
+            box-shadow: 0 4px 12px rgba(192, 85, 34, 0.1);
         }
 
         .form-section {
             display: none;
+        }
+
+        .form-section.active {
+            display: block;
             animation: slideIn 0.4s ease-out;
         }
 
-        .form-section.active { display: block; }
-
-        @@keyframes slideIn {
-            from { opacity: 0; transform: translateX(10px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
         .form-control {
+            border: 2px solid #e9ecef;
             border-radius: 12px;
             padding: 12px 16px;
-            border: 1px solid #e0e0e0;
-            background: #fcfcfc;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
         }
 
         .form-control:focus {
-            border-color: var(--primary-gold);
-            box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1);
-        }
-
-        .btn-premium {
-            background: linear-gradient(135deg, var(--primary-gold) 0%, var(--dark-gold) 100%);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 14px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 10px 25px rgba(197, 160, 89, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .btn-premium:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 35px rgba(197, 160, 89, 0.4);
-            color: white;
+            border-color: var(--terracotta);
+            box-shadow: 0 0 0 3px rgba(192, 85, 34, 0.1);
+            background: white;
         }
 
         .input-group-text {
-            border-radius: 12px 0 0 12px;
-            background: #fcfcfc;
-            border-color: #e0e0e0;
-            color: #999;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #e9ecef;
+            border-right: none;
+            color: var(--text-muted);
+        }
+
+        .form-control:focus + .input-group-text {
+            border-color: var(--terracotta);
+        }
+
+        .btn-auth {
+            background: linear-gradient(135deg, var(--terracotta) 0%, #A0441A 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(192, 85, 34, 0.3);
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(192, 85, 34, 0.4);
+            color: white;
+        }
+
+        .auth-links {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .auth-links a {
+            color: var(--terracotta);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .auth-links a:hover {
+            color: #A0441A;
+            text-decoration: underline;
+        }
+
+        .alert {
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--terracotta);
+            border-color: var(--terracotta);
+        }
+
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .logo-upload-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+        }
+
+        .logo-upload-label {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px dashed var(--terracotta);
+            background: rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .logo-upload-label:hover {
+            background: rgba(255, 255, 255, 0.9);
+            border-style: solid;
+            box-shadow: 0 10px 25px rgba(192, 85, 34, 0.2);
+        }
+
+        .logo-preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+        }
+
+        .logo-placeholder {
+            text-align: center;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
     </style>
 </head>
 <body>
-    <div class="reg-container d-flex align-items-center justify-content-center">
-        <div class="reg-overlay"></div>
-        
-        <div class="glass-card">
-            <div class="text-center mb-4">
-                <h1 class="font-display fw-bold h2 mb-2">Rejoignez SoukDigital</h1>
-                <p class="text-muted">Choisissez votre type de compte pour commencer</p>
+    <!-- Decorative elements -->
+    <div class="shape-blob bg-ciel-30 blur-3xl" style="top: 10%; right: 10%; width: 200px; height: 200px;"></div>
+    <div class="shape-blob bg-sable-30 blur-3xl" style="bottom: 10%; left: 10%; width: 250px; height: 250px;"></div>
+    <div class="shape-blob bg-terracotta-10 blur-3xl" style="top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px;"></div>
+
+    <!-- Moroccan pattern -->
+    <div class="moroccan-pattern-bg">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+            <pattern id="moroccan-pattern" patternUnits="userSpaceOnUse" width="20" height="20">
+                <path d="M10 0 L20 10 L10 20 L0 10 Z" fill="currentColor" />
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#moroccan-pattern)" />
+        </svg>
+    </div>
+
+    <div class="container-fluid-custom">
+        <div class="auth-card">
+            <!-- Logo Section -->
+            <div class="logo-section animate-fade-in-up">
+                <img src="~/images/logo.png" alt="CoopMaroc Logo" class="animate-float" />
+                <h1 class="font-display fw-bold h3 mb-2">
+                    Coop<span class="text-terracotta">Maroc</span>
+                </h1>
+                <p class="text-muted small mb-0">Trésors des Coopératives</p>
             </div>
 
-            <div class="type-toggle">
+            <h2 class="text-center font-display fw-bold mb-4 animate-fade-in-up stagger-1">
+                Rejoignez CoopMaroc
+            </h2>
+
+            <p class="text-center text-muted mb-4 animate-fade-in-up stagger-1">
+                Choisissez votre type de compte pour commencer
+            </p>
+
+            <div class="type-toggle animate-fade-in-up stagger-2">
                 <button type="button" class="type-btn active" id="btn-client" onclick="toggleType('client')">
                     <i class="bi bi-person-fill me-2"></i>Client
                 </button>
@@ -157,29 +328,29 @@
 
             @if (TempData["SuccessMessage"] != null)
             {
-                <div class="alert alert-success small">
-                    @TempData["SuccessMessage"]
+                <div class="alert alert-success animate-fade-in-up stagger-3">
+                    <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
                 </div>
             }
 
             @if (TempData["ErrorMessage"] != null)
             {
-                <div class="alert alert-danger small">
-                    @TempData["ErrorMessage"]
+                <div class="alert alert-danger animate-fade-in-up stagger-3">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i>@TempData["ErrorMessage"]
                 </div>
             }
 
-            <form asp-controller="Auth" asp-action="Register" method="post" enctype="multipart/form-data">
+            <form asp-controller="Auth" asp-action="Register" method="post" enctype="multipart/form-data" class="animate-fade-in-up stagger-3">
                 @Html.AntiForgeryToken()
-                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
-                <input type="hidden" name="userType" id="userType" value="client">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <!-- Force initial value from server -->
+                <input type="hidden" name="userType" id="userType" value="@(ViewData["UserType"] ?? "client")">
 
                 <div class="mb-3">
-                    <label class="form-label small fw-bold text-uppercase text-muted">Email professionnel</label>
+                    <label class="form-label fw-semibold">Email professionnel</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                        <!-- renamed to match stored procedures -->
-                        <input type="email" name="email" class="form-control" placeholder="nom@exemple.com" required>
+                        <input type="email" name="email" class="form-control" placeholder="nom@exemple.com" value="@ViewData["Email"]" required />
                     </div>
                 </div>
 
@@ -187,94 +358,113 @@
                 <div id="clientFields" class="form-section active">
                     <div class="row g-3 mb-3">
                         <div class="col-6">
-                            <label class="form-label small fw-bold text-uppercase text-muted">Prénom</label>
-                            <!-- firstName -> prenom -->
-                            <input type="text" name="prenom" class="form-control" placeholder="Prénom" required>
+                            <label class="form-label fw-semibold">Prénom</label>
+                            <input type="text" name="prenom" class="form-control" placeholder="Prénom" value="@ViewData["Prenom"]" required />
                         </div>
                         <div class="col-6">
-                            <label class="form-label small fw-bold text-uppercase text-muted">Nom</label>
-                            <!-- lastName -> nom -->
-                            <input type="text" name="nom" class="form-control" placeholder="Nom" required>
+                            <label class="form-label fw-semibold">Nom</label>
+                            <input type="text" name="nom" class="form-control" placeholder="Nom" value="@ViewData["Nom"]" required />
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase text-muted">Date de naissance</label>
-                        <!-- birthDate -> date_naissance -->
-                        <input type="date" name="date_naissance" class="form-control">
+                        <label class="form-label fw-semibold">Date de naissance</label>
+                        <input type="date" name="date_naissance" class="form-control" value="@(ViewData["DateNaissance"] is DateTime date ? date.ToString("yyyy-MM-dd") : "")" required />
                     </div>
                 </div>
 
                 <!-- Admin Fields -->
                 <div id="adminFields" class="form-section">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase text-muted">Nom de la Coopérative</label>
-                        <!-- coopName -> nom_cooperative -->
-                        <input type="text" name="nom_cooperative" class="form-control" placeholder="Ex: Coopérative Artisanale de Fès" required>
-                    </div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small fw-bold text-uppercase text-muted">Ville</label>
-                            <!-- city -> ville -->
-                            <input type="text" name="ville" class="form-control" placeholder="Ville">
-                        </div>
-                        <div class="col-6">
-                            <!-- Updated: use file input so user can browse images on PC -->
-                            <label class="form-label small fw-bold text-uppercase text-muted">Logo de la Coopérative</label>
-                            <!-- logoFile -> logo (Controller will save file and pass path to proc) -->
-                            <input type="file" name="logo" class="form-control" accept="image/*">
+                    <!-- Logo Upload Circle -->
+                    <div class="text-center mb-4">
+                        <div class="logo-upload-container">
+                            <input type="file" name="logo" id="logoInput" class="d-none" accept="image/*" @(ViewData["UserType"]?.ToString() == "admin" ? "required" : "") />
+                            <label for="logoInput" class="logo-upload-label">
+                                <img id="logoPreview" src="#" alt="Logo Preview" class="logo-preview-img" style="display: none;" />
+                                <div class="logo-placeholder" id="logoPlaceholder">
+                                    <i class="bi bi-camera-fill fs-1 text-terracotta"></i>
+                                    <span class="small text-muted mt-2">Logo</span>
+                                </div>
+                            </label>
                         </div>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase text-muted">Localisation</label>
-                        <!-- already matches stored procedure -->
-                        <input type="text" name="localisation" class="form-control" placeholder="Adresse complète">
+                        <label class="form-label fw-semibold">Nom de la Coopérative</label>
+                        <input type="text" name="nom_cooperative" class="form-control" placeholder="Ex: Coopérative Artisanale de Fès" value="@ViewData["NomCooperative"]" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Ville</label>
+                        <input type="text" name="ville" class="form-control" placeholder="Ville" value="@ViewData["Ville"]" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Localisation</label>
+                        <input type="text" name="localisation" class="form-control" placeholder="Adresse complète" value="@ViewData["Localisation"]" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea name="description" class="form-control" placeholder="Description de votre coopérative" rows="3" required>@ViewData["Description"]</textarea>
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label small fw-bold text-uppercase text-muted">Téléphone</label>
+                    <label class="form-label fw-semibold">Téléphone</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                        <!-- phone -> telephone -->
-                        <input type="tel" name="telephone" class="form-control" placeholder="+212 6XX XX XX XX" required>
+                        <input type="tel" name="telephone" class="form-control" placeholder="+212 6XX XX XX XX" value="@ViewData["Telephone"]" required />
                     </div>
                 </div>
 
                 <div class="row g-3 mb-4">
                     <div class="col-6">
-                        <label class="form-label small fw-bold text-uppercase text-muted">Mot de passe</label>
-                        <!-- matches stored procedures -->
-                        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                        <label class="form-label fw-semibold">Mot de passe</label>
+                        <div class="input-group">
+                            <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" value="@ViewData["Password"]" required />
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="col-6">
-                        <label class="form-label small fw-bold text-uppercase text-muted">Confirmer</label>
-                        <!-- confirmPassword stays client-side only; controller should validate equality -->
-                        <input type="password" name="confirmPassword" class="form-control" placeholder="••••••••" required>
+                        <label class="form-label fw-semibold">Confirmer</label>
+                        <div class="input-group">
+                            <input type="password" name="confirmPassword" id="confirmPassword" class="form-control" placeholder="••••••••" value="@ViewData["ConfirmPassword"]" required />
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmPassword')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mb-4 form-check">
-                    <input type="checkbox" name="acceptTerms" class="form-check-input" id="terms" value="true" required>
-                    <label class="form-check-label small text-muted" for="terms">
-                        J'accepte les <a href="#" class="text-primary text-decoration-none fw-bold">conditions d'utilisation</a>
-                    </label>
-                </div>
-
-                <button type="submit" class="btn btn-premium w-100 mb-3">
+                <button type="submit" class="btn btn-auth mb-3">
                     Créer mon compte
                 </button>
             </form>
 
-            <p class="text-center mt-2 mb-0 small text-muted">
-                Déjà membre ? <a href="/Auth/Login" class="text-primary fw-bold text-decoration-none">Se connecter</a>
-            </p>
+            <div class="auth-links animate-fade-in-up stagger-3">
+                <p class="mb-0">Déjà membre ? <a href="/Auth/Login">Se connecter</a></p>
+            </div>
         </div>
     </div>
 
     <script>
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling.querySelector('i');
+            
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+
         function toggleType(type) {
             document.getElementById('userType').value = type;
-            
+
             // Gestion des boutons
             document.getElementById('btn-client').classList.toggle('active', type === 'client');
             document.getElementById('btn-admin').classList.toggle('active', type === 'admin');
@@ -287,31 +477,58 @@
             adminSection.classList.toggle('active', type === 'admin');
 
             // Gestion des attributs required et disabled
-            // Si type est 'client', on active les champs client et on désactive les champs admin
             const isClient = type === 'client';
 
             // Champs Client
             clientSection.querySelectorAll('input').forEach(input => {
                 input.disabled = !isClient;
+                // Force required si visible
+                if(isClient && input.hasAttribute('data-required')) input.required = true;
             });
 
             // Champs Admin
-            adminSection.querySelectorAll('input').forEach(input => {
+            adminSection.querySelectorAll('input, textarea').forEach(input => {
                 input.disabled = isClient;
+                // Force required si visible
+                if(!isClient && input.hasAttribute('data-required')) input.required = true;
             });
         }
 
-        // Initialisation au chargement pour être sûr de l'état correct
+        // Image Preview
+        const logoInput = document.getElementById('logoInput');
+        if(logoInput) {
+            logoInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.getElementById('logoPreview');
+                        const placeholder = document.getElementById('logoPlaceholder');
+                        
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        placeholder.style.display = 'none';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Initialisation au chargement
         document.addEventListener('DOMContentLoaded', function() {
+            // Récupérer le type d'utilisateur depuis le serveur (en cas d'erreur) ou par défaut 'client'
+            const serverUserType = '@Html.Raw(ViewData["UserType"] ?? "client")';
             const urlParams = new URLSearchParams(window.location.search);
             const typeParam = urlParams.get('type');
             
             if (typeParam === 'admin' || typeParam === 'cooperative') {
                 toggleType('admin');
             } else {
-                toggleType('client');
+                toggleType(serverUserType);
             }
         });
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
