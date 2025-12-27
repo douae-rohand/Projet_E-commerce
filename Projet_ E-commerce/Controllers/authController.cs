@@ -130,31 +130,7 @@ namespace Projet__E_commerce.Controllers
             string? description,
             IFormFile? logo,
             // Commun
-            string? telephone,
-            bool acceptTerms = false)
-        {
-            email = email?.Trim();
-            password = password?.Trim();
-            confirmPassword = confirmPassword?.Trim();
-
-            try
-            {
-                if (!acceptTerms)
-                {
-                    TempData["ErrorMessage"] = "Vous devez accepter les conditions d'utilisation.";
-                    return View("~/Views/Account/Register.cshtml");
-                }
-
-                if (password != confirmPassword)
-                {
-                    TempData["ErrorMessage"] = "Les mots de passe ne correspondent pas.";
-                    return View("~/Views/Account/Register.cshtml");
-                }
-
-                // Hachage standard pour l'inscription (UTF8, minuscule)
-                string hashedPassword = HashPassword(password, Encoding.UTF8).ToLower();
-                string connectionString = _configuration.GetConnectionString("DefaultConnection");
-
+            string? telephone)
                 if (userType == "client")
                 {
                     using (SqlConnection connection = new SqlConnection(connectionString))
