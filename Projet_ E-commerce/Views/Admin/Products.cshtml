@@ -14,14 +14,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-animation.css" asp-append-version="true" />
 </head>
-<body class="bg-light">
+<body class="admin-bg">
+    <div class="bg-orb-3"></div>
+    
     <div class="d-flex">
         <!-- Sidebar -->
-        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block" style="width: 280px;">
+        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block shadow-sm" style="width: 280px; z-index: 1000;">
             <div class="p-4 border-bottom">
                 <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
-                    <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                     <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
                         <i class="bi bi-flower1 text-white h5 mb-0"></i>
                     </div>
                     <div>
@@ -32,10 +35,15 @@
             </div>
             
             <nav class="nav flex-column p-3 gap-1">
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Dashboard", "Admin")"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
-                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Products", "Admin")"><i class="bi bi-box-seam"></i> Produits</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Orders", "Admin")"><i class="bi bi-cart3"></i> Commandes</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Profile", "Admin")"><i class="bi bi-gear"></i> Profil</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Dashboard", "Admin")"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
+                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 shadow-sm" href="@Url.Action("Products", "Admin")"><i class="bi bi-box-seam"></i> Produits</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Orders", "Admin")"><i class="bi bi-cart3"></i> Commandes</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Profile", "Admin")"><i class="bi bi-gear"></i> Profil</a>
+                <div class="mt-auto pt-4 border-top">
+                    <a class="nav-link text-danger rounded-3 d-flex align-items-center gap-3 py-2 px-3 hover-effect" href="@Url.Action("Logout", "Account")">
+                        <i class="bi bi-box-arrow-right"></i> Déconnexion
+                    </a>
+                </div>
             </nav>
         </aside>
 
@@ -56,30 +64,28 @@
                 </div>
             }
 
-            <header class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-4 mb-5">
+            <header class="d-flex justify-content-between align-items-end mb-5">
                 <div>
-                    <h1 class="font-display fw-bold mb-1">Gestion des Produits</h1>
-                    <p class="text-muted mb-0 small">Gérez vos produits et leurs variantes</p>
+                    <h1 class="font-display fw-bold mb-1 text-dark">Mes Produits</h1>
+                    <p class="text-muted mb-0 small">Gérez votre catalogue, vos stocks et vos prix</p>
                 </div>
-                <div class="d-flex gap-2">
-                    <a href="@Url.Action("CreateProduct", "Admin")" class="btn btn-primary rounded-3 px-4 py-2 small fw-bold shadow-soft">
-                        <i class="bi bi-plus-lg me-2"></i> Nouveau produit
-                    </a>
-                </div>
+                <a href="@Url.Action("CreateProduct", "Admin")" class="btn btn-primary rounded-pill px-4 shadow-sm hover-lift">
+                    <i class="bi bi-plus-lg me-2"></i>Nouveau produit
+                </a>
             </header>
 
             <!-- Products Table -->
-            <div class="card border-0 shadow-soft rounded-4 overflow-hidden">
+            <div class="card card-premium border-0 rounded-4 overflow-hidden">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+                        <thead class="bg-light">
                             <tr class="small text-muted text-uppercase fw-bold border-0">
                                 <th class="border-0 px-4 py-3">Produit</th>
                                 <th class="border-0 px-4 py-3">Catégorie</th>
-                                <th class="border-0 px-4 py-3">Variantes</th>
-                                <th class="border-0 px-4 py-3">Stock</th>
-                                <th class="border-0 px-4 py-3">Prix</th>
-                                <th class="border-0 px-4 py-3">Statut</th>
+                                <th class="border-0 px-4 py-3 text-center">Variantes</th>
+                                <th class="border-0 px-4 py-3 text-center">Stock Total</th>
+                                <th class="border-0 px-4 py-3 text-end">Prix</th>
+                                <th class="border-0 px-4 py-3 text-center">Statut</th>
                                 <th class="border-0 px-4 py-3 text-end">Actions</th>
                             </tr>
                         </thead>
@@ -90,57 +96,60 @@
                                 {
                                     <tr>
                                         <td class="px-4 py-3">
-                                            <div>
-                                                <h6 class="fw-bold mb-0">@product.NomP</h6>
-                                                @if (!string.IsNullOrEmpty(product.Description))
-                                                {
-                                                    <p class="small text-muted mb-0 text-truncate" style="max-width: 300px;">@product.Description</p>
-                                                }
-                                            </div>
+                                            <div class="fw-bold text-dark">@product.NomP</div>
+                                            <!-- <div class="small text-muted text-truncate" style="max-width: 200px;">@product.Description</div> -->
                                         </td>
                                         <td class="px-4 py-3">
-                                            <span class="badge bg-light text-dark">@product.NomCategorie</span>
+                                            <span class="badge bg-light text-dark border">@product.NomCategorie</span>
                                         </td>
-                                        <td class="px-4 py-3">
-                                            <span class="badge bg-primary-subtle text-primary">@product.NombreVariantes variante(s)</span>
+                                        <td class="px-4 py-3 text-center">
+                                            <span class="badge bg-secondary-subtle text-secondary rounded-pill">@product.NombreVariantes</span>
                                         </td>
-                                        <td class="px-4 py-3">
-                                            <span class="@(product.StockTotal <= product.SeuilAlerte ? "text-danger" : "text-success") fw-bold">
-                                                @product.StockTotal
-                                            </span>
+                                        <td class="px-4 py-3 text-center">
                                             @if (product.StockTotal <= product.SeuilAlerte)
                                             {
-                                                <i class="bi bi-exclamation-triangle-fill text-warning ms-1" title="Stock faible"></i>
+                                                <span class="badge bg-danger-subtle text-danger rounded-pill">
+                                                    <i class="bi bi-exclamation-circle me-1"></i>@product.StockTotal
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="fw-medium text-dark">@product.StockTotal</span>
                                             }
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 text-end fw-bold">
                                             @if (product.PrixMin == product.PrixMax)
                                             {
-                                                <span class="fw-bold">@product.PrixMin?.ToString("N2") MAD</span>
+                                                <span>@product.PrixMin?.ToString("N2") DH</span>
                                             }
                                             else
                                             {
-                                                <span class="fw-bold">@product.PrixMin?.ToString("N2") - @product.PrixMax?.ToString("N2") MAD</span>
+                                                <div class="small text-muted">de @product.PrixMin?.ToString("N0")</div>
+                                                <div>à @product.PrixMax?.ToString("N0") <small>DH</small></div>
                                             }
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 text-center">
                                             @if (product.Statut == "active")
                                             {
-                                                <span class="badge bg-success-subtle text-success">Actif</span>
+                                                <span class="badge bg-success-subtle text-success rounded-pill px-3">Actif</span>
                                             }
                                             else
                                             {
-                                                <span class="badge bg-danger-subtle text-danger">Inactif</span>
+                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3">Inactif</span>
                                             }
                                         </td>
                                         <td class="px-4 py-3 text-end">
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="@Url.Action("EditProduct", "Admin", new { id = product.IdP })" class="btn btn-outline-primary">
-                                                    <i class="bi bi-pencil"></i>
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <a href="@Url.Action("EditProduct", "Admin", new { id = product.IdP })" class="btn btn-sm btn-outline-primary rounded-circle" title="Modifier" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="bi bi-pencil-fill" style="font-size: 0.8rem;"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-outline-danger" onclick="confirmDelete(@product.IdP, '@product.NomP')">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
+                                                
+                                                <form asp-action="DeleteProduct" asp-route-id="@product.IdP" method="post" class="d-inline" onsubmit="return confirmDelete(event, '@product.NomP')">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Supprimer" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                                        <i class="bi bi-trash-fill" style="font-size: 0.8rem;"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
@@ -150,9 +159,9 @@
                             {
                                 <tr>
                                     <td colspan="7" class="text-center py-5 text-muted">
-                                        <i class="bi bi-box-seam display-4 d-block mb-3"></i>
+                                        <i class="bi bi-box-seam display-4 d-block mb-3 opacity-50"></i>
                                         <p class="mb-0">Aucun produit trouvé</p>
-                                        <a href="@Url.Action("CreateProduct", "Admin")" class="btn btn-primary mt-3">Créer votre premier produit</a>
+                                        <a href="@Url.Action("CreateProduct", "Admin")" class="btn btn-sm btn-outline-primary mt-2">Créer votre premier produit</a>
                                     </td>
                                 </tr>
                             }
@@ -163,7 +172,7 @@
         </main>
     </div>
 
-    <!-- Delete Confirmation Form -->
+    <!-- Delete Confirmation Form (Unchanged) -->
     <form id="deleteForm" method="post" action="@Url.Action("DeleteProduct", "Admin")" style="display: none;">
         @Html.AntiForgeryToken()
         <input type="hidden" name="id" id="deleteProductId" />
@@ -171,26 +180,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function confirmDelete(productId, productName) {
+        function confirmDelete(e, productName) {
+            e.preventDefault(); // Stop default form submission
             if (confirm(`Êtes-vous sûr de vouloir supprimer le produit "${productName}" ?`)) {
-                document.getElementById('deleteProductId').value = productId;
-                document.getElementById('deleteForm').submit();
+                e.target.closest('form').submit(); // Submit the form
             }
+            return false;
         }
     </script>
-
-    <style>
-        :root {
-            --primary: #5A7EB8;
-            --terracotta: #D87A4F;
-            --sable: rgba(229, 200, 136, 0.2);
-        }
-        .nav-link { font-weight: 500; font-size: 14px; transition: all 0.2s; }
-        .nav-link.active { background: var(--primary); color: white !important; box-shadow: 0 4px 12px rgba(90, 126, 184, 0.3); }
-        .nav-link:hover:not(.active) { background: #f8f9fa; color: var(--primary) !important; }
-        .bg-primary-subtle { background-color: rgba(90, 126, 184, 0.1) !important; }
-        .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1) !important; }
-        .bg-danger-subtle { background-color: rgba(220, 53, 69, 0.1) !important; }
-    </style>
 </body>
 </html>

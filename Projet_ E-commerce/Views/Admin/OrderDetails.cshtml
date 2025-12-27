@@ -1,7 +1,7 @@
 @model Projet__E_commerce.Models.OrderManagementViewModel
 
 @{
-    Layout = null; // Standalone layout as per other admin pages
+    Layout = null;
     ViewData["Title"] = "Détails de la commande " + Model.NumeroCommande;
 }
 
@@ -15,14 +15,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-animation.css" asp-append-version="true" />
 </head>
-<body class="bg-light">
+<body class="admin-bg">
+    <div class="bg-orb-3"></div>
+
     <div class="d-flex">
-        <!-- Sidebar Copy from Orders.cshtml -->
-        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block" style="width: 280px;">
+        <!-- Sidebar -->
+        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block shadow-sm" style="width: 280px; z-index: 1000;">
             <div class="p-4 border-bottom">
                 <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
-                    <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                     <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
                         <i class="bi bi-flower1 text-white h5 mb-0"></i>
                     </div>
                     <div>
@@ -33,10 +36,15 @@
             </div>
             
             <nav class="nav flex-column p-3 gap-1">
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Dashboard", "Admin")"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Products", "Admin")"><i class="bi bi-box-seam"></i> Produits</a>
-                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Orders", "Admin")"><i class="bi bi-cart3"></i> Commandes</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Profile", "Admin")"><i class="bi bi-gear"></i> Profil</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Dashboard", "Admin")"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Products", "Admin")"><i class="bi bi-box-seam"></i> Produits</a>
+                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 shadow-sm" href="@Url.Action("Orders", "Admin")"><i class="bi bi-cart3"></i> Commandes</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Profile", "Admin")"><i class="bi bi-gear"></i> Profil</a>
+                <div class="mt-auto pt-4 border-top">
+                    <a class="nav-link text-danger rounded-3 d-flex align-items-center gap-3 py-2 px-3 hover-effect" href="@Url.Action("Logout", "Account")">
+                        <i class="bi bi-box-arrow-right"></i> Déconnexion
+                    </a>
+                </div>
             </nav>
         </aside>
 
@@ -53,28 +61,28 @@
                                 <li class="breadcrumb-item active" aria-current="page">@Model.NumeroCommande</li>
                             </ol>
                         </nav>
-                        <h1 class="h3 mb-0 text-gray-800">Détails de la commande</h1>
+                        <h1 class="h3 mb-0 text-dark font-display fw-bold">Détails de la commande</h1>
                     </div>
-                    <div>
+                    <div class="d-flex gap-2">
                         @if (Model.Statut == "en_attente")
                         {
-                            <form asp-action="AcceptOrder" asp-controller="Admin" method="post" class="d-inline" id="acceptForm-@Model.IdCommande">
+                            <form asp-action="AcceptOrder" asp-controller="Admin" method="post" id="acceptForm-@Model.IdCommande">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@Model.IdCommande" />
-                                <button type="button" class="btn btn-success me-2" onclick="confirmAccept('@Model.IdCommande', '@Model.NumeroCommande')">
-                                    <i class="bi bi-check-lg me-1"></i>Accepter la commande
+                                <button type="button" class="btn btn-success rounded-pill shadow-sm hover-lift" onclick="confirmAccept('@Model.IdCommande', '@Model.NumeroCommande')">
+                                    <i class="bi bi-check-lg me-1"></i>Accepter
                                 </button>
                             </form>
                         }
-                        <a href="@Url.Action("Orders", "Admin")" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i>Retour à la liste
+                        <a href="@Url.Action("Orders", "Admin")" class="btn btn-light rounded-pill shadow-sm hover-lift">
+                            <i class="bi bi-arrow-left me-1"></i>Retour
                         </a>
                     </div>
                 </div>
 
                 @if (TempData["SuccessMessage"] != null)
                 {
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
                         <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -82,7 +90,7 @@
 
                 @if (TempData["ErrorMessage"] != null)
                 {
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -91,10 +99,10 @@
                 <div class="row">
                     <!-- Informations générales -->
                     <div class="col-lg-8">
-                        <div class="card border-0 shadow-sm mb-4 rounded-4 overflow-hidden">
+                        <div class="card card-premium mb-4 rounded-4 overflow-hidden border-0">
                             <div class="card-header bg-white py-3 border-bottom border-light d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0 text-primary fw-bold">Articles commandés</h5>
-                                <span class="badge bg-light text-dark border">
+                                <h6 class="mb-0 text-dark fw-bold">Articles commandés</h6>
+                                <span class="badge bg-light text-dark border rounded-pill">
                                     @Model.LignesCommande.Count articles
                                 </span>
                             </div>
@@ -103,11 +111,11 @@
                                     <table class="table table-hover align-middle mb-0">
                                         <thead class="bg-light">
                                             <tr>
-                                                <th class="ps-4">Produit</th>
-                                                <th>Variante</th>
-                                                <th class="text-center">Prix unitaire</th>
-                                                <th class="text-center">Quantité</th>
-                                                <th class="text-end pe-4">Total</th>
+                                                <th class="ps-4 border-0">Produit</th>
+                                                <th class="border-0">Variante</th>
+                                                <th class="text-center border-0">Prix unitaire</th>
+                                                <th class="text-center border-0">Quantité</th>
+                                                <th class="text-end pe-4 border-0">Total</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -137,14 +145,14 @@
                                                             x @item.Quantite
                                                         </span>
                                                     </td>
-                                                    <td class="text-end pe-4 fw-bold">@item.SousTotal.ToString("N2") DH</td>
+                                                    <td class="text-end pe-4 fw-bold text-primary">@item.SousTotal.ToString("N2") DH</td>
                                                 </tr>
                                             }
                                         </tbody>
                                         <tfoot class="bg-light">
                                             <tr>
-                                                <td colspan="4" class="text-end fw-bold py-3">Total de la commande:</td>
-                                                <td class="text-end pe-4 fw-bold text-primary fs-5 py-3">@Model.PrixTotal.ToString("N2") DH</td>
+                                                <td colspan="4" class="text-end fw-bold py-3 border-0">Total de la commande:</td>
+                                                <td class="text-end pe-4 fw-bold text-primary fs-5 py-3 border-0">@Model.PrixTotal.ToString("N2") DH</td>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -156,9 +164,9 @@
                     <!-- Sidebar Infos -->
                     <div class="col-lg-4">
                         <!-- État de la commande -->
-                        <div class="card border-0 shadow-sm mb-4 rounded-4">
+                        <div class="card card-premium mb-4 rounded-4 border-0">
                             <div class="card-header bg-white py-3 border-bottom border-light">
-                                <h5 class="mb-0 text-primary fw-bold">Information Commande</h5>
+                                <h6 class="mb-0 text-dark fw-bold">Information Commande</h6>
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
@@ -169,7 +177,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <small class="text-muted d-block mb-1">Date de commande</small>
-                                    <div class="fw-medium">@Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")</div>
+                                    <div class="fw-medium text-dark">@Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")</div>
                                 </div>
                                 @if (Model.UpdatedAt != Model.CreatedAt)
                                 {
@@ -179,17 +187,18 @@
                                     </div>
                                 }
                                 
-                                <hr class="my-3 border-light" />
+                                <hr class="my-3 border-light opacity-10" />
                                 
                                 <div class="mb-3">
                                     <small class="text-muted d-block mb-1">Livraison</small>
                                     @if (!string.IsNullOrEmpty(Model.StatutLivraison))
                                     {
-                                        <div class="fw-medium mb-1">@Model.StatutLivraison</div>
+                                        <div class="fw-medium mb-1 text-dark">@Model.StatutLivraison</div>
                                         <div class="small text-muted">@Model.ModeLivraison</div>
                                         @if (Model.DateDebutEstimation.HasValue)
                                         {
                                             <div class="small text-muted mt-1">
+                                                <i class="bi bi-calendar-event me-1"></i>
                                                 Estimation: @Model.DateDebutEstimation.Value.ToString("dd/MM") 
                                                 @if(Model.DateFinEstimation.HasValue) 
                                                 { 
@@ -207,17 +216,17 @@
                         </div>
 
                         <!-- Client Info -->
-                        <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card card-premium rounded-4 border-0">
                             <div class="card-header bg-white py-3 border-bottom border-light">
-                                <h5 class="mb-0 text-primary fw-bold">Client</h5>
+                                <h6 class="mb-0 text-dark fw-bold">Client</h6>
                             </div>
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-light rounded-circle p-3 me-3 text-primary">
+                                    <div class="bg-primary-subtle rounded-circle p-3 me-3 text-primary">
                                         <i class="bi bi-person-fill fs-4"></i>
                                     </div>
                                     <div>
-                                        <div class="fw-bold">@Model.NomClient</div>
+                                        <div class="fw-bold text-dark">@Model.NomClient</div>
                                         <div class="small text-muted">Client ID: #@Model.IdClient</div>
                                     </div>
                                 </div>
@@ -225,7 +234,7 @@
                                     <i class="bi bi-telephone text-muted me-2"></i>
                                     @if (!string.IsNullOrEmpty(Model.TelephoneClient))
                                     {
-                                        <a href="tel:@Model.TelephoneClient" class="text-decoration-none text-dark">@Model.TelephoneClient</a>
+                                        <a href="tel:@Model.TelephoneClient" class="text-decoration-none text-dark hover-effect">@Model.TelephoneClient</a>
                                     }
                                     else
                                     {
@@ -249,17 +258,5 @@
             }
         }
     </script>
-    <style>
-        :root {
-            --primary: #5A7EB8;
-            --terracotta: #D87A4F;
-        }
-        .nav-link { font-weight: 500; font-size: 14px; transition: all 0.2s; }
-        .nav-link.active { background: var(--primary); color: white !important; box-shadow: 0 4px 12px rgba(90, 126, 184, 0.3); }
-        .nav-link:hover:not(.active) { background: #f8f9fa; color: var(--primary) !important; }
-        .bg-warning-subtle { background-color: rgba(255, 193, 7, 0.1) !important; }
-        .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1) !important; }
-        .bg-danger-subtle { background-color: rgba(220, 53, 69, 0.1) !important; }
-    </style>
 </body>
 </html>

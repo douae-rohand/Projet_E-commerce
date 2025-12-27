@@ -1,0 +1,92 @@
+/* Animation de fond (Background Orbs) */
+body.admin-bg {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    position: relative;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+body.admin-bg::before,
+body.admin-bg::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    z-index: -1;
+    animation: float 20s infinite ease-in-out;
+    opacity: 0.6;
+}
+
+body.admin-bg::before {
+    background: rgba(90, 126, 184, 0.4); /* Primary color */
+    width: 600px;
+    height: 600px;
+    top: -100px;
+    right: -100px;
+    animation-delay: -5s;
+}
+
+body.admin-bg::after {
+    background: rgba(216, 122, 79, 0.3); /* Terracotta color */
+    width: 500px;
+    height: 500px;
+    bottom: -100px;
+    left: -100px;
+}
+
+/* Bulle supplémentaire */
+.bg-orb-3 {
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    background: rgba(229, 200, 136, 0.4); /* Sable color */
+    border-radius: 50%;
+    filter: blur(80px);
+    top: 40%;
+    left: 40%;
+    z-index: -1;
+    animation: float 15s infinite ease-in-out reverse;
+    opacity: 0.5;
+}
+
+@keyframes float {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(50px, -50px) rotate(5deg); }
+    66% { transform: translate(-30px, 30px) rotate(-5deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* Premium Card Design */
+.card-premium {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-premium:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+/* KPI Cards */
+.kpi-card-inner {
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-icon-bg {
+    position: absolute;
+    right: -20px;
+    bottom: -20px;
+    font-size: 8rem;
+    opacity: 0.05;
+    transform: rotate(-15deg);
+}
+
+/* Modern Typography */
+.font-display {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.5px;
+}
