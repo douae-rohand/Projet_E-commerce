@@ -368,7 +368,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Date de naissance</label>
-                        <input type="date" name="date_naissance" class="form-control" value="@(ViewData["DateNaissance"] != null ? ((DateTime)ViewData["DateNaissance"]).ToString("yyyy-MM-dd") : "")" required />
+                        <input type="date" name="date_naissance" class="form-control" value="@(ViewData["DateNaissance"] is DateTime date ? date.ToString("yyyy-MM-dd") : "")" required />
                     </div>
                 </div>
 

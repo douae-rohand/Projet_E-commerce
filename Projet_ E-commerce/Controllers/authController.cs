@@ -42,6 +42,9 @@ namespace Projet__E_commerce.Controllers
 
             try
             {
+                // Hachage du mot de passe pour la vérification (même méthode que l'inscription)
+                // Utilisation de majuscules pour correspondre au style SQL Server (CONVERT(..., 2))
+                string hashedPassword = HashPassword(password, Encoding.UTF8);
                 string connectionString = _configuration.GetConnectionString("DefaultConnection");
 
                 using (SqlConnection connection = new SqlConnection(connectionString))
@@ -50,7 +53,7 @@ namespace Projet__E_commerce.Controllers
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@email", email);
-                        command.Parameters.AddWithValue("@password", password);
+                        command.Parameters.AddWithValue("@password", hashedPassword);
 
                         await connection.OpenAsync();
 
@@ -67,17 +70,15 @@ namespace Projet__E_commerce.Controllers
                                 HttpContext.Session.SetString("UserEmail", userEmail);
                                 HttpContext.Session.SetString("UserRole", role);
 
-                                TempData["SuccessMessage"] = "Connexion réussie !";
-
                                 // Redirection selon le rôle
                                 switch (role)
                                 {
                                     case "SUPER_ADMIN":
-                                        return RedirectToAction("SuperAdminDashboard", "Admin");
+                                        return RedirectToAction("Dashboard", "SuperAdmin");
                                     case "ADMIN":
-                                        return RedirectToAction("Dashboard", "Admin"); // Coopérative
+                                        return RedirectToAction("Dashboard", "Admin");
                                     case "CLIENT":
-                                        return RedirectToAction("UserDashboard", "Account"); // Client
+                                        return RedirectToAction("UserDashboard", "Account");
                                     default:
                                         return RedirectToAction("UserDashboard", "Account");
                                 }
@@ -131,6 +132,37 @@ namespace Projet__E_commerce.Controllers
             IFormFile? logo,
             // Commun
             string? telephone)
+        {
+            email = email?.Trim();
+            password = password?.Trim();
+            confirmPassword = confirmPassword?.Trim();
+
+            // Sauvegarder les données pour réaffichage en cas d'erreur
+            ViewData["UserType"] = userType;
+            ViewData["Email"] = email;
+            ViewData["Prenom"] = prenom;
+            ViewData["Nom"] = nom;
+            ViewData["DateNaissance"] = date_naissance;
+            ViewData["NomCooperative"] = nom_cooperative;
+            ViewData["Ville"] = ville;
+            ViewData["Localisation"] = localisation;
+            ViewData["Description"] = description;
+            ViewData["Telephone"] = telephone;
+            ViewData["Password"] = password;
+            ViewData["ConfirmPassword"] = confirmPassword;
+
+            try
+            {
+                if (password != confirmPassword)
+                {
+                    TempData["ErrorMessage"] = "Les mots de passe ne correspondent pas.";
+                    return View("~/Views/Account/Register.cshtml");
+                }
+
+                // Hachage standard pour l'inscription (UTF8, majuscule pour correspondre à SQL Server)
+                string hashedPassword = HashPassword(password, Encoding.UTF8);
+                string connectionString = _configuration.GetConnectionString("DefaultConnection");
+
                 if (userType == "client")
                 {
                     using (SqlConnection connection = new SqlConnection(connectionString))
@@ -253,7 +285,7 @@ namespace Projet__E_commerce.Controllers
                 StringBuilder builder = new StringBuilder();
                 foreach (byte b in bytes)
                 {
-                    builder.Append(b.ToString("x2"));
+                    builder.Append(b.ToString("X2"));
                 }
                 return builder.ToString();
             }
