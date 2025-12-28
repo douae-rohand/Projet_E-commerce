@@ -1,3 +1,6 @@
+USE [cooperative]
+GO
+
 IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'sp_get_orders_by_admin')
     DROP PROCEDURE sp_get_orders_by_admin;
 GO
@@ -10,14 +13,28 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT DISTINCT
+    ;WITH OrdersWithAdminLines AS (
+        SELECT 
+            c.idCommande,
+            SUM(lc.quantite * lc.prix_unitaire) AS PrixTotalAdmin,
+            MIN(v.photo) AS Thumbnail
+        FROM [dbo].[Commandes] c
+        INNER JOIN [dbo].[LignesCommande] lc ON c.idCommande = lc.idCommande
+        INNER JOIN [dbo].[Variantes] v ON lc.idV = v.idV
+        INNER JOIN [dbo].[Produits] p ON v.idP = p.idP
+        WHERE p.idAdmin = @idAdmin
+        GROUP BY c.idCommande
+    )
+    SELECT 
         c.idCommande AS IdCommande,
-        CONCAT('#CO-', YEAR(c.created_at), '-', FORMAT(c.idCommande, '000')) AS NumeroCommande,
+        CONCAT('#CO-', YEAR(c.created_at), '-', RIGHT('000' + CAST(c.idCommande AS VARCHAR(10)), 3)) AS NumeroCommande,
         c.idClient AS IdClient,
         CONCAT(cl.prenom, ' ', cl.nom) AS NomClient,
         cl.telephone AS TelephoneClient,
         c.statut AS Statut,
         c.prixTotal AS PrixTotal,
+        ISNULL(owa.PrixTotalAdmin, 0) AS PrixTotalAdmin,
+        owa.Thumbnail AS Thumbnail,
         c.created_at AS CreatedAt,
         c.updated_at AS UpdatedAt,
         CASE 
@@ -37,14 +54,11 @@ BEGIN
         l.mode_livraison AS ModeLivraison,
         l.dateDebutEstimation AS DateDebutEstimation,
         l.dateFinEstimation AS DateFinEstimation
-    FROM Commandes c
-    INNER JOIN Clients cl ON c.idClient = cl.id
-    INNER JOIN LignesCommande lc ON c.idCommande = lc.idCommande
-    INNER JOIN Variantes v ON lc.idV = v.idV
-    INNER JOIN Produits p ON v.idP = p.idP
-    LEFT JOIN Livraisons l ON c.idCommande = l.idCommande
-    WHERE p.idAdmin = @idAdmin
-        AND (@statut IS NULL OR c.statut = @statut)
+    FROM OrdersWithAdminLines owa
+    INNER JOIN [dbo].[Commandes] c ON owa.idCommande = c.idCommande
+    INNER JOIN [dbo].[Clients] cl ON c.idClient = cl.id
+    LEFT JOIN [dbo].[Livraisons] l ON c.idCommande = l.idCommande
+    WHERE (@statut IS NULL OR c.statut = @statut)
         AND (@idCommande IS NULL OR c.idCommande = @idCommande)
     ORDER BY c.created_at DESC;
 END;

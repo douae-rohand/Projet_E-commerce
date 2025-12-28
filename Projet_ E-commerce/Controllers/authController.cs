@@ -273,7 +273,7 @@ namespace Projet__E_commerce.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Login");
+            return Redirect("/");
         }
 
         // Méthode utilitaire de hachage
