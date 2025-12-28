@@ -3,14 +3,19 @@
 -- Projet E-commerce - Authentification
 -- ============================================
 
-USE [VotreBaseDeDonnees]; -- Remplacez par le nom de votre base de données
+USE [cooperative]; -- Remplacez par le nom de votre base de données
 GO
+
 
 -- ============================================
 -- Procédure: sp_inscription_admin
 -- Description: Inscription d'un administrateur de coopérative
 -- ============================================
-CREATE OR ALTER PROCEDURE sp_inscription_admin
+IF OBJECT_ID('sp_inscription_admin', 'P') IS NOT NULL
+    DROP PROCEDURE sp_inscription_admin
+GO
+
+CREATE PROCEDURE sp_inscription_admin
     @email NVARCHAR(100),
     @password NVARCHAR(255),
     @nom_cooperative NVARCHAR(255),
@@ -80,7 +85,11 @@ GO
 -- Procédure: sp_inscription_client
 -- Description: Inscription d'un client
 -- ============================================
-CREATE OR ALTER PROCEDURE sp_inscription_client
+IF OBJECT_ID('sp_inscription_client', 'P') IS NOT NULL
+    DROP PROCEDURE sp_inscription_client
+GO
+
+CREATE PROCEDURE sp_inscription_client
     @email NVARCHAR(100),
     @password NVARCHAR(255),
     @prenom NVARCHAR(255),
@@ -141,13 +150,17 @@ BEGIN
         RAISERROR(@ErrorMessage, 16, 1);
     END CATCH
 END;
-
+GO
 
 -- ============================================
 -- Procédure: sp_login_utilisateur
 -- Description: Authentification d'un utilisateur
 -- ============================================
-CREATE OR ALTER PROCEDURE sp_login_utilisateur
+IF OBJECT_ID('sp_login_utilisateur', 'P') IS NOT NULL
+    DROP PROCEDURE sp_login_utilisateur
+GO
+
+CREATE PROCEDURE sp_login_utilisateur
     @email NVARCHAR(100),
     @password NVARCHAR(255)
 AS
