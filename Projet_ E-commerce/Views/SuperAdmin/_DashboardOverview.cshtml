@@ -4,7 +4,7 @@
     <h1 class="font-display fw-bold h3 mb-0">Tableau de bord Plateforme</h1>
     <div class="d-flex align-items-center gap-3">
         <div class="text-end d-none d-sm-block">
-            <h6 class="fw-bold mb-0">@ViewBag.UserEmail</h6>
+            <h6 class="fw-bold mb-0">@Model.UserEmail</h6> <!-- CHANGED: bind from DB-backed model -->
             <p class="small text-muted mb-0">Super Administrateur</p>
         </div>
         <div class="rounded-circle bg-terracotta d-flex align-items-center justify-content-center text-white shadow-soft" style="width: 44px; height: 44px;">
@@ -12,6 +12,29 @@
         </div>
     </div>
 </header>
+
+
+<div class="row g-4 mb-5">
+    <div class="col-xl-4 col-lg-6">
+        <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
+            <h5 class="fw-bold mb-3">Utilisateurs: Actifs vs Inactifs</h5>
+            <canvas id="usersDoughnut" style="max-height:260px"></canvas>
+        </div>
+    </div>
+    <div class="col-xl-4 col-lg-6">
+        <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
+            <h5 class="fw-bold mb-3">Coopératives: Actives vs Inactives</h5>
+            <canvas id="coopsDoughnut" style="max-height:260px"></canvas>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
+            <h5 class="fw-bold mb-3">État du Stock Produits</h5>
+            <canvas id="stockDoughnut" style="max-height:260px"></canvas>
+        </div>
+    </div>
+</div>
+
 
 <div class="row g-4 mb-5">
     <div class="col-sm-6 col-xl-3">
@@ -75,122 +98,183 @@
     </div>
 </div>
 
-<div class="row g-4 mb-5">
-    <div class="col-lg-4">
-        <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
-            <h5 class="fw-bold mb-4">Top Coopératives</h5>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Coopérative</th>
-                            <th>Ville</th>
-                            <th>Produits</th>
-                            <th>Commandes</th>
-                            <th>Revenus</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var coop in Model.TopCooperatives)
-                        {
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        @if (!string.IsNullOrEmpty(coop.Logo))
-                                        {
-                                            <img src="@coop.Logo" alt="@coop.NomCooperative" class="rounded" style="width: 32px; height: 32px; object-fit: cover;">
-                                        }
-                                        else
-                                        {
-                                            <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                                                <i class="bi bi-shop text-muted"></i>
-                                            </div>
-                                        }
-                                        <span class="fw-semibold">@coop.NomCooperative</span>
-                                    </div>
-                                </td>
-                                <td>@coop.Ville</td>
-                                <td><span class="badge bg-primary">@coop.TotalProduits</span></td>
-                                <td><span class="badge bg-info">@coop.TotalCommandes</span></td>
-                                <td class="fw-bold text-success">@coop.Revenue.ToString("N0") MAD</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4">
+    <div class="col-lg-12">
         <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
             <h5 class="fw-bold mb-4">Top Produits</h5>
-            <div class="d-flex flex-column gap-3">
+            <div class="row g-4">
                 @foreach (var produit in Model.TopProduits)
                 {
-                    <div class="d-flex gap-3 align-items-start">
-                        @if (!string.IsNullOrEmpty(produit.ImageUrl))
-                        {
-                            <img src="@produit.ImageUrl" alt="@produit.NomProduit" class="rounded" style="width: 48px; height: 48px; object-fit: cover;">
-                        }
-                        else
-                        {
-                            <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                <i class="bi bi-image text-muted"></i>
-                            </div>
-                        }
-                        <div class="flex-grow-1">
-                            <h6 class="small fw-bold mb-1">@produit.NomProduit</h6>
-                            <p class="small text-muted mb-1">@produit.NomCooperative</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-primary fw-semibold">@produit.Prix.ToString("N0") MAD</small>
-                                <small class="text-success">@produit.NombreVentes ventes</small>
-                            </div>
-                            @if (produit.MoyenneAvis.HasValue)
-                            {
-                                <div class="d-flex align-items-center gap-1 mt-1">
-                                    @for (int i = 1; i <= 5; i++)
+                    <div class="col-md-6 col-lg-4 col-xl-3">
+                        <div class="card border-0 shadow-sm rounded-3 h-100 hover-lift">
+                            <div class="card-body p-3">
+                                <div class="d-flex gap-3 align-items-start mb-3">
+                                    @if (!string.IsNullOrEmpty(produit.ImageUrl))
                                     {
-                                        <i class="bi bi-star-fill small @(i <= produit.MoyenneAvis.Value ? "text-warning" : "text-muted")"></i>
+                                        <img src="@produit.ImageUrl" alt="@produit.NomProduit" class="rounded" style="width: 48px; height: 48px; object-fit: cover;">
                                     }
-                                    <small class="text-muted ms-1">@produit.MoyenneAvis.Value.ToString("F1")</small>
+                                    else
+                                    {
+                                        <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                            <i class="bi bi-image text-muted"></i>
+                                        </div>
+                                    }
+                                    <div class="flex-grow-1">
+                                        <h6 class="small fw-bold mb-1 text-truncate" title="@produit.NomProduit">@produit.NomProduit</h6>
+                                        <p class="small text-muted mb-1">@produit.NomCooperative</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-primary fw-semibold">@produit.Prix.ToString("N0") MAD</small>
+                                            <small class="text-success">@produit.NombreVentes ventes</small>
+                                        </div>
+                                        @if (produit.MoyenneAvis.HasValue)
+                                        {
+                                            <div class="d-flex align-items-center gap-1 mt-1">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <i class="bi bi-star-fill small @(i <= produit.MoyenneAvis.Value ? "text-warning" : "text-muted")"></i>
+                                                }
+                                                <small class="text-muted ms-1">@produit.MoyenneAvis.Value.ToString("F1")</small>
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
-                            }
+                                <div class="text-center">
+                                    <small class="text-muted">Revenus générés: <strong class="text-success">@produit.RevenusGeneres.ToString("N0") MAD</strong></small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 }
                 @if (!Model.TopProduits.Any())
                 {
-                    <div class="text-center py-3">
-                        <i class="bi bi-graph-up text-muted h4 mb-2"></i>
-                        <p class="small text-muted mb-0">Aucun produit vendu pour le moment</p>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4">
-        <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
-            <h5 class="fw-bold mb-4">Activité Récente</h5>
-            <div class="d-flex flex-column gap-3">
-                @foreach (var activity in Model.RecentActivities)
-                {
-                    <div class="d-flex gap-3 align-items-start">
-                        <div class="mt-2 rounded-circle bg-@activity.Color" style="width: 8px; height: 8px;"></div>
-                        <div class="flex-grow-1">
-                            <h6 class="small fw-bold mb-1">@activity.Title</h6>
-                            <p class="small text-muted mb-0">@activity.Detail • Il y a @activity.Time</p>
+                    <div class="col-12">
+                        <div class="text-center py-5">
+                            <i class="bi bi-graph-up text-muted h4 mb-2"></i>
+                            <p class="small text-muted mb-0">Aucun produit vendu pour le moment</p>
                         </div>
-                    </div>
-                }
-                @if (!Model.RecentActivities.Any())
-                {
-                    <div class="text-center py-3">
-                        <i class="bi bi-activity text-muted h4 mb-2"></i>
-                        <p class="small text-muted mb-0">Aucune activité récente</p>
                     </div>
                 }
             </div>
         </div>
     </div>
 </div>
+
+<!-- ADD: Chart.js + scripts to render charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    // Users doughnut: active vs inactive
+    const usersActive = @Model.TotalUsersActifs;
+    const usersInactive = @(Model.TotalUsers - Model.TotalUsersActifs);
+    const usersCtx = document.getElementById('usersDoughnut');
+    if (usersCtx) {
+        new Chart(usersCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Actifs', 'Inactifs'],
+                datasets: [{
+                    data: [usersActive, Math.max(0, usersInactive)],
+                    backgroundColor: ['#198754', '#dee2e6'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
+                cutout: '60%'
+            }
+        });
+    }
+
+    // Cooperatives doughnut: active vs inactive
+    const coopsActive = @Model.TotalCooperativesActives;
+    const coopsInactive = @(Model.TotalCooperatives - Model.TotalCooperativesActives);
+    const coopsCtx = document.getElementById('coopsDoughnut');
+    if (coopsCtx) {
+        new Chart(coopsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Actives', 'Inactives'],
+                datasets: [{
+                    data: [coopsActive, Math.max(0, coopsInactive)],
+                    backgroundColor: ['#0d6efd', '#dee2e6'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
+                cutout: '60%'
+            }
+        });
+    }
+
+    // Stock doughnut: OK / Faible / Rupture
+    const stockOk = @Model.ProduitsStockOk;        // CHANGED: use server-provided count
+    const stockLow = @Model.ProduitsStockFaible;
+    const stockOut = @Model.ProduitsRupture;
+    const stockCtx = document.getElementById('stockDoughnut');
+    if (stockCtx) {
+        new Chart(stockCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Stock OK', 'Stock Faible', 'Rupture'],
+                datasets: [{
+                    data: [stockOk, stockLow, stockOut],
+                    backgroundColor: ['#20c997', '#ffc107', '#dc3545'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
+                cutout: '60%'
+            }
+        });
+    }
+
+    // Prepare data for Top Products (name + sales)
+    const topProducts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        Model.TopProduits.Select(p => new {
+            name = p.NomProduit,
+            sales = p.NombreVentes
+        })
+    ));
+    const productsBarCtx = document.getElementById('topProductsSalesBar');
+    if (productsBarCtx && Array.isArray(topProducts) && topProducts.length) {
+        new Chart(productsBarCtx, {
+            type: 'bar',
+            data: {
+                labels: topProducts.map(p => p.name),
+                datasets: [{
+                    label: 'Ventes',
+                    data: topProducts.map(p => p.sales),
+                    backgroundColor: '#0dcaf0',
+                    borderRadius: 8,
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 } },
+                    y: { beginAtZero: true, precision: 0 }
+                }
+            }
+        });
+    }
+</script>
+
+
+
+<style>
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+    }
+</style>
