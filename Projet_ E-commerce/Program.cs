@@ -9,6 +9,8 @@ builder.Services
     .AddControllersWithViews()
     .AddRazorRuntimeCompilation();
 
+builder.Services.AddHttpClient();
+
 // Configuration EF Core
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -44,6 +46,13 @@ app.UseSession(); // Activation de la session
 app.UseAuthorization();
 
 // Route par défaut - redirige vers Login
+app.MapControllers();
+
+app.MapControllerRoute(
+    name: "process_pending",
+    pattern: "Cart/ProcessPendingItem",
+    defaults: new { controller = "Cart", action = "ProcessPendingItem" });
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=index}/{id?}");

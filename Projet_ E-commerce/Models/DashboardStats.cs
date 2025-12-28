@@ -9,5 +9,6 @@ namespace Projet__E_commerce.Models
         public int TotalClients { get; set; }
         public List<Categorie> Categories { get; set; } = new();
         public List<Avis> RecentReviews { get; set; } = new();
+        public List<ProductViewModel> FeaturedProducts { get; set; } = new();
     }
 }

@@ -52,4 +52,21 @@ namespace Projet__E_commerce.Models
         public string Time { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
     }
+
+    public class ProductDetailViewModel : ProductViewModel
+    {
+        public string Description { get; set; } = string.Empty;
+        public List<string> Images { get; set; } = new List<string>();
+        public List<VarianteViewModel> Variants { get; set; } = new List<VarianteViewModel>();
+    }
+
+    public class VarianteViewModel
+    {
+        public int Id { get; set; }
+        public decimal Price { get; set; }
+        public string Size { get; set; } = string.Empty;
+        public string Color { get; set; } = string.Empty;
+        public int Stock { get; set; }
+        public string? Photo { get; set; }
+    }
 }

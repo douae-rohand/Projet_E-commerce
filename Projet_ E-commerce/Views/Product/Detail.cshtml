@@ -1,5 +1,9 @@
+@model ProductDetailViewModel
 @{
-    ViewData["Title"] = "Tapis Berbère Traditionnel - SoukDigital";
+    ViewData["Title"] = $"{Model.Name} - Artisanat Marocain";
+    var mainImage = Model.Images.FirstOrDefault();
+    var sizes = Model.Variants.Select(v => v.Size).Where(s => !string.IsNullOrEmpty(s)).Distinct().ToList();
+    var colors = Model.Variants.Select(v => v.Color).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList();
 }
 
 <!-- Breadcrumb -->
@@ -8,8 +12,8 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 small">
                 <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Accueil</a></li>
-                <li class="breadcrumb-item"><a href="/catalog" class="text-decoration-none text-muted">Catalogue</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Tapis Berbère</li>
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Catalog")" class="text-decoration-none text-muted">Catalogue</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
             </ol>
         </nav>
     </div>
@@ -21,19 +25,13 @@
         <div class="col-lg-6">
             <div class="sticky-top" style="top: 100px;">
                 <div class="rounded-4 overflow-hidden shadow-soft mb-3">
-                    <img id="main-product-image" src="https://images.unsplash.com/photo-1600166898405-da9535204843?w=800&h=800&fit=crop" class="img-fluid w-100" alt="Product">
+                    <img id="main-product-image" src="@mainImage" class="img-fluid w-100" alt="@Model.Name">
                 </div>
-                <div class="d-flex gap-2">
-                    @{
-                        var images = new[] {
-                            "https://images.unsplash.com/photo-1600166898405-da9535204843?w=800&h=800&fit=crop",
-                            "https://images.unsplash.com/photo-1531835551805-16d864c8d311?w=800&h=800&fit=crop",
-                            "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=800&fit=crop"
-                        };
-                    }
-                    @foreach (var img in images) {
-                        <button class="btn p-0 border rounded-3 overflow-hidden thumbnail-btn" style="width: 80px; height: 80px;" onclick="document.getElementById('main-product-image').src='@img'">
-                            <img src="@img" class="img-fluid h-100 w-100 object-fit-cover" alt="Thumbnail">
+                <div class="d-flex gap-2 pe-2 overflow-auto hide-scrollbar">
+                    @foreach (var img in Model.Images) {
+                        var safeImg = img.Replace("\\", "/");
+                        <button class="btn p-0 border rounded-3 overflow-hidden thumbnail-btn flex-shrink-0" style="width: 80px; height: 80px;" onclick="document.getElementById('main-product-image').src='@safeImg'">
+                            <img src="@safeImg" class="img-fluid h-100 w-100 object-fit-cover" alt="Thumbnail">
                         </button>
                     }
                 </div>
@@ -43,76 +41,87 @@
         <!-- Info -->
         <div class="col-lg-6">
             <div class="ps-lg-4">
-                <span class="text-terracotta fw-bold small text-uppercase mb-2 d-block">Tapis & Textiles</span>
-                <h1 class="font-display display-5 fw-bold mb-3">Tapis Berbère Traditionnel</h1>
+                <span class="text-terracotta fw-bold small text-uppercase mb-2 d-block">@Model.Category</span>
+                <h1 class="font-display display-5 fw-bold mb-3">@Model.Name</h1>
                 
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <div class="d-flex text-warning">
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-half"></i>
+                        @for(int i=0; i<5; i++) {
+                            if(i < Math.Floor(Model.Rating)) { <i class="bi bi-star-fill"></i> }
+                            else if(i < Model.Rating) { <i class="bi bi-star-half"></i> }
+                            else { <i class="bi bi-star"></i> }
+                        }
                     </div>
-                    <span class="fw-bold">4.8</span>
-                    <span class="text-muted small">(124 avis clients)</span>
+                    <span class="fw-bold">@Model.Rating.ToString("0.0")</span>
+                    <span class="text-muted small">(@Model.Reviews avis clients)</span>
                 </div>
 
                 <div class="d-flex align-items-baseline gap-3 mb-4">
-                    <span class="display-6 fw-bold text-dark">1,200.00 MAD</span>
-                    <span class="h4 text-muted text-decoration-line-through">1,500.00 MAD</span>
+                    <span class="display-6 fw-bold text-dark">@Model.Price.ToString("N2") MAD</span>
+                    @if(Model.OriginalPrice > Model.Price) {
+                        <span class="h4 text-muted text-decoration-line-through">@Model.OriginalPrice.ToString("N2") MAD</span>
+                    }
                 </div>
 
                 <p class="text-muted mb-5 lead">
-                    Magnifique tapis berbère fait main par les artisans du Haut Atlas. Chaque pièce est unique et raconte une histoire à travers ses motifs traditionnels. Tissé avec de la laine naturelle de qualité supérieure.
+                    @Model.Description
                 </p>
 
-                <!-- Variants -->
-                <div class="mb-4 pt-4 border-top">
-                    <label class="form-label fw-bold small text-uppercase">Taille</label>
-                    <div class="d-flex flex-wrap gap-2">
-                        <input type="radio" class="btn-check" name="size" id="size1" checked>
-                        <label class="btn btn-outline-dark px-4 rounded-3" for="size1">100x150 cm</label>
-                        
-                        <input type="radio" class="btn-check" name="size" id="size2">
-                        <label class="btn btn-outline-dark px-4 rounded-3" for="size2">150x200 cm</label>
-                        
-                        <input type="radio" class="btn-check" name="size" id="size3">
-                        <label class="btn btn-outline-dark px-4 rounded-3" for="size3">200x300 cm</label>
-                    </div>
-                </div>
+                <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    
+                    <!-- Variants -->
+                    @if (sizes.Any())
+                    {
+                        <div class="mb-4 pt-4 border-top">
+                            <label class="form-label fw-bold small text-uppercase">Taille</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                @for (int i = 0; i < sizes.Count; i++)
+                                {
+                                    var size = sizes[i];
+                                    <input type="radio" class="btn-check" name="size" value="@size" id="size@(i)" @(i==0?"checked":"")>
+                                    <label class="btn btn-outline-dark px-4 rounded-3" for="size@(i)">@size</label>
+                                }
+                            </div>
+                        </div>
+                    }
 
-                <div class="mb-5">
-                    <label class="form-label fw-bold small text-uppercase">Couleur</label>
-                    <div class="d-flex flex-wrap gap-2">
-                        <input type="radio" class="btn-check" name="color" id="color1" checked>
-                        <label class="btn btn-outline-dark px-4 rounded-3" for="color1">Naturel</label>
-                        
-                        <input type="radio" class="btn-check" name="color" id="color2">
-                        <label class="btn btn-outline-dark px-4 rounded-3" for="color2">Rouge & Noir</label>
-                    </div>
-                </div>
+                    @if (colors.Any())
+                    {
+                        <div class="mb-5">
+                            <label class="form-label fw-bold small text-uppercase">Couleur</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                @for (int i = 0; i < colors.Count; i++)
+                                {
+                                    var color = colors[i];
+                                    <input type="radio" class="btn-check" name="color" value="@color" id="color@(i)" @(i==0?"checked":"")>
+                                    <label class="btn btn-outline-dark px-4 rounded-3" for="color@(i)">@color</label>
+                                }
+                            </div>
+                        </div>
+                    }
 
-                <!-- Quantity & Add to Cart -->
-                <div class="row g-3 mb-5">
-                    <div class="col-md-4">
-                        <div class="input-group border rounded-3 overflow-hidden">
-                            <button class="btn btn-light px-3 py-2 border-0" type="button"><i class="bi bi-dash"></i></button>
-                            <input type="text" class="form-control border-0 text-center fw-bold" value="1">
-                            <button class="btn btn-light px-3 py-2 border-0" type="button"><i class="bi bi-plus"></i></button>
+                    <!-- Quantity & Add to Cart -->
+                    <div class="row g-3 mb-5">
+                        <div class="col-md-4">
+                            <div class="input-group border rounded-3 overflow-hidden">
+                                <button class="btn btn-light px-3 py-2 border-0" type="button" onclick="decrementQty()"><i class="bi bi-dash"></i></button>
+                                <input type="number" class="form-control border-0 text-center fw-bold" name="quantity" id="quantityInput" value="1" min="1">
+                                <button class="btn btn-light px-3 py-2 border-0" type="button" onclick="incrementQty()"><i class="bi bi-plus"></i></button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3 shadow-soft py-3 fw-bold d-flex align-items-center justify-content-center gap-2">
+                                <i class="bi bi-cart3"></i> Ajouter au panier
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-dark btn-lg w-100 rounded-3 shadow-soft py-3">
+                                <i class="bi bi-heart"></i>
+                            </button>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <button class="btn btn-primary btn-lg w-100 rounded-3 shadow-soft py-3 fw-bold d-flex align-items-center justify-content-center gap-2">
-                            <i class="bi bi-cart3"></i> Ajouter au panier
-                        </button>
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-outline-dark btn-lg w-100 rounded-3 shadow-soft py-3">
-                            <i class="bi bi-heart"></i>
-                        </button>
-                    </div>
-                </div>
+                </form>
 
                 <!-- Trust Badges -->
                 <div class="row g-3 pt-5 border-top text-center text-md-start">
@@ -134,7 +143,58 @@
     </div>
 </div>
 
+<script>
+    function incrementQty() {
+        var input = document.getElementById('quantityInput');
+        input.value = parseInt(input.value) + 1;
+    }
+    function decrementQty() {
+        var input = document.getElementById('quantityInput');
+        if(parseInt(input.value) > 1) {
+            input.value = parseInt(input.value) - 1;
+        }
+    }
+
+    // Map variants to images
+    var variantImages = {};
+    @foreach(var v in Model.Variants) {
+        if(!string.IsNullOrEmpty(v.Photo)) {
+            var safePhoto = v.Photo.Replace("\\", "/");
+            <text>
+            variantImages['@v.Size-@v.Color'] = '@safePhoto';
+            </text>
+        }
+    }
+
+    function updateVariantImage() {
+        var size = document.querySelector('input[name="size"]:checked')?.value || '';
+        var color = document.querySelector('input[name="color"]:checked')?.value || '';
+        var key = size + '-' + color;
+        
+        if (variantImages[key]) {
+            document.getElementById('main-product-image').src = variantImages[key];
+        }
+    }
+
+    // Attach listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        var radios = document.querySelectorAll('input[name="size"], input[name="color"]');
+        radios.forEach(function(radio) {
+            radio.addEventListener('change', updateVariantImage);
+        });
+    });
+</script>
+
 <style>
     .thumbnail-btn:focus { border-color: var(--primary) !important; box-shadow: none; }
     .btn-check:checked + .btn-outline-dark { background-color: var(--primary); border-color: var(--primary); color: white; }
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .hide-scrollbar {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
 </style>

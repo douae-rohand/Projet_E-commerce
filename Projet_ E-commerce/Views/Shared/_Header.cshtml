@@ -1,3 +1,4 @@
+@using Microsoft.AspNetCore.Http
 <header class="sticky-top bg-white bg-opacity-95 border-bottom shadow-soft" style="backdrop-filter: blur(12px);">
     <div class="container">
         <div class="d-flex align-items-center justify-content-between" style="min-height: 64px;">
@@ -29,12 +30,12 @@
                     </button>
                 </div>
 
-                @if (User.Identity.IsAuthenticated)
+                @if (Context.Session.GetInt32("UserId") != null)
                 {
                     <!-- Cart (Authenticated) -->
                     <a asp-controller="Cart" asp-action="Index" class="btn btn-ghost btn-icon position-relative">
                         <i class="bi bi-cart3"></i>
-                        <span class="cart-badge">3</span>
+                        @* <span class="cart-badge">3</span> *@
                     </a>
 
                     <!-- Account (Authenticated) -->
