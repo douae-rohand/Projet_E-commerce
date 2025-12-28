@@ -7,6 +7,8 @@
   --majorelle: #003D8E;
   --card-bg: rgba(255, 255, 255, 0.9);
   --text-muted: #6c757d;
+  --bg-dashboard: #f9f8f4;
+  --dashboard-blue: #5b76c7;
 }
 
 /* Spacing Utilities */
@@ -117,6 +119,22 @@
 
 .rounded-3xl {
   border-radius: 1.5rem !important;
+}
+
+.rounded-4xl {
+  border-radius: 2rem !important;
+}
+
+.bg-dashboard {
+  background-color: var(--bg-dashboard);
+}
+
+.shadow-premium {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04), 0 4px 8px rgba(0, 0, 0, 0.02);
+}
+
+.border-2-primary {
+  border: 2px solid var(--majorelle) !important;
 }
 
 /* Hero Specifics */
