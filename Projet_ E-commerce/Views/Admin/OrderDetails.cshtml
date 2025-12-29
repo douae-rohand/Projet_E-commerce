@@ -170,15 +170,14 @@
                     </div>
 
                     <!-- Delivery Info -->
-                    @if (!string.IsNullOrEmpty(Model.StatutLivraison))
+                    @if (!string.IsNullOrEmpty(Model.ModeLivraison))
                     {
                         <div class="receipt-delivery">
                             <div class="delivery-icon">
                                 <i class="bi bi-truck"></i>
                             </div>
                             <div class="delivery-text">
-                                <div class="fw-bold">@Model.StatutLivraison</div>
-                                <div class="small">@Model.ModeLivraison</div>
+                                <div class="fw-bold">@Model.ModeLivraison</div>
                                 @if (Model.DateDebutEstimation.HasValue)
                                 {
                                     <div class="small mt-1">Est: @Model.DateDebutEstimation.Value.ToString("dd/MM")</div>

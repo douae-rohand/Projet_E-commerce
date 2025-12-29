@@ -149,7 +149,7 @@ namespace Projet__E_commerce.Controllers
             }
 
             // 2. Finalize Order
-            order.statut = "valide";
+            order.statut = "en_preparation";
             order.updated_at = DateTime.Now;
 
             // 3. Create Livraison
@@ -157,7 +157,6 @@ namespace Projet__E_commerce.Controllers
             {
                 idCommande = order.idCommande,
                 idAdresse = finalAddressId,
-                statut = "en_preparation",
                 mode_livraison = model.DeliveryMode,
                 notes = "Commande e-commerce",
                 created_at = DateTime.Now,

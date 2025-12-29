@@ -43,7 +43,7 @@ BEGIN
 
         -- Mettre à jour les commandes
         UPDATE [dbo].[Commandes]
-        SET statut = 'valide',
+        SET statut = 'en_preparation',
             updated_at = GETDATE()
         WHERE idCommande IN (SELECT idCommande FROM @Candidates);
 

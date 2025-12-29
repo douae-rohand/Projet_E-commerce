@@ -21,7 +21,6 @@ namespace Projet__E_commerce.Models
         public DateTime UpdatedAt { get; set; }
         
         // Informations de livraison
-        public string? StatutLivraison { get; set; }
         public string? ModeLivraison { get; set; }
         public DateTime? DateDebutEstimation { get; set; }
         public DateTime? DateFinEstimation { get; set; }
