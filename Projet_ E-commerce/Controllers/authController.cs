@@ -20,15 +20,17 @@ namespace Projet__E_commerce.Controllers
 
         // GET: /Auth/Login
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string? returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
+            // Correction : on pointe explicitement vers la vue dans le dossier Account
             return View("~/Views/Account/Login.cshtml");
         }
 
         // POST: /Auth/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string email, string password, bool rememberMe = false)
+        public async Task<IActionResult> Login(string email, string password, string? returnUrl = null, bool rememberMe = false)
         {
             // Nettoyage des entrées
             email = email?.Trim();
@@ -69,6 +71,13 @@ namespace Projet__E_commerce.Controllers
                                 HttpContext.Session.SetInt32("UserId", userId);
                                 HttpContext.Session.SetString("UserEmail", userEmail);
                                 HttpContext.Session.SetString("UserRole", role);
+
+                                TempData["SuccessMessage"] = "Connexion réussie !";
+
+                                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                                {
+                                    return Redirect(returnUrl);
+                                }
 
                                 // Redirection selon le rôle
                                 switch (role)

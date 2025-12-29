@@ -86,6 +86,19 @@ namespace Projet__E_commerce.Controllers
 
             return RedirectToAction("UserDashboard");
         }
+         private string GetStatusClass(string status)
+        {
+            return status.ToLower() switch
+            {
+                "livre" => "bg-success-subtle text-success",
+                "valide" => "bg-info-subtle text-info",
+                "en_preparation" => "bg-warning-subtle text-warning",
+                "en_livraison" => "bg-primary-subtle text-primary",
+                "en_attente" => "bg-secondary-subtle text-secondary",
+                "annule" => "bg-danger-subtle text-danger",
+                _ => "bg-light text-muted"
+            };
+    }
 
         [HttpPost("Account/AddAddress")]
         [ValidateAntiForgeryToken]
@@ -244,5 +257,5 @@ namespace Projet__E_commerce.Controllers
 
             return PartialView("_OrderDetailsPartial", order);
         }
-    }
+}
 }

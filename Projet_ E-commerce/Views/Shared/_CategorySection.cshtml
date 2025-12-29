@@ -14,7 +14,7 @@
         var n = name.ToLowerInvariant();
         
         // Nutritive / Alimentaire
-        if (n.Contains("nutritive") || n.Contains("miel") || n.Contains("alimentaire") || n.Contains("cuisine"))
+        if (n.Contains("nutritive") || n.Contains("miel") || n.Contains("alimentaire") || n.Contains("cuisine") || n.Contains("agricole"))
             return ("~/images/categories/alimentaire.jpg", "category-overlay-terracotta");
 
         // Cosmétique / Beauté
@@ -49,50 +49,80 @@
         </div>
 
         <!-- Categories Grid -->
-        <div class="row g-3 g-md-4">
-            @if (Model != null && Model.Any())
-            {
-                int i = 0;
-                foreach (var category in Model)
+        <!-- Marquee Rail -->
+        <div class="marquee-container overflow-hidden position-relative mask-linear-fade">
+            <div class="marquee-content d-flex align-items-stretch gap-4">
+                @if (Model != null && Model.Any())
                 {
-                    var (image, overlay) = GetCategoryStyle(category.nom);
-                    
-                    // Fallback to rotation if no keyword match
-                    if (string.IsNullOrEmpty(image))
+                    // Render the list twice for seamless infinite scroll
+                    for (int k = 0; k < 2; k++)
                     {
-                        var defaultStyle = defaultStyles[i % defaultStyles.Length];
-                        image = defaultStyle.Image;
-                        overlay = defaultStyle.Overlay;
+                        foreach (var category in Model)
+                        {
+                            var (image, overlay) = GetCategoryStyle(category.nom);
+                            
+                            if (string.IsNullOrEmpty(image))
+                            {
+                                var defaultStyle = defaultStyles[category.idC % defaultStyles.Length];
+                                image = defaultStyle.Image;
+                                overlay = defaultStyle.Overlay;
+                            }
+
+                            <a asp-controller="Catalog" asp-action="Index" asp-route-category="@category.idC" 
+                               class="category-card flex-shrink-0" 
+                               style="width: 280px;">
+                                <img src="@Url.Content(image)"
+                                     alt="@category.nom"
+                                     class="category-image" />
+                                <div class="category-overlay @overlay"></div>
+                                <div class="category-content">
+                                    <h3 class="category-title">@category.nom</h3>
+                                    <p class="category-description">@(category.description ?? "Découvrez nos produits")</p>
+                                    <p class="category-count">@category.Produits?.Count produits</p>
+                                </div>
+                                <div class="category-hover-icon">
+                                    <i class="bi bi-arrow-right"></i>
+                                </div>
+                            </a>
+                        }
                     }
-
-                    // Stagger animation delay
-                    var delay = i > 0 ? $"stagger-{Math.Min(i, 3)}" : "";
-
-                    <div class="col-6 col-lg-3">
-                        <a asp-controller="Catalog" asp-action="Index" asp-route-category="@category.idC" class="category-card animate-fade-in-up @delay">
-                            <img src="@Url.Content(image)"
-                                 alt="@category.nom"
-                                 class="category-image" />
-                            <div class="category-overlay @overlay"></div>
-                            <div class="category-content">
-                                <h3 class="category-title">@category.nom</h3>
-                                <p class="category-description">@(category.description ?? "Découvrez nos produits")</p>
-                                <p class="category-count">@category.Produits?.Count produits</p>
-                            </div>
-                            <div class="category-hover-icon">
-                                <i class="bi bi-arrow-right"></i>
-                            </div>
-                        </a>
-                    </div>
-                    i++;
                 }
-            }
-            else
-            {
-                <div class="col-12 text-center">
-                    <p class="text-muted">Aucune catégorie disponible pour le moment.</p>
-                </div>
-            }
+                else
+                {
+                    <div class="w-100 text-center py-5">
+                        <p class="text-muted">Aucune catégorie disponible pour le moment.</p>
+                    </div>
+                }
+            </div>
         </div>
+
+        <style>
+            .marquee-container {
+                width: 100%;
+                padding: 1rem 0;
+            }
+            
+            /* Gradient Mask for edges */
+            .mask-linear-fade {
+                mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+                -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+            }
+
+            .marquee-content {
+                animation: scroll 40s linear infinite;
+                width: max-content;
+            }
+
+            /* PAUSE ON HOVER */
+            .marquee-content:hover {
+                animation-play-state: paused;
+            }
+
+            @@keyframes scroll {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(-50%); } 
+                /* Moves halfway because content is duplicated, creating seamless loop */
+            }
+        </style>
     </div>
 </section>

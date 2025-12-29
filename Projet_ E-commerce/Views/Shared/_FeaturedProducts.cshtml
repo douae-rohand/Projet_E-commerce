@@ -1,3 +1,5 @@
+@model List<Projet__E_commerce.Models.ProductViewModel>
+
 <section class="py-5 bg-white">
     <div class="container">
         <!-- Header -->
@@ -20,40 +22,13 @@
         <!-- Products Grid -->
         <div class="row g-3 g-md-4">
             @{ 
-                var products = new[]
-                {
-                    new { Id = 1, Name = "Huile d'Argan Bio - 100ml", Price = 180, OriginalPrice = 220, Image = "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&h=400&fit=crop", Rating = 4.9, Reviews = 234, Category = "Coopérative Tissaliwine", Cooperative = "Souss-Massa", IsBestSeller = true, IsNew = false },
-                    new { Id = 2, Name = "Safran de Taliouine - 1g", Price = 85, OriginalPrice = 0, Image = "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400&h=400&fit=crop", Rating = 4.8, Reviews = 156, Category = "Coopérative Souktana", Cooperative = "Taliouine", IsBestSeller = false, IsNew = true },
-                    new { Id = 3, Name = "Miel de Thym des Montagnes - 500g", Price = 240, OriginalPrice = 290, Image = "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=400&fit=crop", Rating = 4.7, Reviews = 89, Category = "Coopérative Annahal", Cooperative = "Moyen Atlas", IsBestSeller = false, IsNew = false },
-                    new { Id = 4, Name = "Tapis Berbère Beni Ourain - 150x200", Price = 2800, OriginalPrice = 0, Image = "https://images.unsplash.com/photo-1600166898405-da9535204843?w=400&h=400&fit=crop", Rating = 4.9, Reviews = 67, Category = "Coopérative Azrou", Cooperative = "Moyen Atlas", IsBestSeller = true, IsNew = false },
-                    new { Id = 5, Name = "Amlou aux Amandes - 250g", Price = 95, OriginalPrice = 0, Image = "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=400&h=400&fit=crop", Rating = 4.8, Reviews = 178, Category = "Coopérative Targanine", Cooperative = "Essaouira", IsBestSeller = false, IsNew = true },
-                    new { Id = 6, Name = "Eau de Rose de Kelaa M'Gouna - 200ml", Price = 65, OriginalPrice = 80, Image = "https://images.unsplash.com/photo-1518568403628-df55701ade9e?w=400&h=400&fit=crop", Rating = 4.6, Reviews = 124, Category = "Coopérative Roses du Dadès", Cooperative = "Kelaa M'Gouna", IsBestSeller = false, IsNew = false },
-                    new { Id = 7, Name = "Huile de Figue de Barbarie - 30ml", Price = 320, OriginalPrice = 0, Image = "https://images.unsplash.com/photo-1617897903246-719242758050?w=400&h=400&fit=crop", Rating = 4.9, Reviews = 98, Category = "Coopérative Noor", Cooperative = "Guelmim", IsBestSeller = true, IsNew = false },
-                    new { Id = 8, Name = "Dattes Medjool Premium - 1kg", Price = 150, OriginalPrice = 0, Image = "https://images.unsplash.com/photo-1590502593747-42a996133562?w=400&h=400&fit=crop", Rating = 4.7, Reviews = 203, Category = "Coopérative Oasis", Cooperative = "Errachidia", IsBestSeller = false, IsNew = false }
-                };
-
                 int index = 0;
             }
 
-            @foreach (var product in products)
+            @foreach (var product in Model)
             {
-                var vm = new Projet__E_commerce.Models.ProductViewModel
-                {
-                    Id = product.Id,
-                    Name = product.Name,
-                    Price = System.Convert.ToDecimal(product.Price),
-                    OriginalPrice = System.Convert.ToDecimal(product.OriginalPrice),
-                    Image = product.Image,
-                    Rating = product.Rating,
-                    Reviews = product.Reviews,
-                    Category = product.Category,
-                    Cooperative = product.Cooperative,
-                    IsBestSeller = product.IsBestSeller,
-                    IsNew = product.IsNew
-                };
-
                 <div class="col-6 col-md-4 col-lg-3 animate-fade-in-up" style="animation-delay: @(index * 0.05)s;">
-                    <partial name="_ProductCard" model="vm" />
+                    <partial name="_ProductCard" model="product" />
                 </div>
                 index++;
             }

@@ -17,9 +17,38 @@
     </div>
 
     <partial name="_Footer" />
+    <!-- AI Assistant -->
+    <div id="chat-toggle">
+        <i class="bi bi-robot h3 mb-0"></i>
+    </div>
+
+    <div id="chat-window">
+        <div class="chat-header">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-robot"></i>
+                <span class="fw-bold">Assistant SoukDigital</span>
+            </div>
+            <button id="close-chat" class="btn btn-link text-white p-0"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div id="chat-content">
+            <div class="chat-message ai-message mb-3">
+                <div class="message-bubble shadow-sm">
+                    Bonjour ! Je suis votre assistant virtuel. Comment puis-je vous aider aujourd'hui ?
+                </div>
+            </div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="chat-input" class="form-control border-0 bg-light" placeholder="Posez votre question...">
+            <button id="send-message" class="btn btn-primary rounded-circle p-2">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/ai-assistant.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

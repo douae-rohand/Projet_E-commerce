@@ -146,7 +146,7 @@ BEGIN
         COUNT(lc.idLC) AS NombreVentes,
         SUM(lc.quantite * lc.prix_unitaire) AS RevenuTotal
     FROM Produits p
-    INNER JOIN Variantes v ON p.idP = v.idV
+    INNER JOIN Variantes v ON p.idP = v.idP
     INNER JOIN LignesCommande lc ON v.idV = lc.idV
     INNER JOIN Commandes c ON lc.idCommande = c.idCommande
     WHERE p.idAdmin = @idAdmin

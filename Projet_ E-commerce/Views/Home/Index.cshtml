@@ -48,11 +48,11 @@
                 </p>
 
                 <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start animate-fade-in-up stagger-3 mb-5">
-                    <a asp-controller="Catalog" asp-action="Index" class="btn btn-hero btn-lg d-flex align-items-center justify-content-center gap-2">
+                    <a asp-controller="Cooperatives" asp-action="Index" class="btn btn-hero btn-lg d-flex align-items-center justify-content-center gap-2">
                         Explorer nos coopératives
                         <i class="bi bi-arrow-right"></i>
                     </a>
-                    <a asp-controller="Partners" asp-action="Join" class="btn btn-glass btn-lg">
+                    <a asp-controller="Auth" asp-action="Register" asp-route-type="cooperative" class="btn btn-glass btn-lg">
                         Devenir partenaire
                     </a>
                 </div>
@@ -105,7 +105,7 @@
 <partial name="_CategorySection" model="Model.Categories" />
 
 <!-- Featured Products Section -->
-<partial name="_FeaturedProducts" />
+<partial name="_FeaturedProducts" model="Model.FeaturedProducts" />
 
 <!-- Reviews Section -->
 <partial name="_Avis" model="Model.RecentReviews" />

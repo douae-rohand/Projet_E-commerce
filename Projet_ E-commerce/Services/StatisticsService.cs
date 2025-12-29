@@ -43,7 +43,6 @@ namespace Projet__E_commerce.Services
             var ordersCount = await GetTotalOrdersAsync();
             var categories = await _context.Categories
                 .Include(c => c.Produits.Where(p => p.statut == "active"))
-                .Take(4)
                 .ToListAsync();
 
             var reviews = await _context.Avis

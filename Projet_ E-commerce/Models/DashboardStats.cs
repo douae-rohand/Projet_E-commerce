@@ -11,5 +11,6 @@ namespace Projet__E_commerce.Models
         public List<Admin> Cooperatives { get; set; } = new();
         public List<Categorie> Categories { get; set; } = new();
         public List<Avis> RecentReviews { get; set; } = new();
+        public List<ProductViewModel> FeaturedProducts { get; set; } = new();
     }
 }

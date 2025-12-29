@@ -8,11 +8,14 @@ namespace Projet__E_commerce.Models
         public string NumeroCommande { get; set; } = string.Empty;
         public int IdClient { get; set; }
         public string NomClient { get; set; } = string.Empty;
+        public string PrenomClient { get; set; } = string.Empty;
         public string? TelephoneClient { get; set; }
         public string Statut { get; set; } = string.Empty;
         public string StatusLabel { get; set; } = string.Empty;
         public string StatusClass { get; set; } = string.Empty;
         public decimal PrixTotal { get; set; }
+        public decimal PrixTotalAdmin { get; set; }
+        public string? Thumbnail { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         

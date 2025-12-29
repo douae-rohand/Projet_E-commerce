@@ -10,13 +10,7 @@ namespace Projet__E_commerce.Controllers
         }
     }
 
-    public class CartController : Controller
-    {
-        public IActionResult Index()
-        {
-            return View();
-        }
-    }
+
 
     public class PartnersController : Controller
     {

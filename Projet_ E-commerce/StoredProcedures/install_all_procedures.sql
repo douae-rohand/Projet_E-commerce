@@ -6,6 +6,7 @@
 USE [cooperative];
 GO
 
+
 -- ============================================
 -- Procédure: sp_inscription_admin
 -- Description: Inscription d'un administrateur de coopérative

@@ -63,6 +63,8 @@ namespace Projet__E_commerce.Models
         public int StockTotal { get; set; }
         public decimal? PrixMin { get; set; }
         public decimal? PrixMax { get; set; }
+        public bool HasLowStock { get; set; } // True if ANY variant has low stock
+        public List<string> VariantPhotos { get; set; } = new(); // Photos for carousel
         public DateTime CreatedAt { get; set; }
     }
 }
