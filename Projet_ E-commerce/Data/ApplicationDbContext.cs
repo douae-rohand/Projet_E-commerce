@@ -174,6 +174,7 @@ namespace Projet__E_commerce.Data
 
                     t.HasCheckConstraint("CK_Livraison_Statut", "statut IN ('en_preparation', 'en_cours', 'livre', 'non_livre')");
 
+
                     t.HasCheckConstraint("CK_Livraison_ModeLivraison", "mode_livraison IN ('Standard', 'Express')");
                 });
 
