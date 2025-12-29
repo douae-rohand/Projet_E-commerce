@@ -98,13 +98,13 @@ namespace Projet__E_commerce.Controllers
                 }
 
                 // Get total orders
-                using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM commandes", connection))
+                using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM commandes WHERE statut NOT IN ('en_attente', 'annule')", connection))
                 {
                     model.TotalOrders = (int)await cmd.ExecuteScalarAsync();
                 }
 
                 // Get total revenue
-                using (SqlCommand cmd = new SqlCommand("SELECT ISNULL(SUM(prixTotal), 0) FROM commandes WHERE statut = 'valide'", connection))
+                using (SqlCommand cmd = new SqlCommand("SELECT ISNULL(SUM(prixTotal), 0) FROM commandes WHERE statut NOT IN ('en_attente', 'annule')", connection))
                 {
                     model.TotalRevenue = (decimal)await cmd.ExecuteScalarAsync();
                 }
@@ -118,12 +118,13 @@ namespace Projet__E_commerce.Controllers
                         a.logo,
                         a.created_at,
                         COUNT(DISTINCT p.idP) as TotalProduits,
-                        COUNT(DISTINCT lc.idCommande) as TotalCommandes,
-                        ISNULL(SUM(lc.prix_unitaire * lc.quantite), 0) as Revenue
+                        COUNT(DISTINCT CASE WHEN c.idCommande IS NOT NULL THEN c.idCommande ELSE NULL END) as TotalCommandes,
+                        ISNULL(SUM(CASE WHEN c.idCommande IS NOT NULL THEN lc.prix_unitaire * lc.quantite ELSE 0 END), 0) as Revenue
                     FROM admins a
                     LEFT JOIN produits p ON a.id = p.idAdmin
                     LEFT JOIN variantes v ON p.idP = v.idP
                     LEFT JOIN lignescommande lc ON v.idV = lc.idV
+                    LEFT JOIN commandes c ON lc.idCommande = c.idCommande AND c.statut NOT IN ('en_attente', 'annule')
                     GROUP BY a.id, a.nom_cooperative, a.ville, a.logo, a.created_at
                     ORDER BY Revenue DESC";
 
@@ -199,12 +200,13 @@ namespace Projet__E_commerce.Controllers
                         a.telephone,
                         a.created_at,
                         COUNT(DISTINCT p.idP) as TotalProduits,
-                        COUNT(DISTINCT lc.idCommande) as TotalCommandes,
-                        ISNULL(SUM(lc.prix_unitaire * lc.quantite), 0) as Revenue
+                        COUNT(DISTINCT c.idCommande) as TotalCommandes,
+                        ISNULL(SUM(CASE WHEN c.idCommande IS NOT NULL THEN lc.prix_unitaire * lc.quantite ELSE 0 END), 0) as Revenue
                     FROM admins a
                     LEFT JOIN produits p ON a.id = p.idAdmin
                     LEFT JOIN variantes v ON p.idP = v.idP
                     LEFT JOIN lignescommande lc ON v.idV = lc.idV
+                    LEFT JOIN commandes c ON lc.idCommande = c.idCommande AND c.statut NOT IN ('en_attente', 'annule')
                     GROUP BY a.id, a.nom_cooperative, a.ville, a.logo, a.telephone, a.created_at
                     ORDER BY a.created_at DESC";
 
@@ -620,7 +622,7 @@ namespace Projet__E_commerce.Controllers
                                 COALESCE(SUM(prixTotal), 0) as totalSpent,
                                 MAX(created_at) as lastOrderDate
                             FROM Commandes 
-                            WHERE idClient = @userId";
+                            WHERE idClient = @userId AND statut NOT IN ('en_attente', 'annule')";
 
                         using (SqlCommand statsCmd = new SqlCommand(statsQuery, connection))
                         {
@@ -721,12 +723,13 @@ namespace Projet__E_commerce.Controllers
                 string statsQuery = @"
                     SELECT 
                         COUNT(DISTINCT p.idP) as TotalProduits,
-                        COUNT(DISTINCT lc.idCommande) as TotalCommandes,
-                        ISNULL(SUM(lc.prix_unitaire * lc.quantite), 0) as Revenue
+                        COUNT(DISTINCT c.idCommande) as TotalCommandes,
+                        ISNULL(SUM(CASE WHEN c.idCommande IS NOT NULL THEN lc.prix_unitaire * lc.quantite ELSE 0 END), 0) as Revenue
                     FROM admins a
                     LEFT JOIN produits p ON a.id = p.idAdmin
                     LEFT JOIN variantes v ON p.idP = v.idP
                     LEFT JOIN lignescommande lc ON v.idV = lc.idV
+                    LEFT JOIN commandes c ON lc.idCommande = c.idCommande AND c.statut NOT IN ('en_attente', 'annule')
                     WHERE a.id = @Id";
 
                 using (SqlCommand cmd = new SqlCommand(statsQuery, connection))
@@ -886,7 +889,8 @@ namespace Projet__E_commerce.Controllers
                     SELECT 
                         COUNT(*) as TotalCommandes,
                         ISNULL(SUM(prixTotal), 0) as TotalRevenue
-                    FROM Commandes", connection))
+                    FROM Commandes
+                    WHERE statut NOT IN ('en_attente', 'annule')", connection))
                 using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                 {
                     if (await reader.ReadAsync())
@@ -906,6 +910,7 @@ namespace Projet__E_commerce.Controllers
                     FROM Commandes c
                     INNER JOIN Livraisons l ON c.idCommande = l.idCommande
                     INNER JOIN AdressesLivraison al ON l.idAdresse = al.idAdresse
+                    WHERE c.statut NOT IN ('en_attente', 'annule')
                     GROUP BY al.ville
                     ORDER BY Revenue DESC";
 
@@ -932,12 +937,13 @@ namespace Projet__E_commerce.Controllers
                         a.logo,
                         a.created_at,
                         COUNT(DISTINCT p.idP) as TotalProduits,
-                        COUNT(DISTINCT lc.idCommande) as TotalCommandes,
-                        ISNULL(SUM(lc.prix_unitaire * lc.quantite), 0) as Revenue
+                        COUNT(DISTINCT c.idCommande) as TotalCommandes,
+                        ISNULL(SUM(CASE WHEN c.idCommande IS NOT NULL THEN lc.prix_unitaire * lc.quantite ELSE 0 END), 0) as Revenue
                     FROM Admins a
                     LEFT JOIN Produits p ON a.id = p.idAdmin
                     LEFT JOIN Variantes v ON p.idP = v.idP
                     LEFT JOIN LignesCommande lc ON v.idV = lc.idV
+                    LEFT JOIN Commandes c ON lc.idCommande = c.idCommande AND c.statut NOT IN ('en_attente', 'annule')
                     GROUP BY a.id, a.nom_cooperative, a.ville, a.logo, a.created_at
                     ORDER BY Revenue DESC";
 
@@ -964,15 +970,16 @@ namespace Projet__E_commerce.Controllers
                 string topProduitsQuery = @"
                     SELECT TOP 5
                         p.idP, p.nomP, a.nom_cooperative, 
-                        (SELECT TOP 1 v.photo FROM variantes v WHERE v.idP = p.idP) as image_url,
+                        (SELECT TOP 1 v2.photo FROM variantes v2 WHERE v2.idP = p.idP) as image_url,
                         MIN(v.prix) as prix,
-                        COUNT(DISTINCT lc.idCommande) as NombreVentes,
-                        ISNULL(SUM(lc.prix_unitaire * lc.quantite), 0) as RevenusGeneres,
+                        COUNT(DISTINCT c.idCommande) as NombreVentes,
+                        ISNULL(SUM(CASE WHEN c.idCommande IS NOT NULL THEN lc.prix_unitaire * lc.quantite ELSE 0 END), 0) as RevenusGeneres,
                         (SELECT AVG(CAST(note as FLOAT)) FROM avis WHERE idProduit = p.idP) as MoyenneAvis
                     FROM produits p
                     INNER JOIN admins a ON p.idAdmin = a.id
                     LEFT JOIN variantes v ON p.idP = v.idP
                     LEFT JOIN lignescommande lc ON v.idV = lc.idV
+                    LEFT JOIN commandes c ON lc.idCommande = c.idCommande AND c.statut NOT IN ('en_attente', 'annule')
                     WHERE v.idV IS NOT NULL
                     GROUP BY p.idP, p.nomP, a.nom_cooperative
                     ORDER BY NombreVentes DESC";
@@ -1074,6 +1081,7 @@ namespace Projet__E_commerce.Controllers
                         ISNULL(SUM(prixTotal), 0) as Revenue
                     FROM commandes
                     WHERE created_at >= DATEADD(MONTH, -6, GETDATE())
+                      AND statut NOT IN ('en_attente', 'annule')
                     GROUP BY FORMAT(created_at, 'yyyy-MM')
                     ORDER BY Month";
 
@@ -1096,12 +1104,13 @@ namespace Projet__E_commerce.Controllers
                     SELECT 
                         c.nom as CategoryName,
                         COUNT(DISTINCT p.idP) as TotalProducts,
-                        COUNT(DISTINCT lc.idCommande) as TotalSales,
-                        ISNULL(SUM(lc.prix_unitaire * lc.quantite), 0) as Revenue
+                        COUNT(DISTINCT co.idCommande) as TotalSales,
+                        ISNULL(SUM(CASE WHEN co.idCommande IS NOT NULL THEN lc.prix_unitaire * lc.quantite ELSE 0 END), 0) as Revenue
                     FROM categories c
                     LEFT JOIN produits p ON c.idC = p.idC
                     LEFT JOIN variantes v ON p.idP = v.idP
                     LEFT JOIN lignescommande lc ON v.idV = lc.idV
+                    LEFT JOIN commandes co ON lc.idCommande = co.idCommande AND co.statut NOT IN ('en_attente', 'annule')
                     GROUP BY c.nom
                     ORDER BY Revenue DESC";
 
