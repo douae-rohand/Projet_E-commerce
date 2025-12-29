@@ -63,7 +63,7 @@ BEGIN
         -- Mettre à jour le statut de la commande
         UPDATE Commandes
         SET 
-            statut = 'valide',
+            statut = 'en_preparation',
             updated_at = GETDATE()
         WHERE idCommande = @idCommande;
 

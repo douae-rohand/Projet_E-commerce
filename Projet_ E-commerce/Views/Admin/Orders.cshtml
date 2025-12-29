@@ -3,6 +3,7 @@
     Layout = null;
     ViewData["Title"] = "Gestion des Commandes";
     var currentFilter = ViewBag.CurrentFilter as string;
+    ViewData["ActivePage"] = "Orders";
 }
 
 <!DOCTYPE html>
@@ -39,10 +40,10 @@
         }
         
         .order-card.status-en_attente::before { background: #ffc107; }
-        .order-card.status-acceptée::before { background: #0dcaf0; }
-        .order-card.status-en_cours::before { background: #0d6efd; }
-        .order-card.status-livrée::before { background: #198754; }
-        .order-card.status-annulée::before { background: #dc3545; }
+        .order-card.status-en_preparation::before { background: #0dcaf0; }
+        .order-card.status-en_livraison::before { background: #0d6efd; }
+        .order-card.status-livre::before { background: #198754; }
+        .order-card.status-annule::before { background: #dc3545; }
 
         .client-avatar-small {
             width: 32px;
@@ -63,31 +64,8 @@
     
     <div class="d-flex">
         <!-- Sidebar -->
-        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block shadow-sm" style="width: 280px; z-index: 1000;">
-            <div class="p-4 border-bottom">
-                <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
-                     <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
-                        <i class="bi bi-flower1 text-white h5 mb-0"></i>
-                    </div>
-                    <div>
-                        <h6 class="fw-bold mb-0 text-dark">CoopMaroc</h6>
-                        <p class="small text-muted mb-0" style="font-size: 10px;">ESPACE ADMIN</p>
-                    </div>
-                </a>
-            </div>
-            
-            <nav class="nav flex-column p-3 gap-1">
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Dashboard", "Admin")"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Products", "Admin")"><i class="bi bi-box-seam"></i> Produits</a>
-                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 shadow-sm" href="@Url.Action("Orders", "Admin")"><i class="bi bi-cart3"></i> Commandes</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Profile", "Admin")"><i class="bi bi-gear"></i> Profil</a>
-                <div class="mt-auto pt-4 border-top">
-                    <a class="nav-link text-danger rounded-3 d-flex align-items-center gap-3 py-2 px-3 hover-effect" href="@Url.Action("Logout", "Account")">
-                        <i class="bi bi-box-arrow-right"></i> Déconnexion
-                    </a>
-                </div>
-            </nav>
-        </aside>
+        <!-- Sidebar -->
+        <partial name="_AdminSidebar" />
 
         <!-- Main Content -->
         <main class="flex-grow-1 p-4 p-md-5">
@@ -109,10 +87,7 @@
                             <span class="d-block small text-muted text-uppercase fw-bold">Total</span>
                             <span class="fs-4 fw-bold">@Model.Count</span>
                         </div>
-                        <div class="text-end border-start ps-4">
-                            <span class="d-block small text-muted text-uppercase fw-bold">En Attente</span>
-                            <span class="fs-4 fw-bold text-warning">@Model.Count(o => o.Statut == "en_attente")</span>
-                        </div>
+
                          <div class="text-end border-start ps-4">
                             <span class="d-block small text-muted text-uppercase fw-bold">Revenus (Admin)</span>
                             <span class="fs-4 fw-bold text-success">@Model.Sum(o => o.PrixTotalAdmin).ToString("N0") <small class="fs-6 text-muted">MAD</small></span>
@@ -141,16 +116,17 @@
                 <a href="@Url.Action("Orders", "Admin")" class="btn rounded-pill px-4 py-2 @(string.IsNullOrEmpty(currentFilter) ? "btn-dark shadow-lg" : "btn-light shadow-sm bg-white text-muted hover-lift")">
                     Tous
                 </a>
-                <a href="@Url.Action("Orders", "Admin", new { statut = "en_attente" })" class="btn rounded-pill px-4 py-2 @(currentFilter == "en_attente" ? "btn-warning text-dark shadow-lg" : "btn-light shadow-sm bg-white text-muted hover-lift")">
-                    <span class="badge bg-warning text-dark rounded-circle me-2">@Model.Count(o => o.Statut == "en_attente")</span>En attente
+
+                <a href="@Url.Action("Orders", "Admin", new { statut = "en_preparation" })" class="btn rounded-pill px-4 py-2 @(currentFilter == "en_preparation" ? "btn-info text-dark shadow-lg" : "btn-light shadow-sm bg-white text-muted hover-lift")">
+                    <span class="badge bg-info text-dark rounded-circle me-2">@Model.Count(o => o.Statut == "en_preparation")</span>Préparation
                 </a>
-                <a href="@Url.Action("Orders", "Admin", new { statut = "acceptée" })" class="btn rounded-pill px-4 py-2 @(currentFilter == "acceptée" ? "btn-info text-dark shadow-lg" : "btn-light shadow-sm bg-white text-muted hover-lift")">
-                    <span class="badge bg-info text-dark rounded-circle me-2">@Model.Count(o => o.Statut == "acceptée")</span>Acceptées
+                <a href="@Url.Action("Orders", "Admin", new { statut = "en_livraison" })" class="btn rounded-pill px-4 py-2 @(currentFilter == "en_livraison" ? "btn-primary text-white shadow-lg" : "btn-light shadow-sm bg-white text-muted hover-lift")">
+                    <span class="badge bg-primary text-white rounded-circle me-2">@Model.Count(o => o.Statut == "en_livraison")</span>Livraison
                 </a>
-                <a href="@Url.Action("Orders", "Admin", new { statut = "livrée" })" class="btn rounded-pill px-4 py-2 @(currentFilter == "livrée" ? "btn-success text-white shadow-lg" : "btn-light shadow-sm bg-white text-muted hover-lift")">
+                <a href="@Url.Action("Orders", "Admin", new { statut = "livre" })" class="btn rounded-pill px-4 py-2 @(currentFilter == "livre" ? "btn-success text-white shadow-lg" : "btn-light shadow-sm bg-white text-muted hover-lift")">
                     Livrées
                 </a>
-                <a href="@Url.Action("Orders", "Admin", new { statut = "annulée" })" class="btn rounded-pill px-4 py-2 @(currentFilter == "annulée" ? "btn-danger text-white shadow-lg" : "btn-light shadow-sm bg-white text-muted hover-lift")">
+                <a href="@Url.Action("Orders", "Admin", new { statut = "annule" })" class="btn rounded-pill px-4 py-2 @(currentFilter == "annule" ? "btn-danger text-white shadow-lg" : "btn-light shadow-sm bg-white text-muted hover-lift")">
                     Annulées
                 </a>
             </div>

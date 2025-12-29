@@ -133,6 +133,8 @@ namespace Projet__E_commerce
                     NumeroCommande = $"CMD-{c.idCommande:D6}",
                     NomClient = c.Client.nom,
                     Statut = c.statut,
+                    StatusLabel = GetStatusLabel(c.statut),
+                    StatusClass = GetStatusClass(c.statut),
                     PrixTotal = c.LignesCommande
                         .Where(lc => lc.Variante.Produit.idAdmin == adminId)
                         .Sum(lc => lc.quantite * lc.prix_unitaire),
@@ -169,6 +171,33 @@ namespace Projet__E_commerce
                 {
                     model.CooperativeName = admin.nom_cooperative;
                     model.Location = $"{admin.ville}, Maroc";
+                }
+
+                // Calculate monthly revenue for the current year
+                model.MonthlyRevenue = new List<decimal>();
+                for (int month = 1; month <= 12; month++)
+                {
+                    var monthStart = new DateTime(now.Year, month, 1);
+                    var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+                    
+                    // Only query if month is not in future
+                    if (monthStart <= now)
+                    {
+                         var monthSales = await _context.Commandes
+                            .Include(c => c.LignesCommande)
+                                .ThenInclude(lc => lc.Variante)
+                                    .ThenInclude(v => v.Produit)
+                            .Where(c => c.created_at >= monthStart && c.created_at <= monthEnd &&
+                                       c.LignesCommande.Any(lc => lc.Variante.Produit.idAdmin == adminId))
+                            .SelectMany(c => c.LignesCommande.Where(lc => lc.Variante.Produit.idAdmin == adminId))
+                            .SumAsync(lc => lc.quantite * lc.prix_unitaire);
+                        
+                        model.MonthlyRevenue.Add(monthSales);
+                    }
+                    else
+                    {
+                        model.MonthlyRevenue.Add(0);
+                    }
                 }
 
                 ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
@@ -693,7 +722,7 @@ namespace Projet__E_commerce
                         .ThenInclude(lc => lc.Variante)
                             .ThenInclude(v => v.Produit)
                     .Include(c => c.Livraison)
-                    .Where(c => c.LignesCommande.Any(lc => lc.Variante.Produit.idAdmin == adminId));
+                    .Where(c => c.LignesCommande.Any(lc => lc.Variante.Produit.idAdmin == adminId) && c.statut != "en_attente");
 
                 // Filtrer par statut si fourni
                 if (!string.IsNullOrEmpty(statut))
@@ -735,7 +764,6 @@ namespace Projet__E_commerce
                         Thumbnail = thumbnail,
                         CreatedAt = c.created_at,
                         UpdatedAt = c.updated_at,
-                        StatutLivraison = c.Livraison?.statut,
                         ModeLivraison = c.Livraison?.mode_livraison,
                         DateDebutEstimation = c.Livraison?.dateDebutEstimation,
                         DateFinEstimation = c.Livraison?.dateFinEstimation
@@ -793,7 +821,7 @@ namespace Projet__E_commerce
                         ligne.Variante.updated_at = DateTime.Now;
                     }
 
-                    commande.statut = "acceptée";
+                    commande.statut = "en_preparation";
                     commande.updated_at = DateTime.Now;
                 }
             }
@@ -806,10 +834,11 @@ namespace Projet__E_commerce
             return statut switch
             {
                 "en_attente" => "En attente",
-                "acceptée" => "Acceptée",
-                "en_cours" => "En cours",
-                "livrée" => "Livrée",
-                "annulée" => "Annulée",
+                "en_preparation" => "En préparation",
+                "en_livraison" => "En livraison",
+                "livre" => "Livrée",
+                "valide" => "Validée", // Garder pour compatibilité temporaire
+                "annule" => "Annulée",
                 _ => statut
             };
         }
@@ -819,10 +848,11 @@ namespace Projet__E_commerce
             return statut switch
             {
                 "en_attente" => "warning",
-                "acceptée" => "info",
-                "en_cours" => "primary",
-                "livrée" => "success",
-                "annulée" => "danger",
+                "en_preparation" => "info",
+                "en_livraison" => "primary",
+                "livre" => "success",
+                "valide" => "success",
+                "annule" => "danger",
                 _ => "secondary"
             };
         }
@@ -874,7 +904,6 @@ namespace Projet__E_commerce
                     PrixTotalAdmin = prixTotalAdmin,
                     CreatedAt = commande.created_at,
                     UpdatedAt = commande.updated_at,
-                    StatutLivraison = commande.Livraison?.statut,
                     ModeLivraison = commande.Livraison?.mode_livraison,
                     DateDebutEstimation = commande.Livraison?.dateDebutEstimation,
                     DateFinEstimation = commande.Livraison?.dateFinEstimation,

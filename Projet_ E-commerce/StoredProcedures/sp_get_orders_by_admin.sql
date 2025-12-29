@@ -39,18 +39,21 @@ BEGIN
         c.updated_at AS UpdatedAt,
         CASE 
             WHEN c.statut = 'en_attente' THEN 'En attente'
-            WHEN c.statut = 'valide' THEN 'Validée'
+            WHEN c.statut = 'en_preparation' THEN 'En préparation'
+            WHEN c.statut = 'en_livraison' THEN 'En livraison'
+            WHEN c.statut = 'livre' THEN 'Livrée'
             WHEN c.statut = 'annule' THEN 'Annulée'
             ELSE c.statut
         END AS StatusLabel,
         CASE 
             WHEN c.statut = 'en_attente' THEN 'bg-warning-subtle text-warning'
-            WHEN c.statut = 'valide' THEN 'bg-success-subtle text-success'
+            WHEN c.statut = 'en_preparation' THEN 'bg-info-subtle text-info'
+            WHEN c.statut = 'en_livraison' THEN 'bg-primary-subtle text-primary'
+            WHEN c.statut = 'livre' THEN 'bg-success-subtle text-success'
             WHEN c.statut = 'annule' THEN 'bg-danger-subtle text-danger'
             ELSE 'bg-secondary-subtle text-secondary'
         END AS StatusClass,
-        -- Informations de livraison
-        l.statut AS StatutLivraison,
+        -- Informations de livraison (statut supprimé de la table Livraisons)
         l.mode_livraison AS ModeLivraison,
         l.dateDebutEstimation AS DateDebutEstimation,
         l.dateFinEstimation AS DateFinEstimation
