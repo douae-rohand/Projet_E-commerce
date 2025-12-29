@@ -750,7 +750,7 @@ namespace Projet__E_commerce.Controllers
                 {
                     while (await reader.ReadAsync())
                     {
-                        var order = new OrderDetailsViewModel
+                        model.RecentOrders.Add(new OrderDetailsViewModel
                         {
                             IdCommande = reader.GetInt32(0),
                             DateCommande = reader.GetDateTime(1),
@@ -764,38 +764,39 @@ namespace Projet__E_commerce.Controllers
                             VilleLivraison = reader.IsDBNull(9) ? "" : reader.GetString(9),
                             CodePostalLivraison = reader.IsDBNull(10) ? "" : reader.GetString(10),
                             Notes = reader.IsDBNull(11) ? null : reader.GetString(11)
-                        };
+                        });
+                    }
+                }
 
-                        // Get order items
-                        string orderItemsQuery = @"
-                            SELECT p.idP, p.nomP, a.nom_cooperative, lc.quantite, lc.prix_unitaire, (lc.quantite * lc.prix_unitaire) as sousTotal
-                            FROM lignescommande lc
-                            INNER JOIN variantes v ON lc.idV = v.idV
-                            INNER JOIN produits p ON v.idP = p.idP
-                            INNER JOIN admins a ON p.idAdmin = a.id
-                            WHERE lc.idCommande = @orderId";
+                // Populate items for each order sequentially
+                foreach (var order in model.RecentOrders)
+                {
+                    string orderItemsQuery = @"
+                        SELECT p.idP, p.nomP, a.nom_cooperative, lc.quantite, lc.prix_unitaire, (lc.quantite * lc.prix_unitaire) as sousTotal
+                        FROM lignescommande lc
+                        INNER JOIN variantes v ON lc.idV = v.idV
+                        INNER JOIN produits p ON v.idP = p.idP
+                        INNER JOIN admins a ON p.idAdmin = a.id
+                        WHERE lc.idCommande = @orderId";
 
-                        using (SqlCommand itemsCmd = new SqlCommand(orderItemsQuery, connection))
+                    using (SqlCommand itemsCmd = new SqlCommand(orderItemsQuery, connection))
+                    {
+                        itemsCmd.Parameters.AddWithValue("@orderId", order.IdCommande);
+                        using (SqlDataReader itemsReader = await itemsCmd.ExecuteReaderAsync())
                         {
-                            itemsCmd.Parameters.AddWithValue("@orderId", order.IdCommande);
-                            using (SqlDataReader itemsReader = await itemsCmd.ExecuteReaderAsync())
+                            while (await itemsReader.ReadAsync())
                             {
-                                while (await itemsReader.ReadAsync())
+                                order.Items.Add(new OrderItemViewModel
                                 {
-                                    order.Items.Add(new OrderItemViewModel
-                                    {
-                                        IdProduit = itemsReader.GetInt32(0),
-                                        NomProduit = itemsReader.GetString(1),
-                                        NomCooperative = itemsReader.GetString(2),
-                                        Quantite = itemsReader.GetInt32(3),
-                                        PrixUnitaire = itemsReader.GetDecimal(4),
-                                        SousTotal = itemsReader.GetDecimal(5)
-                                    });
-                                }
+                                    IdProduit = itemsReader.GetInt32(0),
+                                    NomProduit = itemsReader.GetString(1),
+                                    NomCooperative = itemsReader.GetString(2),
+                                    Quantite = itemsReader.GetInt32(3),
+                                    PrixUnitaire = itemsReader.GetDecimal(4),
+                                    SousTotal = itemsReader.GetDecimal(5)
+                                });
                             }
                         }
-
-                        model.RecentOrders.Add(order);
                     }
                 }
             }
