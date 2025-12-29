@@ -2,6 +2,10 @@ namespace Projet__E_commerce.Models.ViewModels
 {
     public class SuperAdminDashboardViewModel
     {
+        // Analytics data merged into dashboard
+        public List<MonthlyRevenueViewModel> MonthlyRevenue { get; set; } = new();
+        public List<CategorySalesViewModel> CategorySales { get; set; } = new();
+
         public int TotalCooperatives { get; set; }
         public int TotalCooperativesActives { get; set; }
         public int TotalUsers { get; set; }
@@ -17,13 +21,18 @@ namespace Projet__E_commerce.Models.ViewModels
         public List<ProductPerformanceViewModel> TopProduits { get; set; } = new();
         public List<RecentActivityViewModel> RecentActivities { get; set; } = new();
         public List<OrderDetailsViewModel> RecentOrders { get; set; } = new();
-        // NEW: bind user email from DB/Identity rather than ViewBag
-        // Added to satisfy _DashboardOverview.cshtml bindings
-        // Added: used by _DashboardOverview.cshtml header
+        
         public string? UserEmail { get; set; }
-
-        // Added: used by stock doughnut in _DashboardOverview.cshtml
         public int ProduitsStockOk { get; set; }
+        public decimal AverageOrderValue { get; set; }
+        public List<CityRevenueViewModel> TopCities { get; set; } = new();
+    }
+
+    public class CityRevenueViewModel
+    {
+        public string City { get; set; } = string.Empty;
+        public decimal Revenue { get; set; }
+        public int OrderCount { get; set; }
     }
 
     public class CooperativeStatsViewModel
@@ -48,6 +57,34 @@ namespace Projet__E_commerce.Models.ViewModels
         public string? NomCooperative { get; set; }
         public bool EstActif { get; set; }
         public DateTime CreatedAt { get; set; }
+    }
+
+    public class UserDetailsViewModel
+    {
+        public int Id { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string? Nom { get; set; }
+        public string? Prenom { get; set; }
+        public string? NomCooperative { get; set; }
+        public bool EstActif { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string? Telephone { get; set; }
+        public string? Adresse { get; set; }
+        public string? Ville { get; set; }
+        public string? CodePostal { get; set; }
+        public int TotalOrders { get; set; }
+        public decimal TotalSpent { get; set; }
+        public DateTime? LastOrderDate { get; set; }
+        public List<OrderSummaryViewModel> RecentOrders { get; set; } = new();
+    }
+
+    public class OrderSummaryViewModel
+    {
+        public int IdCommande { get; set; }
+        public DateTime DateCommande { get; set; }
+        public string Statut { get; set; } = string.Empty;
+        public decimal MontantTotal { get; set; }
     }
 
     public class RecentActivityViewModel
@@ -159,5 +196,11 @@ namespace Projet__E_commerce.Models.ViewModels
         public string? Taille { get; set; }
         public string? Couleur { get; set; }
         public string? Poids { get; set; }
+    }
+
+    public class StatusUpdateRequest
+    {
+        public int IdCommande { get; set; }
+        public string NewStatus { get; set; } = string.Empty;
     }
 }

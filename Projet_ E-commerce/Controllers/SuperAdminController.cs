@@ -50,15 +50,6 @@ namespace Projet__E_commerce.Controllers
             return View("~/Views/SuperAdmin/SuperAdminDashboard.cshtml", users);
         }
 
-        public async Task<IActionResult> Analytics()
-        {
-            ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
-            ViewBag.UserId = HttpContext.Session.GetInt32("UserId");
-            ViewBag.ActiveTab = "analytics";
-
-            var analytics = await GetAnalyticsDataAsync();
-            return View("~/Views/SuperAdmin/SuperAdminDashboard.cshtml", analytics);
-        }
 
         public async Task<IActionResult> DeliveriesAndOrders()
         {
@@ -319,72 +310,6 @@ namespace Projet__E_commerce.Controllers
             return users.OrderByDescending(u => u.CreatedAt).ToList();
         }
 
-        private async Task<AnalyticsViewModel> GetAnalyticsDataAsync()
-        {
-            var model = new AnalyticsViewModel();
-            string connectionString = _configuration.GetConnectionString("DefaultConnection");
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                await connection.OpenAsync();
-
-                // Monthly revenue
-                string monthlyQuery = @"
-                    SELECT 
-                        FORMAT(created_at, 'yyyy-MM') as Month,
-                        COUNT(*) as Orders,
-                        ISNULL(SUM(prixTotal), 0) as Revenue
-                    FROM commandes
-                    WHERE created_at >= DATEADD(MONTH, -6, GETDATE())
-                    GROUP BY FORMAT(created_at, 'yyyy-MM')
-                    ORDER BY Month";
-
-                using (SqlCommand cmd = new SqlCommand(monthlyQuery, connection))
-                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        model.MonthlyRevenue.Add(new MonthlyRevenueViewModel
-                        {
-                            Month = reader.GetString(0),
-                            Orders = reader.GetInt32(1),
-                            Revenue = reader.GetDecimal(2)
-                        });
-                    }
-                }
-
-                // Category sales
-                string categoryQuery = @"
-                    SELECT 
-                        c.nom as CategoryName,
-                        COUNT(DISTINCT p.idP) as TotalProducts,
-                        COUNT(DISTINCT lc.idCommande) as TotalSales,
-                        ISNULL(SUM(lc.prix_unitaire * lc.quantite), 0) as Revenue
-                    FROM categories c
-                    LEFT JOIN produits p ON c.idC = p.idC
-                    LEFT JOIN variantes v ON p.idP = v.idP
-                    LEFT JOIN lignescommande lc ON v.idV = lc.idV
-                    GROUP BY c.nom
-                    ORDER BY Revenue DESC";
-
-                using (SqlCommand cmd = new SqlCommand(categoryQuery, connection))
-                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        model.CategorySales.Add(new CategorySalesViewModel
-                        {
-                            CategoryName = reader.GetString(0),
-                            TotalProducts = reader.GetInt32(1),
-                            TotalSales = reader.GetInt32(2),
-                            Revenue = reader.GetDecimal(3)
-                        });
-                    }
-                }
-            }
-
-            return model;
-        }
 
         private async Task<List<OrderDetailsViewModel>> GetDeliveriesAndOrdersAsync()
         {
@@ -406,6 +331,7 @@ namespace Projet__E_commerce.Controllers
                     INNER JOIN Utilisateurs u ON cl.id = u.id
                     LEFT JOIN Livraisons l ON c.idCommande = l.idCommande
                     LEFT JOIN AdressesLivraison al ON l.idAdresse = al.idAdresse
+                    WHERE c.statut != 'en_attente'
                     ORDER BY c.created_at DESC";
 
                 using (SqlCommand cmd = new SqlCommand(query, connection))
@@ -493,9 +419,9 @@ namespace Projet__E_commerce.Controllers
                                     FraisLivraison = reader["fraisLivraison"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["fraisLivraison"]),
                                     Notes = reader["notes"] == DBNull.Value ? null : reader["notes"].ToString(),
                                     NumeroFacture = reader["numero_facture"] == DBNull.Value ? null : reader["numero_facture"].ToString(),
-                                    PathFacture = reader["path_facture"] == DBNull.Value ? null : reader["path_facture"].ToString(),
+                                    PathFacture = reader["path_facture"] == DBNull.Value ? null : (reader["path_facture"].ToString()?.StartsWith("/") == true ? reader["path_facture"].ToString() : "/factures/" + reader["path_facture"].ToString()),
                                     NumeroBordereau = reader["numero_bordereau"] == DBNull.Value ? null : reader["numero_bordereau"].ToString(),
-                                    PathBordereau = reader["path_bordereau"] == DBNull.Value ? null : reader["path_bordereau"].ToString()
+                                    PathBordereau = reader["path_bordereau"] == DBNull.Value ? null : (reader["path_bordereau"].ToString()?.StartsWith("/") == true ? reader["path_bordereau"].ToString() : "/bordereaux/" + reader["path_bordereau"].ToString())
                                 };
                             }
                         }
@@ -550,10 +476,12 @@ namespace Projet__E_commerce.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateDeliveryStatus(int idCommande, string newStatus)
+        public async Task<IActionResult> UpdateDeliveryStatus([FromBody] StatusUpdateRequest request)
         {
             try
             {
+                if (request == null) return Json(new { success = false, message = "Données invalides." });
+
                 string connectionString = _configuration.GetConnectionString("DefaultConnection");
 
                 using (SqlConnection connection = new SqlConnection(connectionString))
@@ -564,9 +492,9 @@ namespace Projet__E_commerce.Controllers
 
                     using (SqlCommand cmd = new SqlCommand(updateQuery, connection))
                     {
-                        cmd.Parameters.AddWithValue("@status", newStatus);
+                        cmd.Parameters.AddWithValue("@status", request.NewStatus);
                         cmd.Parameters.AddWithValue("@updatedAt", DateTime.Now);
-                        cmd.Parameters.AddWithValue("@idCommande", idCommande);
+                        cmd.Parameters.AddWithValue("@idCommande", request.IdCommande);
 
                         int rowsAffected = await cmd.ExecuteNonQueryAsync();
 
@@ -584,7 +512,165 @@ namespace Projet__E_commerce.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erreur lors de la mise à jour du statut de livraison");
-                return Json(new { success = false, message = "Une erreur est survenue lors de la mise à jour." });
+                return Json(new { success = false, message = "Une erreur est survenue lors de la mise à jour : " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrderStatus([FromBody] StatusUpdateRequest request)
+        {
+            try
+            {
+                if (request == null) return Json(new { success = false, message = "Données invalides." });
+
+                string connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    string updateQuery = "UPDATE Commandes SET statut = @status, updated_at = @updatedAt WHERE idCommande = @idCommande";
+
+                    using (SqlCommand cmd = new SqlCommand(updateQuery, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@status", request.NewStatus);
+                        cmd.Parameters.AddWithValue("@updatedAt", DateTime.Now);
+                        cmd.Parameters.AddWithValue("@idCommande", request.IdCommande);
+
+                        int rowsAffected = await cmd.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                        {
+                            return Json(new { success = true });
+                        }
+                        else
+                        {
+                            return Json(new { success = false, message = "Aucune commande trouvée." });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de la mise à jour du statut de commande");
+                return Json(new { success = false, message = "Une erreur est survenue lors de la mise à jour : " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UserDetailsModal(int id)
+        {
+            try
+            {
+                string connectionString = _configuration.GetConnectionString("DefaultConnection");
+                UserDetailsViewModel? user = null;
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    // Get user basic info
+                    string userQuery = @"
+                        SELECT 
+                            u.id, u.email, u.est_actif, u.created_at,
+                            CASE 
+                                WHEN c.id IS NOT NULL THEN 'CLIENT'
+                                WHEN a.id IS NOT NULL THEN 'ADMIN'
+                                ELSE 'UNKNOWN'
+                            END as Role,
+                            c.nom, c.prenom, c.telephone,
+                            a.nom_cooperative, a.localisation, a.ville
+                        FROM utilisateurs u
+                        LEFT JOIN clients c ON u.id = c.id
+                        LEFT JOIN admins a ON u.id = a.id
+                        WHERE u.id = @id";
+
+                    using (SqlCommand cmd = new SqlCommand(userQuery, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@id", id);
+                        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                user = new UserDetailsViewModel
+                                {
+                                    Id = Convert.ToInt32(reader["id"]),
+                                    Email = reader["email"]?.ToString() ?? "N/A",
+                                    Role = reader["Role"]?.ToString() ?? "UNKNOWN",
+                                    Nom = reader["nom"]?.ToString(),
+                                    Prenom = reader["prenom"]?.ToString(),
+                                    NomCooperative = reader["nom_cooperative"]?.ToString(),
+                                    EstActif = reader["est_actif"] != DBNull.Value && Convert.ToBoolean(reader["est_actif"]),
+                                    CreatedAt = reader["created_at"] != DBNull.Value ? Convert.ToDateTime(reader["created_at"]) : DateTime.MinValue,
+                                    Telephone = reader["telephone"]?.ToString(),
+                                    Adresse = reader["localisation"]?.ToString(), // For admins, use localisation as address
+                                    Ville = reader["ville"]?.ToString(),
+                                    CodePostal = null // Not available in current schema
+                                };
+                            }
+                        }
+                    }
+
+                    if (user != null)
+                    {
+                        // Get order statistics
+                        string statsQuery = @"
+                            SELECT 
+                                COUNT(*) as totalOrders,
+                                COALESCE(SUM(prixTotal), 0) as totalSpent,
+                                MAX(created_at) as lastOrderDate
+                            FROM Commandes 
+                            WHERE idClient = @userId";
+
+                        using (SqlCommand statsCmd = new SqlCommand(statsQuery, connection))
+                        {
+                            statsCmd.Parameters.AddWithValue("@userId", user.Id);
+                            using (SqlDataReader statsReader = await statsCmd.ExecuteReaderAsync())
+                            {
+                                if (await statsReader.ReadAsync())
+                                {
+                                    user.TotalOrders = statsReader["totalOrders"] != DBNull.Value ? Convert.ToInt32(statsReader["totalOrders"]) : 0;
+                                    user.TotalSpent = statsReader["totalSpent"] != DBNull.Value ? Convert.ToDecimal(statsReader["totalSpent"]) : 0;
+                                    user.LastOrderDate = statsReader["lastOrderDate"] != DBNull.Value ? Convert.ToDateTime(statsReader["lastOrderDate"]) : (DateTime?)null;
+                                }
+                            }
+                        }
+
+                        // Get recent orders
+                        string ordersQuery = @"
+                            SELECT TOP 5 idCommande, created_at, statut, prixTotal
+                            FROM Commandes 
+                            WHERE idClient = @userId
+                            ORDER BY created_at DESC";
+
+                        using (SqlCommand ordersCmd = new SqlCommand(ordersQuery, connection))
+                        {
+                            ordersCmd.Parameters.AddWithValue("@userId", user.Id);
+                            using (SqlDataReader ordersReader = await ordersCmd.ExecuteReaderAsync())
+                            {
+                                while (await ordersReader.ReadAsync())
+                                {
+                                    user.RecentOrders.Add(new OrderSummaryViewModel
+                                    {
+                                        IdCommande = Convert.ToInt32(ordersReader["idCommande"]),
+                                        DateCommande = Convert.ToDateTime(ordersReader["created_at"]),
+                                        Statut = ordersReader["statut"]?.ToString() ?? "N/A",
+                                        MontantTotal = ordersReader["prixTotal"] != DBNull.Value ? Convert.ToDecimal(ordersReader["prixTotal"]) : 0
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (user == null) return Content("<div class='alert alert-info'>Utilisateur introuvable.</div>");
+
+                return PartialView("~/Views/SuperAdmin/_UserModalContent.cshtml", user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de la récupération des détails de l'utilisateur");
+                return Content($"<div class='alert alert-danger'>Une erreur serveur est survenue : {ex.Message}</div>");
             }
         }
 
@@ -807,6 +893,33 @@ namespace Projet__E_commerce.Controllers
                     {
                         model.TotalOrders = reader.GetInt32(0);
                         model.TotalRevenue = reader.GetDecimal(1);
+                        model.AverageOrderValue = model.TotalOrders > 0 ? model.TotalRevenue / model.TotalOrders : 0;
+                    }
+                }
+
+                // Top Cities by Revenue
+                string topCitiesQuery = @"
+                    SELECT TOP 5 
+                        al.ville,
+                        COUNT(c.idCommande) as OrderCount,
+                        SUM(c.prixTotal) as Revenue
+                    FROM Commandes c
+                    INNER JOIN Livraisons l ON c.idCommande = l.idCommande
+                    INNER JOIN AdressesLivraison al ON l.idAdresse = al.idAdresse
+                    GROUP BY al.ville
+                    ORDER BY Revenue DESC";
+
+                using (SqlCommand cmd = new SqlCommand(topCitiesQuery, connection))
+                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        model.TopCities.Add(new CityRevenueViewModel
+                        {
+                            City = reader.IsDBNull(0) ? "Inconnue" : reader.GetString(0),
+                            OrderCount = reader.GetInt32(1),
+                            Revenue = reader.GetDecimal(2)
+                        });
                     }
                 }
 
@@ -947,6 +1060,62 @@ namespace Projet__E_commerce.Controllers
                         }
 
                         model.RecentOrders.Add(order);
+                    }
+                }
+
+                // ===== ANALYTICS DATA (Merged) =====
+                
+                // Monthly revenue
+                string monthlyQuery = @"
+                    SELECT 
+                        FORMAT(created_at, 'yyyy-MM') as Month,
+                        COUNT(*) as Orders,
+                        ISNULL(SUM(prixTotal), 0) as Revenue
+                    FROM commandes
+                    WHERE created_at >= DATEADD(MONTH, -6, GETDATE())
+                    GROUP BY FORMAT(created_at, 'yyyy-MM')
+                    ORDER BY Month";
+
+                using (SqlCommand cmd = new SqlCommand(monthlyQuery, connection))
+                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        model.MonthlyRevenue.Add(new MonthlyRevenueViewModel
+                        {
+                            Month = reader.GetString(0),
+                            Orders = reader.GetInt32(1),
+                            Revenue = reader.GetDecimal(2)
+                        });
+                    }
+                }
+
+                // Category sales
+                string categoryQuery = @"
+                    SELECT 
+                        c.nom as CategoryName,
+                        COUNT(DISTINCT p.idP) as TotalProducts,
+                        COUNT(DISTINCT lc.idCommande) as TotalSales,
+                        ISNULL(SUM(lc.prix_unitaire * lc.quantite), 0) as Revenue
+                    FROM categories c
+                    LEFT JOIN produits p ON c.idC = p.idC
+                    LEFT JOIN variantes v ON p.idP = v.idP
+                    LEFT JOIN lignescommande lc ON v.idV = lc.idV
+                    GROUP BY c.nom
+                    ORDER BY Revenue DESC";
+
+                using (SqlCommand cmd = new SqlCommand(categoryQuery, connection))
+                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        model.CategorySales.Add(new CategorySalesViewModel
+                        {
+                            CategoryName = reader.GetString(0),
+                            TotalProducts = reader.GetInt32(1),
+                            TotalSales = reader.GetInt32(2),
+                            Revenue = reader.GetDecimal(3)
+                        });
                     }
                 }
             }

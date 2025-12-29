@@ -6,11 +6,7 @@
             <h2 class="fw-bold text-dark font-display mb-1">Commande & livraison </h2>
             <p class="text-secondary mb-0">Gestion et suivi des commandes et des livraisons</p>
         </div>
-        <div>
-            <button class="btn btn-outline-secondary rounded-pill px-4 text-uppercase small fw-bold">
-                <i class="bi bi-download me-2"></i>Exporter
-            </button>
-        </div>
+        
     </div>
 
     <!-- Stats Summary Cards -->
@@ -73,20 +69,20 @@
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-3">
             <div class="row g-3">
-                <div class="col-md-8">
+                <div class="col-md-6">
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
                         <input type="text" id="orderSearchInput" class="form-control border-start-0" placeholder="Rechercher par # ID, Client (nom, prénom ou email)...">
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <select id="deliveryFilterSelect" class="form-select">
-                        <option value="">Tous les statuts de livraison</option>
+                <div class="col-md-6">
+                    <select id="orderStatusFilterSelect" class="form-select">
+                        <option value="">Tous les statuts de commande</option>
+                      
                         <option value="en_preparation">Préparation</option>
-                        <option value="en_cours">En cours</option>
+                        <option value="en_livraison">En livraison</option>
                         <option value="livre">Livré</option>
-                        <option value="non_livre">Non livré</option>
-                        <option value="no_delivery">Pas de livraison</option>
+                        <option value="annule">Non Livré</option>
                     </select>
                 </div>
             </div>
@@ -100,8 +96,7 @@
                     <tr>
                         <th class="border-0 py-3 ps-4 text-secondary small text-uppercase fw-bold">Commande</th>
                         <th class="border-0 py-3 text-secondary small text-uppercase fw-bold">Client</th>
-                        <th class="border-0 py-3 text-secondary small text-uppercase fw-bold">Adresse</th>
-                        <th class="border-0 py-3 text-secondary small text-uppercase fw-bold">Statut Livraison</th>
+                        <th class="border-0 py-3 text-secondary small text-uppercase fw-bold">Statut Commande</th>
                         <th class="border-0 py-3 text-secondary small text-uppercase fw-bold">Total</th>
                         <th class="border-0 py-3 pe-4 text-end text-secondary small text-uppercase fw-bold">Actions</th>
                     </tr>
@@ -111,6 +106,7 @@
                     {
                         <tr class="order-row" 
                             data-search="@(item.IdCommande) @(item.ClientNom.ToLower()) @(item.ClientPrenom.ToLower()) @(item.ClientEmail.ToLower())"
+                            data-order-status="@item.Statut"
                             data-delivery-status="@(item.HasDelivery ? item.DeliveryStatus : "no_delivery")">
                             <td class="ps-4">
                                 <span class="fw-bold text-dark">#@item.IdCommande</span>
@@ -120,24 +116,16 @@
                                 <div class="fw-medium text-dark">@item.ClientPrenom @item.ClientNom</div>
                                 <div class="small text-secondary">@item.ClientEmail</div>
                             </td>
-                             <td>
-                                <div class="text-truncate" style="max-width: 200px;" title="@item.AdresseComplete">
-                                    @item.VilleLivraison
-                                </div>
-                                <div class="small text-secondary">@item.DeliveryMode</div>
-                            </td>
-                             <td>
-                                @if(item.HasDelivery) {
-                                    <select class="form-select form-select-sm rounded-pill border-0 shadow-sm px-3 py-2 fw-semibold delivery-status-select" 
-                                            data-order-id="@item.IdCommande"
-                                            style="width: 160px; font-size: 0.85rem;">
-                                        <option value="en_preparation" selected="@(item.DeliveryStatus == "en_preparation")">Préparation</option>
-                                        <option value="en_cours" selected="@(item.DeliveryStatus == "en_cours")">En cours</option>
-                                        <option value="livre" selected="@(item.DeliveryStatus == "livre")">Livré</option>
-                                    </select>
-                                } else {
-                                    <span class="text-secondary small">-</span>
-                                }
+                            <td>
+                                <select class="form-select form-select-sm rounded-pill border-0 shadow-sm px-3 py-2 fw-semibold order-status-select" 
+                                        data-order-id="@item.IdCommande"
+                                        style="width: 140px; font-size: 0.85rem;">
+                                    
+                                    <option value="en_preparation" selected="@(item.Statut == "en_preparation")">Préparation</option>
+                                    <option value="en_livraison" selected="@(item.Statut == "en_livraison")">En livraison</option>
+                                    <option value="livre" selected="@(item.Statut == "livre")">Livré</option>
+                                    <option value="annule" selected="@(item.Statut == "annule")">Non Livré</option>
+                                </select>
                             </td>
                             <td class="fw-bold text-dark">@item.MontantTotal.ToString("N2") DH</td>
                             <td class="pe-4 text-end">
@@ -145,6 +133,11 @@
                                         onclick="showOrderDetails(@item.IdCommande)" 
                                         data-bs-toggle="tooltip" title="Voir détails">
                                     <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary rounded-circle shadow-sm ms-1" 
+                                        onclick="showOrderDetails(@item.IdCommande)" 
+                                        data-bs-toggle="tooltip" title="Imprimer Bordereau">
+                                    <i class="bi bi-printer"></i>
                                 </button>
                             </td>
                         </tr>
@@ -181,11 +174,12 @@
     .hover-terracotta:hover { color: white !important; background-color: var(--terracotta) !important; border-color: var(--terracotta) !important; }
     
     /* Dynamic select styling */
-    .delivery-status-select { transition: all 0.3s; }
-    .delivery-status-select[data-val="en_preparation"] { background-color: rgba(13, 202, 240, 0.1); color: #0dcaf0; }
-    .delivery-status-select[data-val="en_cours"] { background-color: rgba(13, 110, 253, 0.1); color: #0d6efd; }
-    .delivery-status-select[data-val="livre"] { background-color: rgba(25, 135, 84, 0.1); color: #198754; }
-    .delivery-status-select[data-val="non_livre"] { background-color: rgba(220, 53, 69, 0.1); color: #dc3545; }
+    .order-status-select { transition: all 0.3s; }
+  
+    .order-status-select[data-val="en_preparation"] { background-color: rgba(255, 193, 7, 0.1); color: #ffc107; }
+    .order-status-select[data-val="en_livraison"] { background-color: rgba(13, 202, 240, 0.1); color: #0dcaf0; }
+    .order-status-select[data-val="livre"] { background-color: rgba(25, 135, 84, 0.1); color: #198754; }
+    .order-status-select[data-val="annule"] { background-color: rgba(220, 53, 69, 0.1); color: #dc3545; }
 </style>
 
 <script>
@@ -215,17 +209,18 @@
 
     function filterOrders() {
         const searchText = document.getElementById('orderSearchInput').value.toLowerCase();
-        const statusFilter = document.getElementById('deliveryFilterSelect').value;
+        const orderStatusFilter = document.getElementById('orderStatusFilterSelect').value;
         const rows = document.querySelectorAll('.order-row');
 
         rows.forEach(row => {
             const searchData = row.getAttribute('data-search');
-            const deliveryStatus = row.getAttribute('data-delivery-status');
+            const orderStatus = row.getAttribute('data-order-status');
             
             const matchSearch = searchData.includes(searchText);
-            const matchStatus = statusFilter === "" || deliveryStatus === statusFilter;
+            // By default, exclude 'en_attente' orders unless specifically filtered
+            const matchOrderStatus = orderStatusFilter === "" ? orderStatus !== "en_attente" : orderStatus === orderStatusFilter;
 
-            if (matchSearch && matchStatus) {
+            if (matchSearch && matchOrderStatus) {
                 row.style.display = '';
             } else {
                 row.style.display = 'none';
@@ -236,14 +231,10 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Filter events
         document.getElementById('orderSearchInput').addEventListener('input', filterOrders);
-        document.getElementById('deliveryFilterSelect').addEventListener('change', filterOrders);
+        document.getElementById('orderStatusFilterSelect').addEventListener('change', filterOrders);
 
-        // Set default filter to 'en_preparation' and apply it
-        document.getElementById('deliveryFilterSelect').value = 'en_preparation';
-        filterOrders();
-
-        const selects = document.querySelectorAll('.delivery-status-select');
-        selects.forEach(select => {
+        const orderSelects = document.querySelectorAll('.order-status-select');
+        orderSelects.forEach(select => {
             updateSelectStyle(select);
             
             select.addEventListener('change', function() {
@@ -251,7 +242,7 @@
                 const newStatus = this.value;
                 const originalStatus = this.getAttribute('data-original-status') || newStatus;
 
-                if (!confirm('Voulez-vous vraiment modifier le statut de livraison ?')) {
+                if (!confirm('Voulez-vous vraiment modifier le statut de la commande ?')) {
                     this.value = originalStatus;
                     updateSelectStyle(this);
                     return;
@@ -259,13 +250,13 @@
 
                 updateSelectStyle(this);
 
-                fetch('/SuperAdmin/UpdateDeliveryStatus', {
+                fetch('/SuperAdmin/UpdateOrderStatus', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
                     },
-                    body: JSON.stringify({ idCommande: parseInt(orderId), newStatus: newStatus })
+                    body: JSON.stringify({ IdCommande: parseInt(orderId), NewStatus: newStatus })
                 })
                 .then(response => response.json())
                 .then(data => {

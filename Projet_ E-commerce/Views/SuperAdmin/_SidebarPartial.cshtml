@@ -29,10 +29,6 @@
            href="@Url.Action("Users", "SuperAdmin")">
             <i class="bi bi-people"></i> Utilisateurs
         </a>
-        <a class="nav-link @(activeTab == "analytics" ? "active" : "text-white-50") rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
-           href="@Url.Action("Analytics", "SuperAdmin")">
-            <i class="bi bi-pie-chart"></i> Analytique
-        </a>
         <a class="nav-link @(activeTab == "deliveries_orders" ? "active" : "text-white-50") rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
            href="@Url.Action("DeliveriesAndOrders", "SuperAdmin")">
             <i class="bi bi-truck"></i> Commande & livraison

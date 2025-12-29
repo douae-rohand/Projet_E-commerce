@@ -166,12 +166,12 @@ namespace Projet__E_commerce.Data
                 .ToTable(t => t.HasCheckConstraint("CK_Produit_Statut", "statut IN ('active', 'inactive')"));
 
             modelBuilder.Entity<Commande>()
-                .ToTable(t => t.HasCheckConstraint("CK_Commande_Statut", "statut IN ('en_attente', 'valide', 'annule')"));
+                .ToTable(t => t.HasCheckConstraint("CK_Commande_Statut", "statut IN ('en_attente', 'en_preparation', 'en_livraison', 'livre', 'annule')"));
 
             modelBuilder.Entity<Livraison>()
                 .ToTable(t =>
                 {
-                    t.HasCheckConstraint("CK_Livraison_Statut", "statut IN ('livre', 'non_livre', 'en_cours')");
+                    t.HasCheckConstraint("CK_Livraison_Statut", "statut IN ('en_preparation', 'en_cours', 'livre', 'non_livre')");
                     t.HasCheckConstraint("CK_Livraison_ModeLivraison", "mode_livraison IN ('Standard', 'Express')");
                 });
 

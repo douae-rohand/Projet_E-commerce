@@ -29,14 +29,6 @@ else if (activeTab == "users")
         <partial name="~/Views/SuperAdmin/_UsersList.cshtml" model="usersModel" />
     }
 }
-else if (activeTab == "analytics")
-{
-    var analyticsModel = Model as AnalyticsViewModel;
-    if (analyticsModel != null)
-    {
-        <partial name="~/Views/SuperAdmin/_AnalyticsView.cshtml" model="analyticsModel" />
-    }
-}
 else if (activeTab == "deliveries_orders")
 {
     var ordersModel = Model as List<OrderDetailsViewModel>;
