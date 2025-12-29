@@ -8,6 +8,7 @@ CREATE PROCEDURE sp_accept_order
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;
 
     BEGIN TRY
         -- Vérifier que la commande contient des produits de cet admin
@@ -31,6 +32,34 @@ BEGIN
             RETURN;
         END
 
+        BEGIN TRANSACTION;
+
+        -- Vérifier le stock pour chaque ligne de commande de cet admin
+        IF EXISTS (
+            SELECT 1
+            FROM LignesCommande lc
+            INNER JOIN Variantes v ON lc.idV = v.idV
+            INNER JOIN Produits p ON v.idP = p.idP
+            WHERE lc.idCommande = @idCommande
+              AND p.idAdmin = @idAdmin
+              AND lc.quantite > v.quantite
+        )
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RAISERROR('STOCK_INSUFFICIENT', 16, 1);
+            RETURN;
+        END
+
+        -- Décrémenter le stock des variantes concernées
+        UPDATE v
+        SET v.quantite = v.quantite - lc.quantite,
+            v.updated_at = GETDATE()
+        FROM Variantes v
+        INNER JOIN LignesCommande lc ON v.idV = lc.idV
+        INNER JOIN Produits p ON v.idP = p.idP
+        WHERE lc.idCommande = @idCommande
+          AND p.idAdmin = @idAdmin;
+
         -- Mettre à jour le statut de la commande
         UPDATE Commandes
         SET 
@@ -38,9 +67,14 @@ BEGIN
             updated_at = GETDATE()
         WHERE idCommande = @idCommande;
 
+        COMMIT TRANSACTION;
+
         SELECT 'ORDER_ACCEPTED' AS message;
     END TRY
     BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
         DECLARE @ErrorMessage NVARCHAR(4000);
         SET @ErrorMessage = ERROR_MESSAGE();
         RAISERROR(@ErrorMessage, 16, 1);

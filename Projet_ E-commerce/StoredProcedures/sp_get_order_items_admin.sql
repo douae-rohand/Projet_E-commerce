@@ -15,8 +15,9 @@ BEGIN
         v.taille AS Taille,
         v.couleur AS Couleur,
         lc.quantite AS Quantite,
-        lc.prix_unitaire AS PrixUnitaire
-        -- SousTotal calculated in C# DTO usually, effectively Quantite * PrixUnitaire
+        lc.prix_unitaire AS PrixUnitaire,
+        v.photo AS Photo
+        -- SousTotal calculé côté C#
     FROM LignesCommande lc
     INNER JOIN Variantes v ON lc.idV = v.idV
     INNER JOIN Produits p ON v.idP = p.idP

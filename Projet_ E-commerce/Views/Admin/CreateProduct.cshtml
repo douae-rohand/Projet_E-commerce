@@ -9,19 +9,184 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]</title>
+    <title>Nouveau Produit</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-animation.css" asp-append-version="true" />
+    <style>
+        /* Specific form styles */
+        .form-control, .form-select {
+            border: 2px solid #e6e2df;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #5A7EB8;
+            box-shadow: 0 0 0 4px rgba(90, 126, 184, 0.1);
+            background: white;
+        }
+
+        .form-label {
+            color: #40322c;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* File upload enhancement */
+        .file-upload-wrapper {
+            position: relative;
+            border: 2px dashed #e6e2df;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(157, 209, 230, 0.05), rgba(229, 200, 136, 0.05));
+            cursor: pointer;
+        }
+
+        .file-upload-wrapper:hover {
+            border-color: #5A7EB8;
+            background: linear-gradient(135deg, rgba(157, 209, 230, 0.1), rgba(229, 200, 136, 0.1));
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #5A7EB8, #9DD1E6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+        
+        /* Section dividers */
+        .section-divider {
+            position: relative;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .section-divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e6e2df, transparent);
+        }
+
+        .section-divider span {
+            background: white;
+            padding: 0.5rem 1.5rem;
+            position: relative;
+            z-index: 1;
+            color: #5A7EB8;
+            font-weight: 600;
+            border-radius: 20px;
+            border: 1px solid #e6e2df;
+        }
+
+        /* Tips card */
+        .tips-card {
+            background: linear-gradient(135deg, rgba(90, 126, 184, 0.08), rgba(229, 200, 136, 0.08));
+            border-left: 4px solid #5A7EB8;
+            position: static;
+        }
+
+        .tips-card ul li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tips-card ul li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: #5A7EB8;
+            font-size: 0.8rem;
+        }
+        
+        .sticky-column {
+            position: sticky;
+            top: 2rem;
+        }
+
+        /* Back button */
+        .back-btn {
+            width: 48px;
+            height: 48px;
+            background: white;
+            border: 2px solid #e6e2df;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #5A7EB8;
+            border-color: #5A7EB8;
+            color: white;
+            transform: translateX(-4px);
+        }
+
+        /* Animations */
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .animate-delay-1 { animation-delay: 0.1s; opacity: 0; }
+        .animate-delay-2 { animation-delay: 0.2s; opacity: 0; }
+        .animate-delay-3 { animation-delay: 0.3s; opacity: 0; }
+    </style>
 </head>
-<body class="bg-light">
+<body class="admin-bg">
+    <div class="bg-orb-3"></div>
+    
     <div class="d-flex">
         <!-- Sidebar -->
-        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block" style="width: 280px;">
+        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block shadow-sm" style="width: 280px; z-index: 1000;">
             <div class="p-4 border-bottom">
                 <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
-                    <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                     <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
                         <i class="bi bi-flower1 text-white h5 mb-0"></i>
                     </div>
                     <div>
@@ -32,128 +197,202 @@
             </div>
             
             <nav class="nav flex-column p-3 gap-1">
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Dashboard", "Admin")"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
-                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Products", "Admin")"><i class="bi bi-box-seam"></i> Produits</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Orders", "Admin")"><i class="bi bi-cart3"></i> Commandes</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Profile", "Admin")"><i class="bi bi-gear"></i> Profil</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Dashboard", "Admin")"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
+                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 shadow-sm" href="@Url.Action("Products", "Admin")"><i class="bi bi-box-seam"></i> Produits</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Orders", "Admin")"><i class="bi bi-cart3"></i> Commandes</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Profile", "Admin")"><i class="bi bi-gear"></i> Profil</a>
+                <div class="mt-auto pt-4 border-top">
+                    <a class="nav-link text-danger rounded-3 d-flex align-items-center gap-3 py-2 px-3 hover-effect" href="@Url.Action("Logout", "Auth")">
+                        <i class="bi bi-box-arrow-right"></i> Déconnexion
+                    </a>
+                </div>
             </nav>
         </aside>
 
         <!-- Main Content -->
         <main class="flex-grow-1 p-4 p-md-5">
-            <header class="mb-5">
+            <header class="mb-5 animate-in">
                 <div class="d-flex align-items-center gap-3 mb-2">
-                    <a href="@Url.Action("Products", "Admin")" class="btn btn-light rounded-circle">
+                    <a href="@Url.Action("Products", "Admin")" class="back-btn rounded-circle text-decoration-none">
                         <i class="bi bi-arrow-left"></i>
                     </a>
                     <div>
-                        <h1 class="font-display fw-bold mb-1">Nouveau Produit</h1>
-                        <p class="text-muted mb-0 small">Ajoutez un nouveau produit à votre catalogue</p>
+                        <h1 class="fw-bold mb-1 text-dark" style="font-family: 'Playfair Display', serif; font-size: 2.5rem;">Nouveau Produit</h1>
+                        <p class="text-muted mb-0">Ajoutez un nouveau produit à votre catalogue artisanal</p>
                     </div>
                 </div>
             </header>
 
-            <div class="row">
+            <div class="row g-4">
                 <div class="col-lg-8">
-                    <div class="card border-0 shadow-soft rounded-4 p-4">
-                        <form method="post" enctype="multipart/form-data" asp-action="CreateProduct">
-                            @Html.AntiForgeryToken()
-                            <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3"></div>
+                    <div class="card-premium p-4 p-md-5 animate-in animate-delay-1">
+                        <form method="post" enctype="multipart/form-data">
+                            <div class="mb-4">
+                                <h5 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                                    <i class="bi bi-info-circle text-primary"></i>
+                                    Informations principales
+                                </h5>
+                                <p class="text-muted small mb-4">Les détails essentiels de votre produit</p>
 
-                            <h5 class="fw-bold mb-4">Informations du produit</h5>
-
-                            <div class="mb-3">
-                                <label asp-for="NomP" class="form-label fw-bold">Nom du produit *</label>
-                                <input asp-for="NomP" class="form-control" placeholder="Ex: Huile d'Argan Bio" />
-                                <span asp-validation-for="NomP" class="text-danger small"></span>
-                            </div>
-
-                            <div class="mb-3">
-                                <label asp-for="Description" class="form-label fw-bold">Description</label>
-                                <textarea asp-for="Description" class="form-control" rows="4" placeholder="Décrivez votre produit..."></textarea>
-                                <span asp-validation-for="Description" class="text-danger small"></span>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="IdC" class="form-label fw-bold">Catégorie *</label>
-                                    <select asp-for="IdC" class="form-select">
-                                        <option value="">-- Sélectionnez --</option>
-                                        @foreach (var cat in Model.Categories)
-                                        {
-                                            <option value="@cat.idC">@cat.nom</option>
-                                        }
-                                    </select>
-                                    <span asp-validation-for="IdC" class="text-danger small"></span>
+                                <div class="mb-4">
+                                    <label class="form-label">
+                                        <i class="bi bi-tag"></i>
+                                        Nom du produit
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="NomP" class="form-control" placeholder="Ex: Huile d'Argan Bio Premium" />
+                                    <span asp-validation-for="NomP" class="text-danger"></span>
                                 </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="SeuilAlerte" class="form-label fw-bold">Seuil d'alerte stock</label>
-                                    <input asp-for="SeuilAlerte" type="number" class="form-control" />
-                                    <span asp-validation-for="SeuilAlerte" class="text-danger small"></span>
-                                </div>
-                            </div>
-
-                            <hr class="my-4" />
-
-                            <h5 class="fw-bold mb-4">Première variante</h5>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="Prix" class="form-label fw-bold">Prix (MAD) *</label>
-                                    <input asp-for="Prix" type="number" step="0.01" class="form-control" placeholder="0.00" />
-                                    <span asp-validation-for="Prix" class="text-danger small"></span>
+                                <div class="mb-4">
+                                    <label class="form-label">
+                                        <i class="bi bi-text-paragraph"></i>
+                                        Description
+                                    </label>
+                                    <textarea asp-for="Description" class="form-control" rows="4" placeholder="Décrivez votre produit, son origine, ses bienfaits..."></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                    <small class="text-muted">Une bonne description aide vos clients à mieux comprendre votre produit</small>
                                 </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="Quantite" class="form-label fw-bold">Quantité *</label>
-                                    <input asp-for="Quantite" type="number" class="form-control" />
-                                    <span asp-validation-for="Quantite" class="text-danger small"></span>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <select asp-for="IdC" class="form-select" asp-items="@(new SelectList(Model.Categories, "idC", "nom"))">
+                                            <option value="">-- Sélectionnez une catégorie --</option>
+                                        </select>
+                                        <span asp-validation-for="IdC" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">
+                                            <i class="bi bi-exclamation-triangle"></i>
+                                            Seuil d'alerte stock
+                                        </label>
+                                        <input asp-for="SeuilAlerte" type="number" class="form-control" placeholder="10" />
+                                        <span asp-validation-for="SeuilAlerte" class="text-danger"></span>
+                                        <small class="text-muted">Vous serez alerté quand le stock descend sous ce seuil</small>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label asp-for="Taille" class="form-label fw-bold">Taille</label>
-                                    <input asp-for="Taille" class="form-control" placeholder="Ex: 100ml" />
-                                </div>
-
-                                <div class="col-md-4 mb-3">
-                                    <label asp-for="Couleur" class="form-label fw-bold">Couleur</label>
-                                    <input asp-for="Couleur" class="form-control" placeholder="Ex: Doré" />
-                                </div>
-
-                                <div class="col-md-4 mb-3">
-                                    <label asp-for="Poids" class="form-label fw-bold">Poids</label>
-                                    <input asp-for="Poids" class="form-control" placeholder="Ex: 100g" />
-                                </div>
+                            <div class="section-divider">
+                                <span>Première variante</span>
                             </div>
 
                             <div class="mb-4">
-                                <label class="form-label fw-bold">Photo du produit</label>
-                                <input type="file" name="photoFile" class="form-control" accept="image/*" />
-                                <small class="text-muted">Formats acceptés: JPG, PNG, WEBP</small>
+                                <h5 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                                    <i class="bi bi-boxes text-primary"></i>
+                                    Détails de la variante
+                                </h5>
+                                <p class="text-muted small mb-4">Prix, quantité et caractéristiques</p>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">
+                                            <i class="bi bi-currency-exchange"></i>
+                                            Prix (MAD)
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <input asp-for="Prix" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                                        <span asp-validation-for="Prix" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">
+                                            <i class="bi bi-box"></i>
+                                            Quantité en stock
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <input asp-for="Quantite" type="number" class="form-control" placeholder="0" />
+                                        <span asp-validation-for="Quantite" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-4">
+                                        <label class="form-label">
+                                            <i class="bi bi-rulers"></i>
+                                            Taille
+                                        </label>
+                                        <input asp-for="Taille" type="text" class="form-control" placeholder="Ex: 100ml" />
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label">
+                                            <i class="bi bi-palette"></i>
+                                            Couleur
+                                        </label>
+                                        <input asp-for="Couleur" type="text" class="form-control" placeholder="Ex: Doré" />
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label">
+                                            <i class="bi bi-weight"></i>
+                                            Poids
+                                        </label>
+                                        <input asp-for="Poids" type="text" class="form-control" placeholder="Ex: 100g" />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="variants-container"></div>
+
+                            <button type="button" class="btn btn-outline-secondary w-100 mb-4" onclick="addVariant()">
+                                <i class="bi bi-plus-lg me-2"></i>Ajouter une variante
+                            </button>
+
+                            <div class="mb-5">
+                                <label class="form-label d-block">
+                                    <i class="bi bi-image"></i>
+                                    Photo du produit
+                                </label>
+                                <div class="file-upload-wrapper">
+                                    <input type="file" name="photoFile" accept="image/*" />
+                                    <div class="upload-icon">
+                                        <i class="bi bi-cloud-upload text-white fs-4"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">Cliquez pour ajouter une image</h6>
+                                    <p class="text-muted small mb-0">ou glissez-déposez ici</p>
+                                    <small class="text-muted d-block mt-2">JPG, PNG, WEBP (max. 5MB)</small>
+                                </div>
                             </div>
 
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary px-4">
+                            <div class="d-flex gap-3 flex-wrap">
+                                <button type="submit" class="btn btn-primary px-5">
                                     <i class="bi bi-check-lg me-2"></i>Créer le produit
                                 </button>
-                                <a href="@Url.Action("Products", "Admin")" class="btn btn-outline-secondary px-4">Annuler</a>
+                                <a href="#" class="btn btn-outline-secondary px-4">
+                                    <i class="bi bi-x-lg me-2"></i>Annuler
+                                </a>
                             </div>
                         </form>
                     </div>
                 </div>
 
                 <div class="col-lg-4">
-                    <div class="card border-0 shadow-soft rounded-4 p-4 bg-light">
-                        <h6 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Conseils</h6>
-                        <ul class="small text-muted mb-0">
-                            <li class="mb-2">Utilisez un nom clair et descriptif</li>
-                            <li class="mb-2">Ajoutez une photo de qualité</li>
-                            <li class="mb-2">Décrivez les caractéristiques principales</li>
-                            <li>Définissez un seuil d'alerte pour gérer votre stock</li>
-                        </ul>
+                    <div class="sticky-column">
+                        <div class="card-premium tips-card p-4 animate-in animate-delay-2">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="bi bi-lightbulb text-warning"></i>
+                                Conseils pour réussir
+                            </h6>
+                            <ul class="mb-0 p-0" style="list-style: none;">
+                                <li>Utilisez un nom clair et descriptif qui reflète l'identité de votre produit</li>
+                                <li>Ajoutez une photo de haute qualité sur fond neutre pour valoriser votre produit</li>
+                                <li>Décrivez les caractéristiques et l'histoire de votre produit artisanal</li>
+                                <li>Définissez un seuil d'alerte pour ne jamais être en rupture de stock</li>
+                                <li>Vérifiez l'exactitude du prix et de la quantité avant de valider</li>
+                            </ul>
+                        </div>
+
+                        <div class="card-premium p-4 mt-4 animate-in animate-delay-3" style="background: linear-gradient(135deg, rgba(216, 122, 79, 0.05), rgba(229, 200, 136, 0.05));">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="bi bi-star text-warning"></i>
+                                Astuce du jour
+                            </h6>
+                            <p class="small text-muted mb-0">
+                                Les produits avec des descriptions détaillées et des photos de qualité génèrent en moyenne <strong>3x plus de ventes</strong> !
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -161,17 +400,65 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@4.0.0/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        let variantCount = 0;
 
-    <style>
-        :root {
-            --primary: #5A7EB8;
-            --terracotta: #D87A4F;
+        function addVariant() {
+            const container = document.getElementById('variants-container');
+            const index = variantCount;
+            
+            const html = `
+                <div class="variant-item mb-4 position-relative border rounded-3 p-3 bg-light" id="variant-${index}">
+                    <button type="button" class="btn-close position-absolute top-0 end-0 m-2" aria-label="Supprimer" onclick="removeVariant(${index})"></button>
+                    <div class="section-divider my-3">
+                        <span>Variante supplémentaire</span>
+                    </div>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="bi bi-currency-exchange"></i> Prix (MAD)</label>
+                            <input name="Variantes[${index}].prix" type="number" step="0.01" class="form-control" placeholder="0.00" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="bi bi-box"></i> Stock</label>
+                            <input name="Variantes[${index}].quantite" type="number" class="form-control" placeholder="0" required />
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label"><i class="bi bi-rulers"></i> Taille</label>
+                            <input name="Variantes[${index}].taille" type="text" class="form-control" placeholder="Ex: 100ml" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><i class="bi bi-palette"></i> Couleur</label>
+                            <input name="Variantes[${index}].couleur" type="text" class="form-control" placeholder="Ex: Doré" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><i class="bi bi-weight"></i> Poids</label>
+                            <input name="Variantes[${index}].poids" type="text" class="form-control" placeholder="Ex: 100g" />
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mt-1">
+                        <div class="col-12">
+                             <label class="form-label"><i class="bi bi-image"></i> Photo de la variante</label>
+                             <input name="Variantes[${index}].PhotoFile" type="file" class="form-control" accept="image/*" />
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', html);
+            variantCount++;
         }
-        .nav-link { font-weight: 500; font-size: 14px; transition: all 0.2s; }
-        .nav-link.active { background: var(--primary); color: white !important; box-shadow: 0 4px 12px rgba(90, 126, 184, 0.3); }
-        .nav-link:hover:not(.active) { background: #f8f9fa; color: var(--primary) !important; }
-    </style>
+
+        function removeVariant(index) {
+            const element = document.getElementById(`variant-${index}`);
+            if (element) {
+                element.remove();
+            }
+        }
+    </script>
 </body>
 </html>

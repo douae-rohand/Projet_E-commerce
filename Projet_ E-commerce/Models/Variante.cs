@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Http;
 
 namespace Projet__E_commerce.Models
 {
@@ -35,5 +36,8 @@ namespace Projet__E_commerce.Models
         // Navigation properties
         public virtual Produit Produit { get; set; } = null!;
         public virtual ICollection<LigneCommande> LignesCommande { get; set; } = new List<LigneCommande>();
+
+        [NotMapped]
+        public IFormFile? PhotoFile { get; set; }
     }
 }
