@@ -6,6 +6,7 @@ using System.Text.Json;
 
 namespace Projet__E_commerce.Controllers
 {
+    [Route("[controller]/[action]")]
     public class CartController : Controller
     {
         private readonly ApplicationDbContext _db;
@@ -69,11 +70,24 @@ namespace Projet__E_commerce.Controllers
                 await _db.SaveChangesAsync();
             }
 
-            // Find specific variant
-            var variant = await _db.Variantes
-                .FirstOrDefaultAsync(v => v.idP == productId && v.taille == size && v.couleur == color);
+            // Find specific variant or first available
+            var variantQuery = _db.Variantes.Where(v => v.idP == productId);
+            
+            if (!string.IsNullOrEmpty(size))
+                variantQuery = variantQuery.Where(v => v.taille == size);
+            
+            if (!string.IsNullOrEmpty(color))
+                variantQuery = variantQuery.Where(v => v.couleur == color);
 
-            if (variant == null) return NotFound();
+            var variant = await variantQuery.FirstOrDefaultAsync();
+
+            if (variant == null)
+            {
+                // Fallback: just get the first variant for this product
+                variant = await _db.Variantes.FirstOrDefaultAsync(v => v.idP == productId);
+            }
+
+            if (variant == null) return NotFound("Produit ou variante non trouvé.");
 
             // Check if item already exists in the order
             var existingLine = await _db.LignesCommande

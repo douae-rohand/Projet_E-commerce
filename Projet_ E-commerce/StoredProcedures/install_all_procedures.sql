@@ -3,7 +3,7 @@
 -- Projet E-commerce - Authentification
 -- ============================================
 
-USE [cooperative]; -- Remplacez par le nom de votre base de données
+USE [cooperative];
 GO
 
 
@@ -11,8 +11,8 @@ GO
 -- Procédure: sp_inscription_admin
 -- Description: Inscription d'un administrateur de coopérative
 -- ============================================
-IF OBJECT_ID('sp_inscription_admin', 'P') IS NOT NULL
-    DROP PROCEDURE sp_inscription_admin
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'sp_inscription_admin')
+    DROP PROCEDURE sp_inscription_admin;
 GO
 
 CREATE PROCEDURE sp_inscription_admin
@@ -22,7 +22,8 @@ CREATE PROCEDURE sp_inscription_admin
     @localisation NVARCHAR(MAX),
     @ville NVARCHAR(255),
     @logo NVARCHAR(255),
-    @telephone NVARCHAR(100)
+    @telephone NVARCHAR(100),
+    @description NVARCHAR(MAX) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -42,7 +43,8 @@ BEGIN
         INSERT INTO Utilisateurs (email, password, est_actif, created_at, updated_at)
         VALUES (@email, @password, 1, GETDATE(), GETDATE());
 
-        DECLARE @userId INT = SCOPE_IDENTITY();
+        DECLARE @userId INT;
+        SET @userId = SCOPE_IDENTITY();
 
         -- Insertion dans la table Admins
         INSERT INTO Admins (
@@ -52,6 +54,7 @@ BEGIN
             ville,
             logo,
             telephone,
+            description,
             created_at,
             updated_at
         )
@@ -62,6 +65,7 @@ BEGIN
             @ville,
             @logo,
             @telephone,
+            @description,
             GETDATE(),
             GETDATE()
         );
@@ -75,7 +79,8 @@ BEGIN
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
         
-        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        SET @ErrorMessage = ERROR_MESSAGE();
         RAISERROR(@ErrorMessage, 16, 1);
     END CATCH
 END;
@@ -85,8 +90,8 @@ GO
 -- Procédure: sp_inscription_client
 -- Description: Inscription d'un client
 -- ============================================
-IF OBJECT_ID('sp_inscription_client', 'P') IS NOT NULL
-    DROP PROCEDURE sp_inscription_client
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'sp_inscription_client')
+    DROP PROCEDURE sp_inscription_client;
 GO
 
 CREATE PROCEDURE sp_inscription_client
@@ -115,7 +120,8 @@ BEGIN
         INSERT INTO Utilisateurs (email, password, est_actif, created_at, updated_at)
         VALUES (@email, @password, 1, GETDATE(), GETDATE());
 
-        DECLARE @userId INT = SCOPE_IDENTITY();
+        DECLARE @userId INT;
+        SET @userId = SCOPE_IDENTITY();
 
         -- Insertion dans la table Clients
         INSERT INTO Clients (
@@ -146,18 +152,20 @@ BEGIN
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
         
-        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        SET @ErrorMessage = ERROR_MESSAGE();
         RAISERROR(@ErrorMessage, 16, 1);
     END CATCH
 END;
 GO
 
+
 -- ============================================
 -- Procédure: sp_login_utilisateur
 -- Description: Authentification d'un utilisateur
 -- ============================================
-IF OBJECT_ID('sp_login_utilisateur', 'P') IS NOT NULL
-    DROP PROCEDURE sp_login_utilisateur
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'sp_login_utilisateur')
+    DROP PROCEDURE sp_login_utilisateur;
 GO
 
 CREATE PROCEDURE sp_login_utilisateur

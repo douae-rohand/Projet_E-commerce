@@ -1,5 +1,5 @@
 @using Microsoft.AspNetCore.Http
-<header class="sticky-top bg-white bg-opacity-95 border-bottom shadow-soft" style="backdrop-filter: blur(12px);">
+<header class="sticky-top bg-white bg-opacity-95 border-bottom shadow-soft" style="backdrop-filter: blur(12px); z-index: 1050;">
     <div class="container">
         <div class="d-flex align-items-center justify-content-between" style="min-height: 64px;">
             <!-- Logo -->
@@ -18,7 +18,7 @@
                 <a asp-controller="Home" asp-action="Index" class="nav-link-custom">Accueil</a>
                 <a asp-controller="Catalog" asp-action="Index" class="nav-link-custom">Produits</a>
                 <a asp-controller="Cooperatives" asp-action="Index" class="nav-link-custom">Coopératives</a>
-                <a asp-controller="About" asp-action="Index" class="nav-link-custom">A propos</a>
+                <a asp-controller="About" asp-action="Index" class="nav-link-custom">Notre Mission</a>
             </nav>
 
             <!-- Actions -->
@@ -30,17 +30,24 @@
                     </button>
                 </div>
 
-                @if (Context.Session.GetInt32("UserId") != null)
+                @using Microsoft.AspNetCore.Http
+                @{
+                    var userId = Context.Session.GetInt32("UserId");
+                }
+
+                @if (userId != null)
                 {
                     <!-- Cart (Authenticated) -->
-                    <a asp-controller="Cart" asp-action="Index" class="btn btn-ghost btn-icon position-relative">
-                        <i class="bi bi-cart3"></i>
-                        @* <span class="cart-badge">3</span> *@
+                    <a asp-controller="Cart" asp-action="Index" class="btn btn-ghost btn-icon position-relative me-2">
+                        <i class="bi bi-cart3 fs-5"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-terracotta border border-2 border-white" style="font-size: 10px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; padding: 0;">
+                            3
+                        </span>
                     </a>
 
                     <!-- Account (Authenticated) -->
-                    <a asp-controller="Account" asp-action="Profile" class="btn btn-ghost btn-icon">
-                        <i class="bi bi-person"></i>
+                    <a asp-controller="Account" asp-action="UserDashboard" class="btn btn-ghost btn-icon border-0">
+                        <i class="bi bi-person fs-4"></i>
                     </a>
                 }
                 else
@@ -52,7 +59,7 @@
                     </a>
 
                     <!-- Register Button (Not Authenticated) -->
-                    <a asp-controller="Auth" asp-action="Register" class="btn btn-outline-primary px-3 py-2 d-none d-sm-flex">
+                    <a asp-controller="Auth" asp-action="Register" class="btn btn-outline-primary px-3 py-2 d-none d-sm-flex ms-2">
                         <i class="bi bi-person-plus me-2"></i>
                         S'inscrire
                     </a>
@@ -72,12 +79,12 @@
 
         <!-- Search Collapse (Desktop) -->
         <div class="collapse" id="searchCollapse">
-            <div class="d-flex align-items-center gap-2 py-3">
-                <input type="text" class="form-control" placeholder="Huile d'argan, safran..." />
+            <form asp-controller="Catalog" asp-action="Index" method="get" class="d-flex align-items-center gap-2 py-3">
+                <input type="text" name="search" class="form-control" placeholder="Huile d'argan, safran, coopérative..." />
                 <button class="btn btn-ghost btn-icon" type="button" data-bs-toggle="collapse" data-bs-target="#searchCollapse">
                     <i class="bi bi-x"></i>
                 </button>
-            </div>
+            </form>
         </div>
 
         <!-- Mobile Menu -->

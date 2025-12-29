@@ -46,27 +46,36 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const data = await response.json();
+            console.log("n8n Response Data:", data); // DEBUG: Show what n8n actually sent
             removeTyping(typingId);
 
-            // Handle n8n response format
-            // Based on n8n "AI Agent" node, usually it returns an array [ { output: "text" } ] 
-            // or if via Webhook it might be the direct object.
-            let aiText = "";
-            
-            // Aggressive search for content in n8n response
-            if (Array.isArray(data) && data.length > 0) {
-                const first = data[0];
-                aiText = first.output || first.text || first.message || (typeof first === 'string' ? first : "");
-            } else if (typeof data === 'object' && data !== null) {
-                aiText = data.output || data.text || data.message || "";
-                // If it's the raw webhook response object (which we saw in logs), don't show it
-                if (data.headers && data.body) aiText = ""; 
-            } else if (typeof data === 'string') {
-                aiText = data;
+            // Robust search for text content in n8n response
+            function findText(obj) {
+                if (!obj) return "";
+                if (typeof obj === 'string') return obj;
+                if (Array.isArray(obj)) return obj.length > 0 ? findText(obj[0]) : "";
+                
+                // Priority fields for AI agents
+                const priorities = ['output', 'text', 'message', 'response', 'content'];
+                for (const key of priorities) {
+                    if (obj[key] && typeof obj[key] === 'string') return obj[key];
+                    if (obj[key] && typeof obj[key] === 'object') {
+                        const nested = findText(obj[key]);
+                        if (nested) return nested;
+                    }
+                }
+
+                // Fallback: look for any string property
+                for (const key in obj) {
+                    if (typeof obj[key] === 'string' && key !== 'sessionId' && key !== 'requestId') return obj[key];
+                }
+                return "";
             }
 
+            let aiText = findText(data);
+            
             if (!aiText || aiText.trim() === "") {
-                aiText = "L'assistant réfléchit... ou n'a pas pu formuler de réponse. Vérifiez la configuration n8n.";
+                aiText = "L'assistant n'a pas pu formuler de réponse. Vérifiez que votre node 'Respond to Webhook' dans n8n renvoie bien le texte de l'agent.";
             }
 
             addMessage(aiText, 'ai');

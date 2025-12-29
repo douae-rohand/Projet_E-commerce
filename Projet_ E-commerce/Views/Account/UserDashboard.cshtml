@@ -1,4 +1,4 @@
-@model List<Projet__E_commerce.Models.OrderViewModel>
+@model Projet__E_commerce.Models.Client
 @{
     ViewData["Title"] = "Mon Compte - SoukDigital";
 }
@@ -11,28 +11,35 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
     <div class="row g-4">
         <!-- Sidebar -->
         <aside class="col-lg-3">
-            <div class="card border-0 shadow-soft rounded-4 p-3 sticky-top" style="top: 100px;">
+            <div class="card border border-light-subtle rounded-4 p-3 sticky-top" style="top: 100px; z-index: 100; background-color: #fbfbfb;">
                 <div class="d-flex align-items-center gap-3 p-2 mb-4">
                     <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
                         <i class="bi bi-person h4 mb-0 text-primary"></i>
                     </div>
                     <div>
-                        <h6 class="fw-bold mb-0">Ahmed Benali</h6>
-                        <p class="small text-muted mb-0">ahmed.benali@email.com</p>
+                        <h6 class="fw-bold mb-0">@Model.prenom @Model.nom</h6>
+                        <p class="small text-muted mb-0">@Model.Utilisateur.email</p>
                     </div>
                 </div>
                 
                 <nav class="nav flex-column gap-2 dashboard-nav">
                     <a class="nav-link active rounded-3 px-3 py-2 d-flex align-items-center gap-3" href="#profile"><i class="bi bi-person-badge"></i> Mon Profil</a>
                     <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center gap-3" href="#orders"><i class="bi bi-box-seam"></i> Mes Commandes</a>
-                    <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center gap-3" href="#wishlist"><i class="bi bi-heart"></i> Ma Wishlist</a>
+
                     <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center gap-3" href="#addresses"><i class="bi bi-geo-alt"></i> Mes Adresses</a>
                     <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center gap-3" href="#payment"><i class="bi bi-credit-card"></i> Paiement</a>
                     <div class="border-top my-2"></div>
-                    <a class="nav-link text-danger rounded-3 px-3 py-2 d-flex align-items-center gap-3" href="#"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
+                    <a class="nav-link text-danger rounded-3 px-3 py-2 d-flex align-items-center gap-3" asp-controller="Auth" asp-action="Logout"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
                 </nav>
             </div>
         </aside>
@@ -42,56 +49,101 @@
             <!-- Profile Section -->
             <div id="profile" class="dashboard-section card border-0 shadow-soft rounded-4 p-4 p-md-5 mb-4">
                 <h2 class="font-display fw-bold mb-4">Mon Profil</h2>
-                <div class="row g-4 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold">Prénom</label>
-                        <input type="text" class="form-control" value="Ahmed">
+                <form asp-controller="Account" asp-action="UpdateProfile" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Prénom</label>
+                            <input type="text" name="prenom" class="form-control profile-input" value="@Model.prenom" readonly required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nom</label>
+                            <input type="text" name="nom" class="form-control profile-input" value="@Model.nom" readonly required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Email</label>
+                            <input type="email" class="form-control" value="@Model.Utilisateur.email" readonly disabled>
+                            <div class="form-text small">L'email ne peut pas être modifié.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Téléphone</label>
+                            <input type="tel" name="telephone" class="form-control profile-input" value="@Model.telephone" readonly>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold">Nom</label>
-                        <input type="text" class="form-control" value="Benali">
+                    <div class="d-flex gap-3 mt-2">
+                        <button type="button" id="btnEditProfile" class="btn btn-primary px-5 py-2 rounded-pill fw-bold">
+                            Modifier le profil
+                        </button>
+                        <button type="submit" id="btnSaveProfile" class="btn btn-primary px-5 py-2 rounded-pill fw-bold d-none">
+                            Sauvegarder
+                        </button>
+                        <button type="button" id="btnCancelEdit" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-bold d-none">
+                            Annuler
+                        </button>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold">Email</label>
-                        <input type="email" class="form-control" value="ahmed.benali@email.com">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold">Téléphone</label>
-                        <input type="tel" class="form-control" value="+212 612 345 678">
-                    </div>
-                </div>
-                <button class="btn btn-primary px-5 py-3 rounded-pill fw-bold">Sauvegarder</button>
+                </form>
             </div>
 
             <!-- Orders Section -->
             <div id="orders" class="dashboard-section card border-0 shadow-soft rounded-4 p-4 p-md-5 mb-4 d-none">
                 <h2 class="font-display fw-bold mb-4">Mes Commandes</h2>
-                <div class="d-flex flex-column gap-3">
-                    @if (Model != null && Model.Any())
-                    {
-                        @foreach (var order in Model) {
+                
+                @if (Model.Commandes == null || !Model.Commandes.Any())
+                {
+                    <div class="text-center py-5">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                            <i class="bi bi-box-seam h2 mb-0 text-muted"></i>
+                        </div>
+                        <h5 class="fw-bold">Aucune commande pour le moment</h5>
+                        <p class="text-muted">Découvrez nos produits et faites votre premier achat !</p>
+                        <a asp-controller="Catalog" asp-action="Index" class="btn btn-primary rounded-pill px-4 mt-2">Voir le catalogue</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var order in Model.Commandes.OrderByDescending(o => o.created_at))
+                        {
+                            string statusLabel = order.statut;
+                            string statusClass = "bg-secondary-subtle text-secondary";
+
+                            switch (order.statut.ToLower())
+                            {
+                                case "en_attente":
+                                    statusLabel = "En attente";
+                                    statusClass = "bg-warning-subtle text-warning";
+                                    break;
+                                case "payee":
+                                    statusLabel = "Payée";
+                                    statusClass = "bg-info-subtle text-info";
+                                    break;
+                                case "expediee":
+                                    statusLabel = "Expédiée";
+                                    statusClass = "bg-primary-subtle text-primary";
+                                    break;
+                                case "livree":
+                                    statusLabel = "Livrée";
+                                    statusClass = "bg-success-subtle text-success";
+                                    break;
+                                case "annulee":
+                                    statusLabel = "Annulée";
+                                    statusClass = "bg-danger-subtle text-danger";
+                                    break;
+                            }
+
                             <div class="card bg-light border-0 rounded-4 p-4 d-flex flex-row justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="fw-bold mb-1">@order.Id</h6>
-                                    <p class="small text-muted mb-0">@order.Date • @order.Items article(s)</p>
+                                    <h6 class="fw-bold mb-1">Commande #@order.idCommande</h6>
+                                    <p class="small text-muted mb-0">@order.created_at.ToString("dd MMM yyyy") • @order.LignesCommande.Count article(s)</p>
                                 </div>
                                 <div class="text-end">
-                                    <span class="badge rounded-pill @order.StatusClass px-3 py-2 mb-2">@order.Status</span>
-                                    <h6 class="fw-bold mb-0">@order.Total.ToString("N2") MAD</h6>
+                                    <span class="badge rounded-pill @statusClass px-3 py-2 mb-2">@statusLabel</span>
+                                    <h6 class="fw-bold mb-0">@order.prixTotal.ToString("N2") MAD</h6>
                                 </div>
                             </div>
                         }
-                    }
-                    else
-                    {
-                        <div class="text-center py-5">
-                            <i class="bi bi-cart-x display-1 text-muted opacity-50 mb-3"></i>
-                            <h5>Aucune commande pour le moment</h5>
-                            <p class="text-muted">Explorez notre catalogue et soutenez les coopératives !</p>
-                            <a asp-controller="Catalog" asp-action="Index" class="btn btn-primary rounded-pill px-4 mt-2">Découvrir les produits</a>
-                        </div>
-                    }
-                </div>
+                    </div>
+                }
             </div>
 
             <!-- More sections can be added or handled via JS -->
@@ -103,15 +155,17 @@
     .dashboard-nav .nav-link { 
         color: var(--bs-gray-600);
         font-weight: 500;
+        padding: 0.75rem 1rem !important;
         transition: all 0.2s;
     }
     .dashboard-nav .nav-link:hover { 
-        background-color: var(--bs-gray-100);
-        color: var(--primary);
+        background-color: rgba(0, 61, 142, 0.03);
+        color: var(--majorelle);
     }
     .dashboard-nav .nav-link.active { 
-        background-color: var(--primary);
-        color: white;
+        background-color: rgba(0, 61, 142, 0.05);
+        color: var(--majorelle);
+        font-weight: 600;
     }
     .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1) !important; }
     .bg-primary-subtle { background-color: rgba(90, 126, 184, 0.1) !important; }
@@ -119,10 +173,13 @@
 </style>
 
 <script>
-    // Simple logic to switch between dashboard sections
+    // Logic to toggle between dashboard sections
     document.querySelectorAll('.dashboard-nav .nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
-            const targetId = this.getAttribute('href').substring(1);
+            const href = this.getAttribute('href');
+            if (!href || href === '#' || href.startsWith('/')) return; // Allow normal links like Logout
+
+            const targetId = href.substring(1);
             if (!targetId) return;
             
             e.preventDefault();
@@ -140,5 +197,25 @@
                 }
             });
         });
+    });
+
+    // Profile Edit Mode Toggle
+    const btnEdit = document.getElementById('btnEditProfile');
+    const btnSave = document.getElementById('btnSaveProfile');
+    const btnCancel = document.getElementById('btnCancelEdit');
+    const profileInputs = document.querySelectorAll('.profile-input');
+
+    btnEdit.addEventListener('click', () => {
+        profileInputs.forEach(input => input.removeAttribute('readonly'));
+        btnEdit.classList.add('d-none');
+        btnSave.classList.remove('d-none');
+        btnCancel.classList.remove('d-none');
+    });
+
+    btnCancel.addEventListener('click', () => {
+        profileInputs.forEach(input => input.setAttribute('readonly', true));
+        btnEdit.classList.remove('d-none');
+        btnSave.classList.add('d-none');
+        btnCancel.classList.add('d-none');
     });
 </script>

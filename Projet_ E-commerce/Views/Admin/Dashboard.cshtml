@@ -1,5 +1,6 @@
+@model Projet__E_commerce.Models.AdminDashboardViewModel
 @{
-    Layout = null; // Admin dashboards often have their own sidebar layout
+    Layout = null;
     ViewData["Title"] = "Espace Coopérative - SoukDigital";
 }
 
@@ -31,13 +32,10 @@
             </div>
             
             <nav class="nav flex-column p-3 gap-1">
-                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="#"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="#"><i class="bi bi-box-seam"></i> Produits</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="#"><i class="bi bi-cart3"></i> Commandes</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="#"><i class="bi bi-people"></i> Membres</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="#"><i class="bi bi-tag"></i> Catégories</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="#"><i class="bi bi-bar-chart"></i> Statistiques</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="#"><i class="bi bi-gear"></i> Paramètres</a>
+                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Dashboard", "Admin")"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Products", "Admin")"><i class="bi bi-box-seam"></i> Produits</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Orders", "Admin")"><i class="bi bi-cart3"></i> Commandes</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Profile", "Admin")"><i class="bi bi-gear"></i> Profil</a>
             </nav>
 
             <div class="mt-auto p-3 border-top position-absolute bottom-0 w-100">
@@ -63,12 +61,11 @@
             }
             <header class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-4 mb-5">
                 <div>
-                    <h1 class="font-display fw-bold mb-1">Coopérative Tissaliwine</h1>
-                    <p class="text-muted mb-0 small"><i class="bi bi-geo-alt me-1"></i> Souss-Massa, Maroc</p>
+                    <h1 class="font-display fw-bold mb-1">@Model.CooperativeName</h1>
+                    <p class="text-muted mb-0 small"><i class="bi bi-geo-alt me-1"></i> @Model.Location</p>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-dark rounded-3 px-4 py-2 small fw-bold"><i class="bi bi-download me-2"></i> Exporter</button>
-                    <button class="btn btn-primary rounded-3 px-4 py-2 small fw-bold shadow-soft"><i class="bi bi-plus-lg me-2"></i> Nouveau produit</button>
+                    <a href="@Url.Action("CreateProduct", "Admin")" class="btn btn-primary rounded-3 px-4 py-2 small fw-bold shadow-soft"><i class="bi bi-plus-lg me-2"></i> Nouveau produit</a>
                 </div>
             </header>
 
@@ -80,8 +77,11 @@
                             <p class="text-muted small fw-bold text-uppercase mb-0">Ventes du mois</p>
                             <div class="text-primary"><i class="bi bi-graph-up-arrow"></i></div>
                         </div>
-                        <h3 class="fw-bold mb-2">45,200 MAD</h3>
-                        <p class="text-success small fw-bold mb-0"><i class="bi bi-arrow-up-right me-1"></i> +18% vs mois dernier</p>
+                        <h3 class="fw-bold mb-2">@Model.VentesMois.ToString("N2") MAD</h3>
+                        <p class="@(Model.VentesPourcentage >= 0 ? "text-success" : "text-danger") small fw-bold mb-0">
+                            <i class="bi bi-arrow-@(Model.VentesPourcentage >= 0 ? "up" : "down")-right me-1"></i> 
+                            @Model.VentesPourcentage.ToString("N1")% vs mois dernier
+                        </p>
                     </div>
                 </div>
                 <div class="col-sm-6 col-xl-3">
@@ -90,8 +90,11 @@
                             <p class="text-muted small fw-bold text-uppercase mb-0">Commandes</p>
                             <div class="text-primary"><i class="bi bi-cart3"></i></div>
                         </div>
-                        <h3 class="fw-bold mb-2">124</h3>
-                        <p class="text-success small fw-bold mb-0"><i class="bi bi-arrow-up-right me-1"></i> +12% vs mois dernier</p>
+                        <h3 class="fw-bold mb-2">@Model.CommandesMois</h3>
+                        <p class="@(Model.CommandesPourcentage >= 0 ? "text-success" : "text-danger") small fw-bold mb-0">
+                            <i class="bi bi-arrow-@(Model.CommandesPourcentage >= 0 ? "up" : "down")-right me-1"></i> 
+                            @Model.CommandesPourcentage.ToString("N1")% vs mois dernier
+                        </p>
                     </div>
                 </div>
                 <div class="col-sm-6 col-xl-3">
@@ -100,20 +103,11 @@
                             <p class="text-muted small fw-bold text-uppercase mb-0">Produits actifs</p>
                             <div class="text-primary"><i class="bi bi-box-seam"></i></div>
                         </div>
-                        <h3 class="fw-bold mb-2">48</h3>
-                        <p class="text-success small fw-bold mb-0"><i class="bi bi-plus-circle me-1"></i> +3 nouveaux</p>
+                        <h3 class="fw-bold mb-2">@Model.ProduitsActifs</h3>
+                        <p class="text-muted small fw-bold mb-0">Produits disponibles</p>
                     </div>
                 </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
-                        <div class="d-flex justify-content-between mb-3">
-                            <p class="text-muted small fw-bold text-uppercase mb-0">Membres actifs</p>
-                            <div class="text-primary"><i class="bi bi-people"></i></div>
-                        </div>
-                        <h3 class="fw-bold mb-2">25</h3>
-                        <p class="text-muted small fw-bold mb-0">Statut stable</p>
-                    </div>
-                </div>
+
             </div>
 
             <div class="row g-4 mb-5">
@@ -136,20 +130,25 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @{
-                                        var recentOrders = new OrderViewModel[] {
-                                            new OrderViewModel { Id = "#CO-2024-089", Name = "Fatima Benali", Status = "Expédiée", Total = 540, StatusClass = "bg-primary-subtle text-primary" },
-                                            new OrderViewModel { Id = "#CO-2024-088", Name = "Pierre Dupont", Status = "En préparation", Total = 190, StatusClass = "bg-warning-subtle text-warning" },
-                                            new OrderViewModel { Id = "#CO-2024-087", Name = "Sarah Miller", Status = "Livrée", Total = 850, StatusClass = "bg-success-subtle text-success" }
-                                        };
+                                    @if (Model.RecentOrders.Any())
+                                    {
+                                        @foreach (var order in Model.RecentOrders)
+                                        {
+                                            <tr>
+                                                <td class="px-3 py-3 fw-bold">@order.NumeroCommande</td>
+                                                <td class="px-3 py-3">@order.NomClient</td>
+                                                <td class="px-3 py-3"><span class="badge rounded-pill @order.StatusClass px-3 py-2">@order.StatusLabel</span></td>
+                                                <td class="px-3 py-3 fw-bold">@order.PrixTotal.ToString("N2") MAD</td>
+                                                <td class="px-3 py-3 text-end">
+                                                    <a href="@Url.Action("Orders", "Admin")" class="btn btn-light btn-sm rounded-3">Voir</a>
+                                                </td>
+                                            </tr>
+                                        }
                                     }
-                                    @foreach (var order in recentOrders) {
+                                    else
+                                    {
                                         <tr>
-                                            <td class="px-3 py-3 fw-bold">@order.Id</td>
-                                            <td class="px-3 py-3">@order.Name</td>
-                                            <td class="px-3 py-3"><span class="badge rounded-pill @order.StatusClass px-3 py-2">@order.Status</span></td>
-                                            <td class="px-3 py-3 fw-bold">@order.Total.ToString("N0") MAD</td>
-                                            <td class="px-3 py-3 text-end"><button class="btn btn-light btn-sm rounded-circle"><i class="bi bi-three-dots-vertical"></i></button></td>
+                                            <td colspan="5" class="text-center py-4 text-muted">Aucune commande récente</td>
                                         </tr>
                                     }
                                 </tbody>
@@ -163,24 +162,25 @@
                     <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
                         <h5 class="fw-bold mb-4">Meilleures ventes</h5>
                         <div class="d-flex flex-column gap-4">
-                            @{
-                                var topProducts = new ProductViewModel[] {
-                                    new ProductViewModel { Name = "Huile d'Argan Bio", Reviews = 156, Price = 28080 },
-                                    new ProductViewModel { Name = "Amlou aux Amandes", Reviews = 98, Price = 9310 },
-                                    new ProductViewModel { Name = "Pack Beauté Argan", Reviews = 45, Price = 13500 }
-                                };
+                            @if (Model.TopProducts.Any())
+                            {
+                                @foreach (var p in Model.TopProducts)
+                                {
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-3 bg-sable p-2 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                            <i class="bi bi-leaf text-terracotta"></i>
+                                        </div>
+                                        <div class="flex-grow-1 overflow-hidden">
+                                            <h6 class="fw-bold mb-1 text-truncate">@p.NomP</h6>
+                                            <p class="small text-muted mb-0">@p.NombreVentes ventes</p>
+                                        </div>
+                                        <p class="fw-bold mb-0 small">@p.RevenuTotal.ToString("N2") MAD</p>
+                                    </div>
+                                }
                             }
-                            @foreach (var p in topProducts) {
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="rounded-3 bg-sable p-2 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                        <i class="bi bi-leaf text-terracotta"></i>
-                                    </div>
-                                    <div class="flex-grow-1 overflow-hidden">
-                                        <h6 class="fw-bold mb-1 text-truncate">@p.Name</h6>
-                                        <p class="small text-muted mb-0">@p.Reviews ventes</p>
-                                    </div>
-                                    <p class="fw-bold mb-0 small">@p.Price.ToString("N0") MAD</p>
-                                </div>
+                            else
+                            {
+                                <p class="text-muted text-center">Aucune vente enregistrée</p>
                             }
                         </div>
                     </div>

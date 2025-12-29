@@ -27,18 +27,22 @@ namespace Projet__E_commerce.Controllers
             {
                 var client = _httpClientFactory.CreateClient();
                 
-                // n8n Webhook URL provided by the user
-                var webhookUrl = "http://localhost:5678/webhook-test/3dc65d23-466f-47a6-828e-e3f4f5c4e0fd";
+                // Get webhook URL from configuration
+                var baseUrl = _configuration["N8n:WebhookUrl"] ?? "https://shopitri.app.n8n.cloud/webhook/3dc65d23-466f-47a6-828e-e3f4f5c4e0fd";
+                var sessionId = HttpContext.Session.Id;
+                var webhookUrl = $"{baseUrl}?sessionId={sessionId}";
 
                 // Force session initialization to get a stable ID
-                if (string.IsNullOrEmpty(HttpContext.Session.GetString("_SessionInit")))
+                if (string.IsNullOrEmpty(HttpContext.Session.GetString("_SessionStarted")))
                 {
-                    HttpContext.Session.SetString("_SessionInit", "true");
+                    HttpContext.Session.SetString("_SessionStarted", "true");
                 }
+                await HttpContext.Session.CommitAsync();
 
                 var n8nRequest = new
                 {
                     chatInput = request.Message,
+                    query = request.Message, // Some n8n nodes expect 'query' by default
                     sessionId = HttpContext.Session.Id
                 };
 

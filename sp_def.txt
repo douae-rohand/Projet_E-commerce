@@ -1,0 +1,16 @@
+definition                                                                                                                                                                                                                                                      
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE   PROCEDURE sp_login_utilisateur
+    @email NVARCHAR(100),
+    @password NVARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Nettoyer les paramÃ¨tres
+    SET @email = LTRIM(RTRIM(@email));
+    SET @password = LTRIM(RTRIM(@password));
+
+    
+
+(1 lignes affectées)

@@ -9,6 +9,27 @@
   --text-muted: #6c757d;
 }
 
+/* Spacing Utilities */
+.py-10 {
+  padding-top: 5rem !important;
+  padding-bottom: 5rem !important;
+}
+
+.py-15 {
+  padding-top: 7.5rem !important;
+  padding-bottom: 7.5rem !important;
+}
+
+.py-20 {
+  padding-top: 10rem !important;
+  padding-bottom: 10rem !important;
+}
+
+/* Border Radius Utilities */
+.rounded-6 {
+  border-radius: 2.5rem !important;
+}
+
 /* Animations */
 @keyframes fadeInUp {
   from {
@@ -729,6 +750,98 @@ header+* {
 
 .newsletter-avatar:first-child {
   margin-left: 0;
+}
+
+/* Layout Boilerplate Styles */
+a.navbar-brand {
+  white-space: normal;
+  text-align: center;
+  word-break: break-all;
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show>.nav-link {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+.box-shadow {
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+
+button.accept-policy {
+  font-size: 1rem;
+  line-height: inherit;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;
+}
+
+/* Color & Background Utilities */
+.text-terracotta {
+  color: #C05522 !important;
+}
+
+.text-sable {
+  color: #FFB35B !important;
+}
+
+.text-majorelle {
+  color: #003D8E !important;
+}
+
+.text-ciel {
+  color: #A3C6D3 !important;
+}
+
+.text-pastel-blue {
+  color: #89CFF0 !important;
+}
+
+.bg-terracotta {
+  background-color: var(--terracotta) !important;
+}
+
+.bg-majorelle {
+  background-color: var(--majorelle) !important;
+}
+
+.bg-sable {
+  background-color: var(--sable) !important;
+}
+
+.bg-terracotta-10 {
+  background-color: rgba(192, 85, 34, 0.1) !important;
+}
+
+.bg-primary-10 {
+  background-color: rgba(129, 178, 154, 0.1) !important;
+}
+
+.bg-sable-20 {
+  background-color: rgba(255, 179, 91, 0.2) !important;
+}
+
+.bg-ciel-30 {
+  background-color: rgba(163, 198, 211, 0.3) !important;
+}
+
+.bg-dark-10 {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.rounded-6 {
+  border-radius: 2.5rem !important;
+}
+
+.rounded-7 {
+  border-radius: 3.5rem !important;
 }
 
 /* AI Assistant Styles */

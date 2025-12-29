@@ -20,22 +20,6 @@ namespace Projet__E_commerce.Controllers
         }
     }
 
-    public class CooperativesController : Controller
-    {
-        public IActionResult Index()
-        {
-            return Content("Coming soon");
-        }
-    }
-
-    public class AboutController : Controller
-    {
-        public IActionResult Index()
-        {
-            return Content("Coming soon");
-        }
-    }
-
     public class CategoriesController : Controller
     {
         public IActionResult Index()

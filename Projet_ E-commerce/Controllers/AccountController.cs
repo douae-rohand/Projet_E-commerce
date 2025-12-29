@@ -1,14 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Projet__E_commerce.Data;
 using Projet__E_commerce.Models;
 
 namespace Projet__E_commerce.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly Projet__E_commerce.Data.ApplicationDbContext _db;
+        private readonly ApplicationDbContext _db;
 
-        public AccountController(Projet__E_commerce.Data.ApplicationDbContext db)
+        public AccountController(ApplicationDbContext db)
         {
             _db = db;
         }
@@ -21,32 +22,71 @@ namespace Projet__E_commerce.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null) return RedirectToAction("Login", "Auth");
-
-            // Fetch orders
-            var orders = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(
-                _db.Commandes
-                .Include(c => c.LignesCommande)
-                .Where(c => c.idClient == userId)
-                .OrderByDescending(c => c.created_at)
-            );
-
-            // Map to ViewModel
-            var model = orders.Select(o => new Projet__E_commerce.Models.OrderViewModel
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
             {
-                Id = "CMD-" + o.idCommande.ToString("D5"),
-                Date = o.created_at.ToString("dd MMM yyyy"),
-                Status = o.statut,
-                Total = o.prixTotal,
-                Items = o.LignesCommande.Sum(l => l.quantite),
-                StatusClass = GetStatusClass(o.statut)
-            }).ToList();
+                return RedirectToAction("Login", "Auth");
+            }
 
-            return View(model);
+            var client = await _db.Clients
+                .Include(c => c.Utilisateur)
+                .Include(c => c.Commandes)
+                    .ThenInclude(o => o.LignesCommande)
+                .Include(c => c.AdressesLivraison)
+                .FirstOrDefaultAsync(c => c.id == userId.Value);
+
+            if (client == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            return View(client);
         }
 
-        private string GetStatusClass(string status)
+        [HttpPost("Account/UpdateProfile")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfile(string prenom, string nom, string telephone)
+        {
+            // Vérifier si l'utilisateur est Client
+            if (HttpContext.Session.GetString("UserRole") != "CLIENT")
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            try
+            {
+                var client = await _db.Clients.FirstOrDefaultAsync(c => c.id == userId.Value);
+                if (client == null)
+                {
+                    TempData["ErrorMessage"] = "Client non trouvé.";
+                    return RedirectToAction("UserDashboard");
+                }
+
+                // Mise à jour des champs
+                client.prenom = prenom?.Trim();
+                client.nom = nom?.Trim();
+                client.telephone = telephone?.Trim();
+                client.updated_at = DateTime.Now;
+
+                _db.Entry(client).State = EntityState.Modified;
+                await _db.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Votre profil a été mis à jour avec succès.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Une erreur est survenue lors de la mise à jour : " + ex.Message;
+            }
+
+            return RedirectToAction("UserDashboard");
+        }
+         private string GetStatusClass(string status)
         {
             return status.ToLower() switch
             {
@@ -58,6 +98,6 @@ namespace Projet__E_commerce.Controllers
                 "annule" => "bg-danger-subtle text-danger",
                 _ => "bg-light text-muted"
             };
-        }
     }
+}
 }
