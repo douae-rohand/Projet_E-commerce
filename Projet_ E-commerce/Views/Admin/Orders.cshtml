@@ -64,7 +64,6 @@
     
     <div class="d-flex">
         <!-- Sidebar -->
-        <!-- Sidebar -->
         <partial name="_AdminSidebar" />
 
         <!-- Main Content -->
@@ -127,7 +126,7 @@
                     Livrées
                 </a>
                 <a href="@Url.Action("Orders", "Admin", new { statut = "annule" })" class="btn rounded-pill px-4 py-2 @(currentFilter == "annule" ? "btn-danger text-white shadow-lg" : "btn-light shadow-sm bg-white text-muted hover-lift")">
-                    Annulées
+                    Non livrées
                 </a>
             </div>
 
