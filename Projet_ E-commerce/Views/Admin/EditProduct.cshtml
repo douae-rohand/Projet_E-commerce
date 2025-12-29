@@ -14,14 +14,50 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-animation.css" asp-append-version="true" />
+    
+    <style>
+        /* Custom styles for this page */
+        .glass-input {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .stagger-1 { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; animation-delay: 0.1s; }
+        .stagger-2 { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; animation-delay: 0.2s; }
+        .stagger-3 { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; animation-delay: 0.3s; }
+        
+        @@keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .variant-card {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        .variant-card:hover {
+            border-left-color: #cca460;
+            background: rgba(255,255,255,0.6);
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body class="admin-bg">
+    <div class="bg-orb-3"></div>
+    
     <div class="d-flex">
         <!-- Sidebar -->
-        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block" style="width: 280px;">
+        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block shadow-sm" style="width: 280px; z-index: 1000;">
             <div class="p-4 border-bottom">
                 <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
-                    <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                     <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
                         <i class="bi bi-flower1 text-white h5 mb-0"></i>
                     </div>
                     <div>
@@ -32,52 +68,77 @@
             </div>
             
             <nav class="nav flex-column p-3 gap-1">
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Dashboard", "Admin")"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
-                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Products", "Admin")"><i class="bi bi-box-seam"></i> Produits</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Orders", "Admin")"><i class="bi bi-cart3"></i> Commandes</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Profile", "Admin")"><i class="bi bi-gear"></i> Profil</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Dashboard", "Admin")"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
+                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 shadow-sm" href="@Url.Action("Products", "Admin")"><i class="bi bi-box-seam"></i> Produits</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Orders", "Admin")"><i class="bi bi-cart3"></i> Commandes</a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Profile", "Admin")"><i class="bi bi-gear"></i> Profil</a>
+                <div class="mt-auto pt-4 border-top">
+                    <a class="nav-link text-danger rounded-3 d-flex align-items-center gap-3 py-2 px-3 hover-effect" href="@Url.Action("Logout", "Account")">
+                        <i class="bi bi-box-arrow-right"></i> Déconnexion
+                    </a>
+                </div>
             </nav>
         </aside>
 
         <!-- Main Content -->
         <main class="flex-grow-1 p-4 p-md-5">
-            <header class="mb-5">
+            <header class="mb-5 stagger-1">
                 <div class="d-flex align-items-center gap-3 mb-2">
-                    <a href="@Url.Action("Products", "Admin")" class="btn btn-light rounded-circle">
+                    <a href="@Url.Action("Products", "Admin")" class="btn btn-light rounded-circle shadow-sm hover-lift" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                         <i class="bi bi-arrow-left"></i>
                     </a>
                     <div>
-                        <h1 class="font-display fw-bold mb-1">Modifier Produit</h1>
-                        <p class="text-muted mb-0 small">@Model.NomP</p>
+                        <h1 class="font-display fw-bold mb-1 text-dark">Modifier Produit</h1>
+                        <p class="text-muted mb-0 small">Mise à jour des informations pour @Model.NomP</p>
                     </div>
                 </div>
             </header>
 
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="card border-0 shadow-soft rounded-4 p-4 mb-4">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm stagger-1" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm stagger-1" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="row g-4">
+                <!-- Left Column: Product Info -->
+                <div class="col-lg-8 stagger-2">
+                    <div class="card card-premium border-0 rounded-4 p-4 position-relative overflow-hidden h-100">
+                        <div class="position-absolute top-0 end-0 p-3 opacity-25">
+                           <i class="bi bi-file-text display-1 text-secondary"></i>
+                        </div>
+                        
+                        <h4 class="font-display fw-bold mb-4">Informations Générales</h4>
+                        
                         <form method="post" asp-action="EditProduct">
                             @Html.AntiForgeryToken()
                             <input type="hidden" asp-for="IdP" />
                             <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3"></div>
 
-                            <h5 class="fw-bold mb-4">Informations du produit</h5>
-
-                            <div class="mb-3">
-                                <label asp-for="NomP" class="form-label fw-bold">Nom du produit *</label>
-                                <input asp-for="NomP" class="form-control" />
+                            <div class="mb-4">
+                                <label asp-for="NomP" class="form-label fw-bold small text-uppercase text-muted">Nom du produit</label>
+                                <input asp-for="NomP" class="form-control form-control-lg glass-input rounded-3 shadow-none" placeholder="Ex: Huile d'Argan Bio" />
                                 <span asp-validation-for="NomP" class="text-danger small"></span>
                             </div>
 
-                            <div class="mb-3">
-                                <label asp-for="Description" class="form-label fw-bold">Description</label>
-                                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <div class="mb-4">
+                                <label asp-for="Description" class="form-label fw-bold small text-uppercase text-muted">Description</label>
+                                <textarea asp-for="Description" class="form-control glass-input rounded-3 shadow-none" rows="5" placeholder="Description détaillée du produit..."></textarea>
                             </div>
 
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="IdC" class="form-label fw-bold">Catégorie *</label>
-                                    <select asp-for="IdC" class="form-select">
+                                <div class="col-md-6 mb-4">
+                                    <label asp-for="IdC" class="form-label fw-bold small text-uppercase text-muted">Catégorie</label>
+                                    <select asp-for="IdC" class="form-select form-select-lg glass-input rounded-3 shadow-none" style="cursor: pointer;">
                                         @foreach (var cat in Model.Categories)
                                         {
                                             <option value="@cat.idC">@cat.nom</option>
@@ -86,77 +147,258 @@
                                     <span asp-validation-for="IdC" class="text-danger small"></span>
                                 </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="SeuilAlerte" class="form-label fw-bold">Seuil d'alerte stock</label>
-                                    <input asp-for="SeuilAlerte" type="number" class="form-control" />
+                                <div class="col-md-6 mb-4">
+                                    <label asp-for="SeuilAlerte" class="form-label fw-bold small text-uppercase text-muted">Seuil d'alerte stock</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text glass-input border-end-0 rounded-start-3"><i class="bi bi-bell"></i></span>
+                                        <input asp-for="SeuilAlerte" type="number" class="form-control form-control-lg glass-input border-start-0 rounded-end-3 shadow-none" />
+                                    </div>
                                 </div>
                             </div>
+                            
+                            <hr class="my-4 border-secondary opacity-25">
 
-                            <div class="mb-3">
-                                <label asp-for="Statut" class="form-label fw-bold">Statut</label>
-                                <select asp-for="Statut" class="form-select">
-                                    <option value="active">Actif</option>
-                                    <option value="inactive">Inactif</option>
-                                </select>
-                            </div>
-
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary px-4">
-                                    <i class="bi bi-check-lg me-2"></i>Enregistrer
+                            <div class="d-flex gap-3">
+                                <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2 px-5 py-2 rounded-pill shadow-sm hover-lift">
+                                    <i class="bi bi-check-lg"></i>
+                                    <span>Enregistrer les modifications</span>
                                 </button>
-                                <a href="@Url.Action("Products", "Admin")" class="btn btn-outline-secondary px-4">Annuler</a>
+                                <a href="@Url.Action("Products", "Admin")" class="btn btn-outline-secondary px-4 py-2 rounded-pill hover-effect border-0">Annuler</a>
                             </div>
                         </form>
                     </div>
+                </div>
 
-                    <!-- Variantes Section -->
-                    @if (Model.Variantes.Any())
-                    {
-                        <div class="card border-0 shadow-soft rounded-4 p-4">
-                            <h5 class="fw-bold mb-4">Variantes existantes</h5>
-                            <div class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Prix</th>
-                                            <th>Taille</th>
-                                            <th>Couleur</th>
-                                            <th>Stock</th>
-                                            <th>Poids</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                <!-- Right Column: Status Card -->
+                <div class="col-lg-4 stagger-2" style="animation-delay: 0.3s;">
+                    <div class="card card-premium border-0 rounded-4 p-4 mb-4">
+                         <h5 class="font-display fw-bold mb-3">État du Produit</h5>
+                         <div class="d-flex align-items-center justify-content-between p-3 rounded-3 mb-3 bg-light bg-opacity-50 border">
+                             <div>
+                                 <span class="small text-muted text-uppercase fw-bold d-block mb-1">Statut actuel</span>
+                                 @if(Model.Statut == "active") {
+                                     <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 rounded-pill">
+                                         <i class="bi bi-check-circle-fill me-1"></i> Actif
+                                     </span>
+                                 } else {
+                                     <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary px-3 py-2 rounded-pill">
+                                         <i class="bi bi-pause-circle-fill me-1"></i> Inactif
+                                     </span>
+                                 }
+                             </div>
+                             <form method="post" asp-action="ToggleProductStatus" asp-route-id="@Model.IdP" class="ms-auto">
+                                 @Html.AntiForgeryToken()
+                                 @if(Model.Statut == "active") {
+                                     <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" title="Désactiver">
+                                         <i class="bi bi-power"></i> Désactiver
+                                     </button>
+                                 } else {
+                                      <button type="submit" class="btn btn-sm btn-outline-success rounded-pill" title="Activer">
+                                         <i class="bi bi-power"></i> Activer
+                                     </button>
+                                 }
+                             </form>
+                         </div>
+                         
+                         <div class="d-flex align-items-center gap-3 mb-2 text-muted">
+                             <i class="bi bi-layers"></i>
+                             <span>@Model.Variantes.Count variantes</span>
+                         </div>
+                         <div class="d-flex align-items-center gap-3 text-muted">
+                             <i class="bi bi-box-seam"></i>
+                             <span>@Model.StockTotal en stock (total)</span>
+                         </div>
+                    </div>
+
+                    <!-- Add Variant Mini Form -->
+                    <div class="card card-premium border-0 rounded-4 p-4 bg-terracotta bg-opacity-10">
+                        <h5 class="font-display fw-bold mb-3 text-terracotta">Ajouter une variante</h5>
+                        <form method="post" asp-action="AddVariant" enctype="multipart/form-data">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@Model.IdP" />
+                            
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <input name="prix" type="number" step="0.01" class="form-control glass-input form-control-sm rounded-3" placeholder="Prix (MAD)" required />
+                                </div>
+                                <div class="col-6">
+                                    <input name="quantite" type="number" class="form-control glass-input form-control-sm rounded-3" placeholder="Qté" min="0" required />
+                                </div>
+                                <div class="col-6">
+                                    <input name="taille" class="form-control glass-input form-control-sm rounded-3" placeholder="Taille" />
+                                </div>
+                                <div class="col-6">
+                                    <input name="couleur" class="form-control glass-input form-control-sm rounded-3" placeholder="Couleur" />
+                                </div>
+                                <div class="col-12">
+                                    <input name="poids" class="form-control glass-input form-control-sm rounded-3" placeholder="Poids (ex: 200g)" />
+                                </div>
+                                 <div class="col-12">
+                                    <label class="form-label small text-muted mb-1">Photo</label>
+                                    <input name="photoFile" type="file" accept="image/*" class="form-control glass-input form-control-sm rounded-3" />
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-dark w-100 rounded-pill shadow-sm mt-2">
+                                <i class="bi bi-plus-lg me-1"></i> Ajouter
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Bottom Row: Variants Management -->
+                <div class="col-12 stagger-3">
+                    <div class="card card-premium border-0 rounded-4 p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                            <h4 class="font-display fw-bold mb-0">Gestion des Variantes</h4>
+                            <span class="badge bg-light text-dark border shadow-sm">@Model.Variantes.Count variantes existantes</span>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" style="border-collapse: separate; border-spacing: 0 10px;">
+                                <thead class="text-uppercase small text-muted">
+                                    <tr>
+                                        <th class="border-0 ps-3">Aperçu</th>
+                                        <th class="border-0">Détails</th>
+                                        <th class="border-0">Stock</th>
+                                        <th class="border-0 text-end pe-3">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Variantes.Any())
+                                    {
                                         @foreach (var v in Model.Variantes)
                                         {
-                                            <tr>
-                                                <td>@v.prix.ToString("N2") MAD</td>
-                                                <td>@(v.taille ?? "-")</td>
-                                                <td>@(v.couleur ?? "-")</td>
-                                                <td>@v.quantite</td>
-                                                <td>@(v.poids ?? "-")</td>
+                                            var collapseId = $"edit-variant-{v.idV}";
+                                            <tr class="bg-white rounded-3 shadow-sm variant-card position-relative">
+                                                <td class="ps-3 py-3 rounded-start-3">
+                                                    @if (!string.IsNullOrEmpty(v.photo))
+                                                    {
+                                                        <div class="position-relative" style="width: 60px; height: 60px;">
+                                                            <img src="@v.photo" alt="Variante" class="rounded-3 w-100 h-100 shadow-sm" style="object-fit:cover;" />
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="rounded-3 bg-light d-flex align-items-center justify-content-center text-muted border" style="width: 60px; height: 60px;">
+                                                            <i class="bi bi-image"></i>
+                                                        </div>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column gap-1">
+                                                        <span class="fw-bold text-dark fs-5">@v.prix.ToString("N2") <small class="text-muted fs-6">MAD</small></span>
+                                                        <div class="d-flex gap-2 small">
+                                                            @if(!string.IsNullOrEmpty(v.taille)) { <span class="badge bg-light text-dark border">T: @v.taille</span> }
+                                                            @if(!string.IsNullOrEmpty(v.couleur)) { 
+                                                                <span class="badge bg-light text-dark border d-flex align-items-center gap-1">
+                                                                    <span class="rounded-circle" style="width: 8px; height: 8px; background-color: @v.couleur;"></span>
+                                                                    @v.couleur
+                                                                </span> 
+                                                            }
+                                                            @if(!string.IsNullOrEmpty(v.poids)) { <span class="badge bg-light text-dark border">@v.poids</span> }
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    @if (v.quantite == 0)
+                                                    {
+                                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3">Épuisé</span>
+                                                    }
+                                                    else if (v.quantite <= Model.SeuilAlerte)
+                                                    {
+                                                        <div class="d-flex align-items-center gap-2 text-warning">
+                                                            <i class="bi bi-exclamation-triangle-fill"></i>
+                                                            <span class="fw-bold">@v.quantite</span>
+                                                            <span class="small text-muted">stock faible</span>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="d-flex align-items-center gap-2 text-success">
+                                                            <i class="bi bi-check-circle-fill"></i>
+                                                            <span class="fw-bold">@v.quantite</span>
+                                                            <span class="small text-muted">en stock</span>
+                                                        </div>
+                                                    }
+                                                </td>
+                                                <td class="text-end pe-3 rounded-end-3">
+                                                    <div class="d-flex gap-2 justify-content-end">
+                                                        <button class="btn btn-light shadow-sm text-primary rounded-circle hover-lift" style="width: 36px; height: 36px;" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false">
+                                                            <i class="bi bi-pencil-fill small"></i>
+                                                        </button>
+                                                        <form method="post" asp-action="DeleteVariant" class="d-inline" onsubmit="return confirm('Confirmer la suppression de cette variante ?');">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="idV" value="@v.idV" />
+                                                            <input type="hidden" name="productId" value="@Model.IdP" />
+                                                            <button class="btn btn-light shadow-sm text-danger rounded-circle hover-lift" style="width: 36px; height: 36px;" type="submit">
+                                                                <i class="bi bi-trash-fill small"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <!-- Edit Form Collapse -->
+                                            <tr class="collapse" id="@collapseId">
+                                                <td colspan="4" class="p-0 border-0">
+                                                    <div class="card border-0 bg-light bg-opacity-50 m-3 p-3 rounded-4 shadow-inner">
+                                                        <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-pencil-square me-2"></i>Modifier la variante</h6>
+                                                        <form method="post" asp-action="UpdateVariant" enctype="multipart/form-data" class="row g-3">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="idV" value="@v.idV" />
+                                                            <input type="hidden" name="productId" value="@Model.IdP" />
+                                                            <div class="col-sm-3">
+                                                                <label class="form-label small fw-bold text-muted">Prix (MAD)</label>
+                                                                <input name="prix" type="number" step="0.01" class="form-control glass-input shadow-none" value="@v.prix" required />
+                                                            </div>
+                                                            <div class="col-sm-2">
+                                                                <label class="form-label small fw-bold text-muted">Stock</label>
+                                                                <input name="quantite" type="number" class="form-control glass-input shadow-none" min="0" value="@v.quantite" required />
+                                                            </div>
+                                                            <div class="col-sm-2">
+                                                                <label class="form-label small fw-bold text-muted">Taille</label>
+                                                                <input name="taille" class="form-control glass-input shadow-none" value="@v.taille" />
+                                                            </div>
+                                                            <div class="col-sm-2">
+                                                                <label class="form-label small fw-bold text-muted">Couleur</label>
+                                                                <input name="couleur" class="form-control glass-input shadow-none" value="@v.couleur" />
+                                                            </div>
+                                                            <div class="col-sm-3">
+                                                                <label class="form-label small fw-bold text-muted">Poids</label>
+                                                                <input name="poids" class="form-control glass-input shadow-none" value="@v.poids" />
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <label class="form-label small fw-bold text-muted">Nouvelle photo (optionnel)</label>
+                                                                <input name="photoFile" type="file" accept="image/*" class="form-control glass-input" />
+                                                            </div>
+                                                            <div class="col-md-4 d-flex align-items-end justify-content-end">
+                                                                <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                                                                    <i class="bi bi-save-fill me-2"></i>Mettre à jour
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         }
-                                    </tbody>
-                                </table>
-                            </div>
-                            <p class="small text-muted mb-0"><i class="bi bi-info-circle me-1"></i>La gestion des variantes sera disponible prochainement</p>
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-5">
+                                                <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
+                                                Aucune variante disponible pour le moment.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
                         </div>
-                    }
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <style>
-        :root {
-            --primary: #5A7EB8;
-            --terracotta: #D87A4F;
-        }
-        .nav-link { font-weight: 500; font-size: 14px; transition: all 0.2s; }
-        .nav-link.active { background: var(--primary); color: white !important; box-shadow: 0 4px 12px rgba(90, 126, 184, 0.3); }
-        .nav-link:hover:not(.active) { background: #f8f9fa; color: var(--primary) !important; }
-    </style>
 </body>
 </html>

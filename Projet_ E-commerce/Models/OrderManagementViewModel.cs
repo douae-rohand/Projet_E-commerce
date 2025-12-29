@@ -8,11 +8,15 @@ namespace Projet__E_commerce.Models
         public string NumeroCommande { get; set; } = string.Empty;
         public int IdClient { get; set; }
         public string NomClient { get; set; } = string.Empty;
+        public string PrenomClient { get; set; } = string.Empty;
         public string? TelephoneClient { get; set; }
         public string Statut { get; set; } = string.Empty;
         public string StatusLabel { get; set; } = string.Empty;
         public string StatusClass { get; set; } = string.Empty;
         public decimal PrixTotal { get; set; }
+        // Total des lignes appartenant à la coop de l'admin (pas toute la commande globale)
+        public decimal PrixTotalAdmin { get; set; }
+        public string? Thumbnail { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         
@@ -35,6 +39,7 @@ namespace Projet__E_commerce.Models
         public string? Couleur { get; set; }
         public int Quantite { get; set; }
         public decimal PrixUnitaire { get; set; }
+        public string? Photo { get; set; }
         public decimal SousTotal => Quantite * PrixUnitaire;
     }
 }

@@ -1,7 +1,7 @@
 @model Projet__E_commerce.Models.AdminDashboardViewModel
 @{
     Layout = null;
-    ViewData["Title"] = "Espace Coopérative - SoukDigital";
+    ViewData["Title"] = "Tableau de bord - " + Model.CooperativeName;
 }
 
 <!DOCTYPE html>
@@ -14,14 +14,193 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-animation.css" asp-append-version="true" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); Handled by bootstrap card */
+        }
+
+        #chart3d {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+        }
+
+        #product-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+            min-width: 200px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        #product-info.show {
+            opacity: 1;
+        }
+
+        .info-title {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: #6c757d;
+            margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .info-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #40322c;
+            margin-bottom: 12px;
+        }
+
+        .info-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-top: 1px solid #e6e2df;
+        }
+
+        .info-stat-label {
+            font-size: 0.8rem;
+            color: #73605a;
+        }
+
+        .info-stat-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #5A7EB8;
+        }
+
+        .chart-legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 10px 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .legend-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #6c757d;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: rgba(90, 126, 184, 0.05);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .legend-item:hover {
+            background: rgba(90, 126, 184, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .chart-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .control-btn {
+            width: 35px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            color: #5A7EB8;
+            font-size: 1rem;
+        }
+
+        .control-btn:hover {
+            background: #5A7EB8;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .chart-title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            font-weight: 700;
+            color: #40322c;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body class="admin-bg">
+    <div class="bg-orb-3"></div>
+    
     <div class="d-flex">
         <!-- Sidebar -->
-        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block" style="width: 280px;">
+        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block shadow-sm" style="width: 280px; z-index: 1000;">
             <div class="p-4 border-bottom">
-                <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
-                    <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                 <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
+                    <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
                         <i class="bi bi-flower1 text-white h5 mb-0"></i>
                     </div>
                     <div>
@@ -32,175 +211,596 @@
             </div>
             
             <nav class="nav flex-column p-3 gap-1">
-                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Dashboard", "Admin")"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Products", "Admin")"><i class="bi bi-box-seam"></i> Produits</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Orders", "Admin")"><i class="bi bi-cart3"></i> Commandes</a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3" href="@Url.Action("Profile", "Admin")"><i class="bi bi-gear"></i> Profil</a>
-            </nav>
-
-            <div class="mt-auto p-3 border-top position-absolute bottom-0 w-100">
-                <div class="d-flex align-items-center gap-3 p-2 bg-light rounded-3">
-                    <div class="rounded-circle bg-terracotta text-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 12px; font-weight: bold;">AA</div>
-                    <div class="overflow-hidden">
-                        <p class="small fw-bold mb-0 text-truncate">Aicha Ait Brahim</p>
-                        <p class="small text-muted mb-0" style="font-size: 10px;">Responsable</p>
-                    </div>
-                    <a href="#" class="ms-auto text-muted"><i class="bi bi-box-arrow-right"></i></a>
+                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 shadow-sm" href="@Url.Action("Dashboard", "Admin")">
+                    <i class="bi bi-speedometer2"></i> Tableau de bord
+                </a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Products", "Admin")">
+                    <i class="bi bi-box-seam"></i> Produits
+                </a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Orders", "Admin")">
+                    <i class="bi bi-cart3"></i> Commandes
+                </a>
+                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Profile", "Admin")">
+                    <i class="bi bi-gear"></i> Profil
+                </a>
+                <div class="mt-auto pt-4 border-top">
+                    <a class="nav-link text-danger rounded-3 d-flex align-items-center gap-3 py-2 px-3 hover-effect" href="@Url.Action("Logout", "Account")">
+                        <i class="bi bi-box-arrow-right"></i> Déconnexion
+                    </a>
                 </div>
-            </div>
+            </nav>
         </aside>
 
         <!-- Main Content -->
         <main class="flex-grow-1 p-4 p-md-5">
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
-                    <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
-            <header class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-4 mb-5">
+            <!-- Header -->
+            <header class="d-flex justify-content-between align-items-center mb-5">
                 <div>
-                    <h1 class="font-display fw-bold mb-1">@Model.CooperativeName</h1>
-                    <p class="text-muted mb-0 small"><i class="bi bi-geo-alt me-1"></i> @Model.Location</p>
+                    <h1 class="font-display fw-bold mb-1 text-dark">Tableau de bord</h1>
+                    <p class="text-muted mb-0">Bienvenue, @Model.CooperativeName</p>
                 </div>
-                <div class="d-flex gap-2">
-                    <a href="@Url.Action("CreateProduct", "Admin")" class="btn btn-primary rounded-3 px-4 py-2 small fw-bold shadow-soft"><i class="bi bi-plus-lg me-2"></i> Nouveau produit</a>
+                <div class="d-flex gap-3 align-items-center">
+                    <div class="bg-white px-3 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2 border">
+                        <i class="bi bi-geo-alt text-primary"></i>
+                        <span class="small fw-medium">@Model.Location</span>
+                    </div>
+                    <a href="@Url.Action("CreateProduct", "Admin")" class="btn btn-primary rounded-pill px-4 shadow-sm hover-lift">
+                        <i class="bi bi-plus-lg me-2"></i>Nouveau Produit
+                    </a>
                 </div>
             </header>
 
-            <!-- Stats Grid -->
+            <!-- KPI Cards -->
             <div class="row g-4 mb-5">
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
-                        <div class="d-flex justify-content-between mb-3">
-                            <p class="text-muted small fw-bold text-uppercase mb-0">Ventes du mois</p>
-                            <div class="text-primary"><i class="bi bi-graph-up-arrow"></i></div>
-                        </div>
-                        <h3 class="fw-bold mb-2">@Model.VentesMois.ToString("N2") MAD</h3>
-                        <p class="@(Model.VentesPourcentage >= 0 ? "text-success" : "text-danger") small fw-bold mb-0">
-                            <i class="bi bi-arrow-@(Model.VentesPourcentage >= 0 ? "up" : "down")-right me-1"></i> 
-                            @Model.VentesPourcentage.ToString("N1")% vs mois dernier
-                        </p>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
-                        <div class="d-flex justify-content-between mb-3">
-                            <p class="text-muted small fw-bold text-uppercase mb-0">Commandes</p>
-                            <div class="text-primary"><i class="bi bi-cart3"></i></div>
-                        </div>
-                        <h3 class="fw-bold mb-2">@Model.CommandesMois</h3>
-                        <p class="@(Model.CommandesPourcentage >= 0 ? "text-success" : "text-danger") small fw-bold mb-0">
-                            <i class="bi bi-arrow-@(Model.CommandesPourcentage >= 0 ? "up" : "down")-right me-1"></i> 
-                            @Model.CommandesPourcentage.ToString("N1")% vs mois dernier
-                        </p>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
-                        <div class="d-flex justify-content-between mb-3">
-                            <p class="text-muted small fw-bold text-uppercase mb-0">Produits actifs</p>
-                            <div class="text-primary"><i class="bi bi-box-seam"></i></div>
-                        </div>
-                        <h3 class="fw-bold mb-2">@Model.ProduitsActifs</h3>
-                        <p class="text-muted small fw-bold mb-0">Produits disponibles</p>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="row g-4 mb-5">
-                <!-- Recent Orders -->
-                <div class="col-lg-8">
-                    <div class="card border-0 shadow-soft rounded-4 overflow-hidden h-100">
-                        <div class="card-header bg-white border-0 p-4 d-flex justify-content-between align-items-center">
-                            <h5 class="fw-bold mb-0">Dernières commandes</h5>
-                            <a href="#" class="small text-primary text-decoration-none fw-bold">Voir tout</a>
-                        </div>
-                        <div class="table-responsive px-4 pb-4">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light rounded-3">
-                                    <tr class="small text-muted text-uppercase fw-bold border-0">
-                                        <th class="border-0 px-3 py-3 rounded-start-3">N° Commande</th>
-                                        <th class="border-0 px-3 py-3">Client</th>
-                                        <th class="border-0 px-3 py-3">Statut</th>
-                                        <th class="border-0 px-3 py-3">Total</th>
-                                        <th class="border-0 px-3 py-3 rounded-end-3 text-end">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (Model.RecentOrders.Any())
-                                    {
-                                        @foreach (var order in Model.RecentOrders)
-                                        {
-                                            <tr>
-                                                <td class="px-3 py-3 fw-bold">@order.NumeroCommande</td>
-                                                <td class="px-3 py-3">@order.NomClient</td>
-                                                <td class="px-3 py-3"><span class="badge rounded-pill @order.StatusClass px-3 py-2">@order.StatusLabel</span></td>
-                                                <td class="px-3 py-3 fw-bold">@order.PrixTotal.ToString("N2") MAD</td>
-                                                <td class="px-3 py-3 text-end">
-                                                    <a href="@Url.Action("Orders", "Admin")" class="btn btn-light btn-sm rounded-3">Voir</a>
-                                                </td>
-                                            </tr>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <tr>
-                                            <td colspan="5" class="text-center py-4 text-muted">Aucune commande récente</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Best Sellers -->
-                <div class="col-lg-4">
-                    <div class="card border-0 shadow-soft rounded-4 p-4 h-100">
-                        <h5 class="fw-bold mb-4">Meilleures ventes</h5>
-                        <div class="d-flex flex-column gap-4">
-                            @if (Model.TopProducts.Any())
-                            {
-                                @foreach (var p in Model.TopProducts)
-                                {
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-3 bg-sable p-2 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                            <i class="bi bi-leaf text-terracotta"></i>
-                                        </div>
-                                        <div class="flex-grow-1 overflow-hidden">
-                                            <h6 class="fw-bold mb-1 text-truncate">@p.NomP</h6>
-                                            <p class="small text-muted mb-0">@p.NombreVentes ventes</p>
-                                        </div>
-                                        <p class="fw-bold mb-0 small">@p.RevenuTotal.ToString("N2") MAD</p>
-                                    </div>
+                <!-- Ventes du mois -->
+                <div class="col-md-4">
+                    <div class="card card-premium h-100 border-0 rounded-4 overflow-hidden kpi-card-inner">
+                        <div class="card-body p-4 position-relative z-1">
+                            <h6 class="text-muted text-uppercase small fw-bold mb-3">Ventes du mois</h6>
+                            <h2 class="display-5 fw-bold text-dark mb-2">@Model.VentesMois.ToString("N0") <small class="fs-4 text-muted">MAD</small></h2>
+                            <div class="d-flex align-items-center gap-2">
+                                @if (Model.VentesPourcentage >= 0) {
+                                    <span class="badge bg-success-subtle text-success rounded-pill">
+                                        <i class="bi bi-arrow-up-right"></i> +@Model.VentesPourcentage.ToString("0.0")%
+                                    </span>
+                                } else {
+                                    <span class="badge bg-danger-subtle text-danger rounded-pill">
+                                        <i class="bi bi-arrow-down-right"></i> @Model.VentesPourcentage.ToString("0.0")%
+                                    </span>
                                 }
-                            }
-                            else
-                            {
-                                <p class="text-muted text-center">Aucune vente enregistrée</p>
-                            }
+                                <span class="text-muted small">vs mois dernier</span>
+                            </div>
+                        </div>
+                        <i class="bi bi-graph-up-arrow kpi-icon-bg text-primary"></i>
+                    </div>
+                </div>
+
+                <!-- Commandes -->
+                <div class="col-md-4">
+                    <div class="card card-premium h-100 border-0 rounded-4 overflow-hidden kpi-card-inner">
+                        <div class="card-body p-4 position-relative z-1">
+                            <h6 class="text-muted text-uppercase small fw-bold mb-3">Commandes</h6>
+                            <h2 class="display-5 fw-bold text-dark mb-2">@Model.CommandesMois</h2>
+                            <div class="d-flex align-items-center gap-2">
+                                @if (Model.CommandesPourcentage >= 0) {
+                                    <span class="badge bg-success-subtle text-success rounded-pill">
+                                        <i class="bi bi-arrow-up-right"></i> +@Model.CommandesPourcentage.ToString("0.0")%
+                                    </span>
+                                } else {
+                                    <span class="badge bg-danger-subtle text-danger rounded-pill">
+                                        <i class="bi bi-arrow-down-right"></i> @Model.CommandesPourcentage.ToString("0.0")%
+                                    </span>
+                                }
+                                <span class="text-muted small">vs mois dernier</span>
+                            </div>
+                        </div>
+                        <i class="bi bi-bag kpi-icon-bg text-terracotta"></i>
+                    </div>
+                </div>
+
+                <!-- Produits Actifs -->
+                <div class="col-md-4">
+                    <div class="card card-premium h-100 border-0 rounded-4 overflow-hidden kpi-card-inner">
+                        <div class="card-body p-4 position-relative z-1">
+                            <h6 class="text-muted text-uppercase small fw-bold mb-3">Produits Actifs</h6>
+                            <h2 class="display-5 fw-bold text-dark mb-2">@Model.ProduitsActifs</h2>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary-subtle text-primary rounded-pill">En vente</span>
+                                <a href="@Url.Action("Products", "Admin")" class="text-decoration-none small stretched-link">Gérer le catalogue <i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </div>
+                        <i class="bi bi-box-seam kpi-icon-bg text-warning"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="row g-4 mb-5">
+                <!-- Sales Chart -->
+                <div class="col-lg-8">
+                    <div class="card card-premium border-0 rounded-4 h-100">
+                        <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold text-dark mb-0">Aperçu des Ventes</h5>
+                            <select class="form-select form-select-sm w-auto border-0 bg-light rounded-pill">
+                                <option>Cette année</option>
+                                <option>Ce mois</option>
+                            </select>
+                        </div>
+                        <div class="card-body p-4">
+                            <div style="position: relative; height: 300px; width: 100%;">
+                                <canvas id="salesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Products Chart (3D) -->
+                <div class="col-lg-6">
+                    <div class="card card-premium border-0 rounded-4 h-100 p-0 overflow-hidden">
+                        <div class="chart-container h-100">
+                             <div class="chart-title">📊 Performance des Produits (3D)</div>
+        
+                            <div id="product-info">
+                                <div class="info-title">Produit Sélectionné</div>
+                                <div class="info-name" id="info-product-name">-</div>
+                                <div class="info-stat">
+                                    <span class="info-stat-label">Ventes</span>
+                                    <span class="info-stat-value" id="info-sales">-</span>
+                                </div>
+                                <div class="info-stat">
+                                    <span class="info-stat-label">Part de marché</span>
+                                    <span class="info-stat-value" id="info-percentage">-</span>
+                                </div>
+                            </div>
+
+                            <div class="chart-controls">
+                                <button class="control-btn" id="btn-reset" title="Réinitialiser la vue">🔄</button>
+                                <button class="control-btn" id="btn-rotate" title="Auto-rotation">🔁</button>
+                            </div>
+
+                            <canvas id="chart3d"></canvas>
+
+                            <div class="chart-legend">
+                                <div class="legend-title">Produits • Cliquez pour mettre en évidence</div>
+                                <div class="legend-items" id="legend-container"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
         </main>
     </div>
 
-    <style>
-        :root {
-            --primary: #5A7EB8;
-            --terracotta: #D87A4F;
-            --sable: rgba(229, 200, 136, 0.2);
+    <!-- Scripts for Charts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Configuration commune pour Chart.js (Sales)
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#6c757d';
+        
+        const ctxSales = document.getElementById('salesChart').getContext('2d');
+        const gradientSales = ctxSales.createLinearGradient(0, 0, 0, 400);
+        gradientSales.addColorStop(0, 'rgba(90, 126, 184, 0.2)');
+        gradientSales.addColorStop(1, 'rgba(90, 126, 184, 0.0)');
+
+        new Chart(ctxSales, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
+                datasets: [{
+                    label: 'Chiffre d\'affaires (MAD)',
+                    data: [12000, 19000, 15000, 25000, 22000, 30000, 28000, 35000, 32000, 40000, 45000, @Model.VentesMois],
+                    borderColor: '#5A7EB8',
+                    backgroundColor: gradientSales,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#5A7EB8',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }, // Corrected missing property name 'display'
+                scales: {
+                    y: { beginAtZero: true, grid: { borderDash: [5, 5], color: '#f0f0f0' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // ==========================================
+        // 3D Chart Logic (Three.js)
+        // ==========================================
+        
+        // Data from Razor
+        const rawData = @Html.Raw(Json.Serialize(Model.TopProducts.Select(p => new { name = p.NomP, sales = p.NombreVentes })));
+        
+        // Colors palette
+        const colors = [0x5A7EB8, 0xD87A4F, 0xE5C888, 0x9DD1E6, 0x8B7355, 0x6B8E23, 0xDC143C, 0xFF8C00];
+        
+        // Map to format required by 3D chart
+        const productsData = rawData.length > 0 ? rawData.map((item, index) => ({
+            name: item.name,
+            sales: item.sales,
+            color: colors[index % colors.length]
+        })) : [ // Dummy data if empty
+            { name: "Exemple A", sales: 100, color: 0x5A7EB8 },
+            { name: "Exemple B", sales: 50, color: 0xD87A4F }
+        ];
+
+        // Three.js Setup
+        let scene, camera, renderer, bars = [], raycaster, mouse;
+        let particles;
+        let autoRotate = true;
+        let selectedBar = null;
+        let clock = new THREE.Clock();
+
+        function init3D() {
+            // Container
+            const container = document.getElementById('chart3d');
+            if (!container) return;
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xffffff); 
+            // Add subtle fog for depth
+            scene.fog = new THREE.FogExp2(0xffffff, 0.02);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(20, 15, 20);
+            camera.lookAt(0, 5, 0);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ canvas: container, antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.physicallyCorrectLights = true;
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+            dirLight.position.set(10, 20, 10);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 1024;
+            dirLight.shadow.mapSize.height = 1024;
+            dirLight.shadow.camera.near = 0.5;
+            dirLight.shadow.camera.far = 50;
+            scene.add(dirLight);
+
+            // Colored rim light for atmosphere
+            const spotLight = new THREE.SpotLight(0x5A7EB8, 5);
+            spotLight.position.set(-20, 10, -10);
+            spotLight.lookAt(0,0,0);
+            scene.add(spotLight);
+
+            // Ground Grid - Fading custom grid
+            const gridHelper = new THREE.GridHelper(50, 50, 0xe0e0e0, 0xf8f9fa);
+            scene.add(gridHelper);
+
+            // Bars (Hexagons)
+            createBars();
+            
+            // Particles
+            createParticles();
+
+            // Interaction
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            // Events
+            container.addEventListener('mousemove', onMouseMove);
+            container.addEventListener('click', onMouseClick);
+            window.addEventListener('resize', onWindowResize);
+            
+            const btnReset = document.getElementById('btn-reset');
+            if(btnReset) btnReset.addEventListener('click', resetCamera);
+            
+            const btnRotate = document.getElementById('btn-rotate');
+            if(btnRotate) btnRotate.addEventListener('click', toggleAutoRotate);
+
+            // Legend
+            createLegend();
+
+            // Animation Loop
+            animate();
         }
-        .nav-link { font-weight: 500; font-size: 14px; transition: all 0.2s; }
-        .nav-link.active { background: var(--primary); color: white !important; box-shadow: 0 4px 12px rgba(90, 126, 184, 0.3); }
-        .nav-link:hover:not(.active) { background: #f8f9fa; color: var(--primary) !important; }
-        .bg-primary-subtle { background-color: rgba(90, 126, 184, 0.1) !important; }
-        .bg-warning-subtle { background-color: rgba(255, 193, 7, 0.1) !important; }
-        .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1) !important; }
-    </style>
+
+        function createBars() {
+            const totalSales = productsData.reduce((sum, p) => sum + p.sales, 0);
+            const maxSales = Math.max(...productsData.map(p => p.sales));
+            
+            // Hexagonal layout or circle layout? Let's do a circle for creativity!
+            // Or stick to line but with hexagons? Linear is easier to compare.
+            // Let's do Linear but with gaps and nice hex shapes.
+            const spacing = 4;
+            const startX = -(productsData.length * spacing) / 2;
+
+            productsData.forEach((product, index) => {
+                const height = maxSales > 0 ? (product.sales / maxSales) * 12 : 0;
+                const percentage = totalSales > 0 ? ((product.sales / totalSales) * 100).toFixed(1) : 0;
+
+                // Hexagonal Prism
+                // radiusTop, radiusBottom, height, radialSegments
+                const geometry = new THREE.CylinderGeometry(1.5, 1.5, Math.max(0.1, height), 6);
+                
+                // Enhanced Material
+                const material = new THREE.MeshPhysicalMaterial({
+                    color: product.color,
+                    metalness: 0.1,
+                    roughness: 0.2,
+                    transmission: 0.1, // Slight glass effect
+                    transparent: true,
+                    opacity: 0.9,
+                    emissive: product.color,
+                    emissiveIntensity: 0.2,
+                    polygonOffset: true,
+                    polygonOffsetFactor: 1, // To avoid z-fighting with edges
+                });
+
+                const bar = new THREE.Mesh(geometry, material);
+                bar.position.x = startX + index * spacing;
+                bar.position.y = height / 2;
+                bar.castShadow = true;
+                bar.receiveShadow = true;
+
+                // Store data
+                bar.userData = {
+                    name: product.name,
+                    sales: product.sales,
+                    percentage: percentage,
+                    originalColor: product.color,
+                    originalHeight: height,
+                    index: index,
+                    hovered: false
+                };
+
+                scene.add(bar);
+                bars.push(bar);
+                
+                // Glowing Edge helper
+                const edges = new THREE.EdgesGeometry(geometry);
+                const lineMaterial = new THREE.LineBasicMaterial({ 
+                    color: 0xffffff, 
+                    transparent: true, 
+                    opacity: 0.5,
+                    linewidth: 2 
+                });
+                const wireframe = new THREE.LineSegments(edges, lineMaterial);
+                bar.add(wireframe);
+                
+                // Add a "base" ring
+                const ringGeo = new THREE.TorusGeometry(1.8, 0.05, 8, 30);
+                const ringMat = new THREE.MeshBasicMaterial({ color: 0xcccccc, transparent: true, opacity: 0.3 });
+                const ring = new THREE.Mesh(ringGeo, ringMat);
+                ring.rotation.x = Math.PI / 2;
+                ring.position.y = -height/2 + 0.05; // relative to bar center, but bar center is at Y=height/2. So base is at y=0 relative to world.
+                // Actually bar local coords: 0 is center. Bottom is -height/2.
+                ring.position.y = -height/2;
+                bar.add(ring);
+            });
+        }
+        
+        function createParticles() {
+            const particlesCount = 200;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particlesCount * 3);
+            const scales = new Float32Array(particlesCount);
+            
+            for(let i=0; i<particlesCount; i++) {
+                positions[i*3] = (Math.random() - 0.5) * 60; // x
+                positions[i*3 + 1] = Math.random() * 30;     // y
+                positions[i*3 + 2] = (Math.random() - 0.5) * 60; // z
+                scales[i] = Math.random();
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('scale', new THREE.BufferAttribute(scales, 1));
+            
+            const material = new THREE.PointsMaterial({
+                color: 0x5A7EB8,
+                size: 0.3,
+                transparent: true,
+                opacity: 0.6,
+                sizeAttenuation: true
+            });
+            
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+        }
+
+        function createLegend() {
+            const container = document.getElementById('legend-container');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            productsData.forEach((product, index) => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                item.innerHTML = `<div class="legend-color" style="background-color: #${product.color.toString(16).padStart(6, '0')}"></div><span>${product.name}</span>`;
+                item.addEventListener('click', () => highlightBar(index));
+                container.appendChild(item);
+            });
+        }
+
+        function highlightBar(index) {
+            // Reset all
+            bars.forEach(bar => {
+                bar.material.emissiveIntensity = 0.2;
+                bar.scale.set(1, 1, 1);
+                bar.userData.hovered = false;
+            });
+
+            const bar = bars[index];
+            if(bar) {
+                bar.material.emissiveIntensity = 0.8;
+                // Pop effect
+                bar.scale.set(1.1, 1.1, 1.1);
+                bar.userData.hovered = true;
+                
+                selectedBar = bar;
+                showProductInfo(bar.userData);
+                animateCameraToBar(bar);
+            }
+        }
+
+        function animateCameraToBar(bar) {
+            // Position better suited for hexagons
+            const targetPos = new THREE.Vector3(bar.position.x + 10, bar.position.y + 10, bar.position.z + 10);
+            const startPos = camera.position.clone();
+            const duration = 1000;
+            const startTime = Date.now();
+
+            function anim() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+                camera.position.lerpVectors(startPos, targetPos, eased);
+                camera.lookAt(bar.position.x, bar.position.y/2, bar.position.z); // Look at center
+
+                if (progress < 1) requestAnimationFrame(anim);
+            }
+            anim();
+        }
+
+        function onMouseMove(event) {
+            const rect = event.target.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(bars);
+
+            // Handle hover states
+            if (intersects.length > 0) {
+                const bar = intersects[0].object;
+                if (bar !== selectedBar) {
+                   document.body.style.cursor = 'pointer';
+                   // Slight glow on hover
+                   bar.material.emissiveIntensity = 0.5;
+                }
+                showProductInfo(bar.userData);
+            } else {
+                document.body.style.cursor = 'default';
+                // Reset non-selected bars
+                bars.forEach(bar => {
+                    if(bar !== selectedBar) bar.material.emissiveIntensity = 0.2;
+                });
+                
+                if (!selectedBar) hideProductInfo();
+            }
+        }
+
+        function onMouseClick(event) {
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(bars);
+
+            if (intersects.length > 0) {
+                highlightBar(intersects[0].object.userData.index);
+            } else {
+                if (selectedBar) {
+                    resetCamera();
+                }
+            }
+        }
+
+        function showProductInfo(data) {
+            const info = document.getElementById('product-info');
+            if(!info) return;
+            document.getElementById('info-product-name').textContent = data.name;
+            document.getElementById('info-sales').textContent = data.sales;
+            document.getElementById('info-percentage').textContent = data.percentage + '%';
+            info.classList.add('show');
+        }
+
+        function hideProductInfo() {
+            const info = document.getElementById('product-info');
+            if(info) info.classList.remove('show');
+        }
+
+        function resetCamera() {
+            if(!camera) return;
+            // Smooth reset? For now direct
+            camera.position.set(20, 15, 20);
+            camera.lookAt(0, 5, 0);
+            
+            bars.forEach(bar => {
+                bar.material.emissiveIntensity = 0.2;
+                bar.scale.set(1, 1, 1);
+                bar.userData.hovered = false;
+            });
+            selectedBar = null;
+            hideProductInfo();
+        }
+
+        function toggleAutoRotate() {
+            autoRotate = !autoRotate;
+            const btn = document.getElementById('btn-rotate');
+            if(btn) {
+                btn.style.background = autoRotate ? '#5A7EB8' : 'rgba(255, 255, 255, 0.95)';
+                btn.style.color = autoRotate ? 'white' : '#5A7EB8';
+            }
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('chart3d');
+            if (!container || !camera || !renderer) return;
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+
+            // Rotate camera if auto-rotate
+            if (autoRotate && !selectedBar) {
+                camera.position.x = Math.sin(time * 0.1) * 25;
+                camera.position.z = Math.cos(time * 0.1) * 25;
+                camera.lookAt(0, 5, 0);
+            }
+            
+            // Animate hexagons (Slow bobbing and rotation)
+            bars.forEach((bar, index) => {
+                 if (bar !== selectedBar) {
+                    bar.position.y = (bar.userData.originalHeight / 2) + Math.sin(time * 2 + index) * 0.2;
+                    bar.rotation.y = Math.sin(time * 0.5 + index) * 0.1;
+                 } else {
+                     // Selected bar spins slowly
+                     bar.rotation.y += 0.01;
+                 }
+            });
+            
+            // Animate particles
+            if(particles) {
+                particles.rotation.y = time * 0.05;
+                const positions = particles.geometry.attributes.position.array;
+                for(let i=0; i< positions.length; i+=3) {
+                     positions[i+1] += Math.sin(time + positions[i]) * 0.02; // Float y
+                }
+                particles.geometry.attributes.position.needsUpdate = true;
+            }
+            
+            if(renderer && scene && camera) {
+                renderer.render(scene, camera);
+            }
+        }
+
+        // Initialize 3D Chart
+        document.addEventListener('DOMContentLoaded', init3D);
+
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
