@@ -173,6 +173,33 @@ namespace Projet__E_commerce
                     model.Location = $"{admin.ville}, Maroc";
                 }
 
+                // Calculate monthly revenue for the current year
+                model.MonthlyRevenue = new List<decimal>();
+                for (int month = 1; month <= 12; month++)
+                {
+                    var monthStart = new DateTime(now.Year, month, 1);
+                    var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+                    
+                    // Only query if month is not in future
+                    if (monthStart <= now)
+                    {
+                         var monthSales = await _context.Commandes
+                            .Include(c => c.LignesCommande)
+                                .ThenInclude(lc => lc.Variante)
+                                    .ThenInclude(v => v.Produit)
+                            .Where(c => c.created_at >= monthStart && c.created_at <= monthEnd &&
+                                       c.LignesCommande.Any(lc => lc.Variante.Produit.idAdmin == adminId))
+                            .SelectMany(c => c.LignesCommande.Where(lc => lc.Variante.Produit.idAdmin == adminId))
+                            .SumAsync(lc => lc.quantite * lc.prix_unitaire);
+                        
+                        model.MonthlyRevenue.Add(monthSales);
+                    }
+                    else
+                    {
+                        model.MonthlyRevenue.Add(0);
+                    }
+                }
+
                 ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
                 ViewBag.UserId = adminId;
             }
