@@ -49,25 +49,17 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-grow-1 p-4 p-md-5">
-            <div class="container-fluid p-0">
-                <!-- En-tête -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
+        <main class="flex-grow-1 p-4 p-md-5 d-flex justify-content-center" style="min-height: 100vh;">
+            <div class="container-fluid" style="max-width: 900px;">
+                
+                <!-- Navigation Header -->
+                <div class="d-flex justify-content-between align-items-center mb-5 animate-fade-down">
                     <div>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb mb-1">
-                                <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Admin")" class="text-decoration-none text-muted">Tableau de bord</a></li>
-                                <li class="breadcrumb-item"><a href="@Url.Action("Orders", "Admin")" class="text-decoration-none text-muted">Commandes</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">@Model.NumeroCommande</li>
-                            </ol>
-                        </nav>
-                        <h1 class="h3 mb-0 text-dark font-display fw-bold">Détails de la commande</h1>
-                    </div>
-                    <div>
-                        <a href="@Url.Action("Orders", "Admin")" class="btn btn-light rounded-pill shadow-sm hover-lift">
-                            <i class="bi bi-arrow-left me-1"></i>Retour
+                        <a href="@Url.Action("Orders", "Admin")" class="btn btn-white rounded-pill shadow-sm hover-scale text-dark fw-bold px-4">
+                            <i class="bi bi-arrow-left me-2"></i>Retour
                         </a>
                     </div>
+                    <h1 class="font-display fw-bold mb-0 text-dark">Commande #@Model.NumeroCommande</h1>
                 </div>
 
                 @if (TempData["SuccessMessage"] != null)
@@ -86,171 +78,347 @@
                     </div>
                 }
 
-                <div class="row">
-                    <!-- Informations générales -->
-                    <div class="col-lg-8">
-                        <div class="card card-premium mb-4 rounded-4 overflow-hidden border-0">
-                            <div class="card-header bg-white py-3 border-bottom border-light d-flex justify-content-between align-items-center">
-                                <h6 class="mb-0 text-dark fw-bold">Articles commandés</h6>
-                                <span class="badge bg-light text-dark border rounded-pill">
-                                    @Model.LignesCommande.Count articles
-                                </span>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
-                                        <thead class="bg-light">
-                                            <tr>
-                                                <th class="ps-4 border-0">Produit</th>
-                                                <th class="border-0">Variante</th>
-                                                <th class="border-0">Photo</th>
-                                                <th class="text-center border-0">Prix unitaire</th>
-                                                <th class="text-center border-0">Quantité</th>
-                                                <th class="text-end pe-4 border-0">Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var item in Model.LignesCommande)
-                                            {
-                                                <tr>
-                                                    <td class="ps-4">
-                                                        <div class="fw-bold text-dark">@item.NomProduit</div>
-                                                    </td>
-                                                    <td>
-                                                        @if (!string.IsNullOrEmpty(item.Taille))
-                                                        {
-                                                            <span class="badge bg-light text-secondary border me-1">Taille: @item.Taille</span>
-                                                        }
-                                                        @if (!string.IsNullOrEmpty(item.Couleur))
-                                                        {
-                                                            <span class="badge bg-light text-secondary border">Couleur: @item.Couleur</span>
-                                                        }
-                                                        @if (string.IsNullOrEmpty(item.Taille) && string.IsNullOrEmpty(item.Couleur))
-                                                        {
-                                                            <span class="text-muted small">-</span>
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                        @if (!string.IsNullOrEmpty(item.Photo))
-                                                        {
-                                                            <img src="@item.Photo" alt="Photo variante" class="rounded" style="width: 52px; height: 52px; object-fit: cover;" />
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="text-muted small">-</span>
-                                                        }
-                                                    </td>
-                                                    <td class="text-center">@item.PrixUnitaire.ToString("N2") DH</td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3">
-                                                            x @item.Quantite
-                                                        </span>
-                                                    </td>
-                                                    <td class="text-end pe-4 fw-bold text-primary">@item.SousTotal.ToString("N2") DH</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                        <tfoot class="bg-light">
-                                            <tr>
-                                                <td colspan="4" class="text-end fw-bold py-3 border-0">Total de la commande:</td>
-                                                <td class="text-end pe-4 fw-bold text-primary fs-5 py-3 border-0">@Model.PrixTotal.ToString("N2") DH</td>
-                                            </tr>
-                                            <tr>
-                                                <td colspan="4" class="text-end fw-bold py-2 border-0">Total de votre coopérative:</td>
-                                                <td class="text-end pe-4 fw-bold text-success py-2 border-0">@Model.PrixTotalAdmin.ToString("N2") DH</td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
+                <div class="receipt-container animate-receipt-slide">
+                    <!-- Receipt Header -->
+                    <div class="receipt-header">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="brand-logo mb-2">
+                                    <i class="bi bi-flower1"></i> CoopMaroc
                                 </div>
+                                <div class="receipt-meta">
+                                    <span>Date: @Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")</span>
+                                    <span>ID: @Model.NumeroCommande</span>
+                                </div>
+                            </div>
+                            <div class="status-stamp @(Model.StatusLabel.ToLower())">
+                                @Model.StatusLabel
                             </div>
                         </div>
                     </div>
 
-                    <!-- Sidebar Infos -->
-                    <div class="col-lg-4">
-                        <!-- État de la commande -->
-                        <div class="card card-premium mb-4 rounded-4 border-0">
-                            <div class="card-header bg-white py-3 border-bottom border-light">
-                                <h6 class="mb-0 text-dark fw-bold">Information Commande</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <small class="text-muted d-block mb-1">Statut</small>
-                                    <span class="badge @Model.StatusClass px-3 py-2 rounded-pill">
-                                        @Model.StatusLabel
-                                    </span>
-                                </div>
-                                <div class="mb-3">
-                                    <small class="text-muted d-block mb-1">Date de commande</small>
-                                    <div class="fw-medium text-dark">@Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")</div>
-                                </div>
-                                @if (Model.UpdatedAt != Model.CreatedAt)
-                                {
-                                    <div class="mb-3">
-                                        <small class="text-muted d-block mb-1">Dernière mise à jour</small>
-                                        <div class="text-muted small">@Model.UpdatedAt.ToString("dd MMM yyyy, HH:mm")</div>
-                                    </div>
-                                }
-                                
-                                <hr class="my-3 border-light opacity-10" />
-                                
-                                <div class="mb-3">
-                                    <small class="text-muted d-block mb-1">Livraison</small>
-                                    @if (!string.IsNullOrEmpty(Model.StatutLivraison))
-                                    {
-                                        <div class="fw-medium mb-1 text-dark">@Model.StatutLivraison</div>
-                                        <div class="small text-muted">@Model.ModeLivraison</div>
-                                        @if (Model.DateDebutEstimation.HasValue)
-                                        {
-                                            <div class="small text-muted mt-1">
-                                                <i class="bi bi-calendar-event me-1"></i>
-                                                Estimation: @Model.DateDebutEstimation.Value.ToString("dd/MM") 
-                                                @if(Model.DateFinEstimation.HasValue) 
-                                                { 
-                                                    <span> - @Model.DateFinEstimation.Value.ToString("dd/MM")</span>
-                                                }
-                                            </div>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted fst-italic">En attente d'expédition</span>
-                                    }
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Dashed Divider -->
+                    <div class="dashed-line"></div>
 
-                        <!-- Client Info -->
-                        <div class="card card-premium rounded-4 border-0">
-                            <div class="card-header bg-white py-3 border-bottom border-light">
-                                <h6 class="mb-0 text-dark fw-bold">Client</h6>
+                    <!-- Client Info Section -->
+                    <div class="receipt-section">
+                        <h6 class="section-title">Client</h6>
+                        <div class="client-box">
+                            <div class="client-avatar">
+                                <span>@Model.NomClient.Substring(0,1).ToUpper()</span>
                             </div>
-                            <div class="card-body">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-primary-subtle rounded-circle p-3 me-3 text-primary">
-                                        <i class="bi bi-person-fill fs-4"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fw-bold text-dark">@Model.NomClient</div>
-                                        <div class="small text-muted">Client ID: #@Model.IdClient</div>
-                                    </div>
-                                </div>
-                                <div class="mb-2">
-                                    <i class="bi bi-telephone text-muted me-2"></i>
+                            <div class="client-details">
+                                <div class="client-name">@Model.NomClient @Model.PrenomClient</div>
+                                <div class="client-contact">
                                     @if (!string.IsNullOrEmpty(Model.TelephoneClient))
                                     {
-                                        <a href="tel:@Model.TelephoneClient" class="text-decoration-none text-dark hover-effect">@Model.TelephoneClient</a>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted fst-italic">Non renseigné</span>
+                                        <span><i class="bi bi-telephone-fill"></i> @Model.TelephoneClient</span>
                                     }
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Items Table -->
+                    <div class="receipt-section">
+                        <h6 class="section-title">Articles</h6>
+                        <div class="receipt-table">
+                            <div class="r-row header">
+                                <span class="r-col-photo" style="width: 60px;">Article</span>
+                                <span class="r-col-item">Description</span>
+                                <span class="r-col-qty text-center">Qté</span>
+                                <span class="r-col-price text-end">Prix</span>
+                            </div>
+                            @foreach (var item in Model.LignesCommande)
+                            {
+                                <div class="r-row item align-items-center">
+                                    <div class="r-col-photo" style="width: 60px;">
+                                        @if (!string.IsNullOrEmpty(item.Photo))
+                                        {
+                                            <img src="@item.Photo" alt="Produit" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center text-muted" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-image" style="font-size: 1.2rem;"></i>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="r-col-item">
+                                        <div class="item-name">@item.NomProduit</div>
+                                        <div class="item-variant">
+                                            @if(!string.IsNullOrEmpty(item.Taille)) { <span>@item.Taille</span> }
+                                            @if(!string.IsNullOrEmpty(item.Couleur)) { <span class="ms-1">@item.Couleur</span> }
+                                        </div>
+                                    </div>
+                                    <div class="r-col-qty text-center">x @item.Quantite</div>
+                                    <div class="r-col-price text-end">@item.SousTotal.ToString("N2") DH</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Dashed Divider -->
+                    <div class="dashed-line"></div>
+
+                    <!-- Total Section -->
+                    <div class="receipt-footer">
+                        <div class="footer-row highlight">
+                            <span>Total Coopérative:</span>
+                            <span class="amount-admin">@Model.PrixTotalAdmin.ToString("N2") DH</span>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Info -->
+                    @if (!string.IsNullOrEmpty(Model.StatutLivraison))
+                    {
+                        <div class="receipt-delivery">
+                            <div class="delivery-icon">
+                                <i class="bi bi-truck"></i>
+                            </div>
+                            <div class="delivery-text">
+                                <div class="fw-bold">@Model.StatutLivraison</div>
+                                <div class="small">@Model.ModeLivraison</div>
+                                @if (Model.DateDebutEstimation.HasValue)
+                                {
+                                    <div class="small mt-1">Est: @Model.DateDebutEstimation.Value.ToString("dd/MM")</div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Receipt Bottom Edge -->
+                    <div class="receipt-edge"></div>
                 </div>
+
             </div>
+
+            <style>
+                /* Receipt Styles */
+                .receipt-container {
+                    background: white;
+                    width: 100%;
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 40px 40px 60px 40px;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.08); /* Soft shadow */
+                    position: relative;
+                    border-radius: 4px; /* Slight rounding at top */
+                    mask-image: radial-gradient(circle at bottom, transparent 10px, black 11px);
+                    mask-size: 100% 100%;
+                    mask-position: bottom;
+                    mask-repeat: no-repeat;
+                    /* Alternative: clip-path for serrated edge if mask support is limited, but mask is better for paper tear */
+                }
+                
+                /* Serrated edge implementation via pseudo element */
+                .receipt-edge {
+                    position: absolute;
+                    bottom: -15px;
+                    left: 0;
+                    right: 0;
+                    height: 20px;
+                    background: white;
+                    /* Using radial gradient for circles */
+                    background-image: radial-gradient(circle, transparent 50%, white 50%);
+                    background-size: 20px 20px;
+                    background-position: bottom center;
+                    /* Inverting with mask is cleaner but complex. Let's simpler zig zag */
+                    background: 
+                        linear-gradient(45deg, transparent 33.333%, white 33.333%, white 66.667%, transparent 66.667%),
+                        linear-gradient(-45deg, transparent 33.333%, white 33.333%, white 66.667%, transparent 66.667%);
+                    background-size: 20px 40px;
+                    background-position: 0 -20px; /* Offset to hide top half */
+                    display: none; /* Disabling pseudo complexity, relying on main container drop shadow and look */
+                }
+
+                /* Simple zig-zag border via CSS generator logic */
+                .receipt-container::after {
+                    content: "";
+                    position: absolute;
+                    bottom: -10px;
+                    left: 0;
+                    height: 20px;
+                    width: 100%;
+                    background: 
+                         linear-gradient(135deg, transparent 75%, white 76%) 0 0,
+                         linear-gradient(225deg, transparent 75%, white 76%) 0 0;
+                    background-size: 20px 20px;
+                    background-repeat: repeat-x;
+                    background-position: 0 bottom;
+                    transform: rotate(180deg);
+                    filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.05));
+                }
+
+                .brand-logo {
+                    font-family: 'Playfair Display', serif;
+                    font-size: 1.5rem;
+                    color: var(--terracotta);
+                    font-weight: bold;
+                }
+
+                .receipt-meta {
+                    display: flex;
+                    flex-direction: column;
+                    font-size: 0.85rem;
+                    color: #999;
+                    font-family: 'Inter', sans-serif;
+                }
+
+                .status-stamp {
+                    border: 3px double;
+                    padding: 5px 15px;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                    border-radius: 8px;
+                    transform: rotate(-10deg);
+                    font-size: 1rem;
+                    letter-spacing: 2px;
+                    opacity: 0.8;
+                }
+                /* Stamp colors based on labels (rough mapping) */
+                .status-stamp { color: #555; border-color: #555; }
+                .status-stamp:contains("Payée"), .status-stamp:contains("Livrée") { color: #27ae60; border-color: #27ae60; } /* Requires JS for :contains css or manual classes. Using razor class */
+
+                .status-stamp.livrée, .status-stamp.payée { color: var(--majorelle); border-color: var(--majorelle); }
+                .status-stamp.expédiée { color: #f39c12; border-color: #f39c12; }
+                .status-stamp.annulée { color: #e74c3c; border-color: #e74c3c; }
+
+                .dashed-line {
+                    border-bottom: 2px dashed #eee;
+                    margin: 2rem 0;
+                }
+
+                .section-title {
+                    text-transform: uppercase;
+                    font-size: 0.75rem;
+                    color: #bbb;
+                    letter-spacing: 1px;
+                    margin-bottom: 1rem;
+                }
+
+                .client-box {
+                    display: flex;
+                    align-items: center;
+                    background: #fdfaf8; /* Blush ultra light */
+                    padding: 1.5rem;
+                    border-radius: 12px;
+                }
+
+                .client-avatar {
+                    width: 50px;
+                    height: 50px;
+                    background: var(--terracotta);
+                    color: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    font-size: 1.2rem;
+                    margin-right: 1rem;
+                }
+
+                .client-name {
+                    font-weight: 700;
+                    color: #333;
+                }
+                .client-contact {
+                    font-size: 0.85rem;
+                    color: #777;
+                }
+
+                .receipt-table {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+
+                .r-row {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 0.95rem;
+                }
+                .r-row.header {
+                    font-weight: 600;
+                    color: #999;
+                    font-size: 0.85rem;
+                    margin-bottom: 0.5rem;
+                }
+                
+                .r-col-item { flex: 2; }
+                .r-col-qty { flex: 0 0 60px; }
+                .r-col-price { flex: 0 0 100px; }
+
+                .item-name {
+                    color: #2c3e50;
+                    font-weight: 500;
+                }
+                .item-variant {
+                    font-size: 0.8rem;
+                    color: #95a5a6;
+                }
+
+                .receipt-footer .footer-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                    font-size: 0.95rem;
+                    color: #7f8c8d;
+                }
+                .receipt-footer .amount {
+                    font-weight: 600;
+                    color: #2c3e50;
+                }
+                .receipt-footer .highlight {
+                    margin-top: 1rem;
+                    font-size: 1.2rem;
+                    color: var(--terracotta);
+                    font-weight: 700;
+                    background: #fff9f5;
+                    padding: 10px;
+                    border-radius: 8px;
+                }
+
+                .receipt-delivery {
+                    margin-top: 2rem;
+                    border: 1px solid #eee;
+                    border-radius: 8px;
+                    padding: 1rem;
+                    display: flex;
+                    gap: 1rem;
+                    align-items: center;
+                }
+                .delivery-icon {
+                    width: 40px;
+                    height: 40px;
+                    background: #f0f2f5;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #666;
+                }
+
+                /* Animations */
+                .animate-receipt-slide {
+                    animation: receiptSlide 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+                    transform-origin: top;
+                }
+
+                @@keyframes receiptSlide {
+                    from { transform: translateY(-50px) scaleY(0.9); opacity: 0; }
+                    to { transform: translateY(0) scaleY(1); opacity: 1; }
+                }
+
+                .animate-fade-down {
+                    animation: fadeDown 0.8s ease-out;
+                }
+                @@keyframes fadeDown {
+                    from { opacity: 0; transform: translateY(-20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            </style>
         </main>
     </div>
 

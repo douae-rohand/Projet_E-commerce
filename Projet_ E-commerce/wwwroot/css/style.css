@@ -223,8 +223,8 @@ h6 {
 /* Status Badges - FIXED VISIBILITY */
 .badge.bg-warning,
 .badge.warning {
-    background-color: #E5C888 !important;
-    color: #40322c !important;
+    background-color: #d00808 !important;
+    color: #f0e9e6 !important;
     font-weight: 600;
 }
 

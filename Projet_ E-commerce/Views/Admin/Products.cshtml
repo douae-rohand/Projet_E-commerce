@@ -34,7 +34,7 @@
         }
 
         .low-stock-card {
-            border-left: 4px solid #E5C888;
+            border-left: 4px solid #d00808;
         }
 
         .inactive-card {
@@ -239,9 +239,9 @@
                                     @if (product.VariantPhotos.Any())
                                     {
                                         <div class="product-carousel" data-photos='@Json.Serialize(product.VariantPhotos)'>
-                                            @foreach (var photo in product.VariantPhotos)
+                                            @for (int i = 0; i < product.VariantPhotos.Count; i++)
                                             {
-                                                <img src="@photo" alt="@product.NomP" class="product-image" />
+                                                <img src="@product.VariantPhotos[i]" alt="@product.NomP" class="product-image @(i == 0 ? "active" : "")" />
                                             }
                                         </div>
                                     }
@@ -326,23 +326,222 @@
                                     <!-- Actions -->
                                     <div class="product-actions mt-3">
                                         <a href="@Url.Action("ProductDetails", "Admin", new { id = product.IdP })" 
-                                           class="btn btn-sm btn-outline-secondary flex-fill" 
+                                           class="btn btn-retro btn-retro-outline flex-fill py-2" 
                                            title="Voir détails">
                                             <i class="bi bi-eye"></i>
-                                            <span class="d-none d-lg-inline ms-1"></span>
+                                            
                                         </a>
                                         <a href="@Url.Action("EditProduct", "Admin", new { id = product.IdP })" 
-                                           class="btn btn-sm btn-majorelle flex-fill" 
+                                           class="btn btn-retro btn-retro-primary flex-fill py-2" 
                                            title="Modifier">
                                             <i class="bi bi-pencil-fill"></i>
-                                            <span class="d-none d-lg-inline ms-1"></span>
+                                            
                                         </a>
-                                        <form asp-action="DeleteProduct" asp-route-id="@product.IdP" method="post" class="d-inline flex-fill" onsubmit="return confirmDelete(event, '@product.NomP')">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100" title="Désactiver">
-                                                <i class="bi bi-trash-fill"></i>
-                                            </button>
-                                        </form>
+                                    <form asp-action="ToggleProductStatus" asp-route-id="@product.IdP" method="post" class="d-inline flex-fill" style="flex: 0 0 auto;">
+                                        @Html.AntiForgeryToken()
+                                        <div class="uiverse-switch-wrapper" title="@(product.Statut == "active" ? "Désactiver" : "Activer")">
+                                            <div class="uiverse-switch">
+                                                <div class="switch-body">
+                                                    <div class="switch-content">
+                                                        <div class="switch-circle"></div>
+                                                        <label class="switch-paddle">
+                                                            <input type="checkbox" name="status" class="switch-input" onchange="this.form.submit()" @(product.Statut == "active" ? "checked" : "") />
+                                                            <div class="paddle-body">
+                                                                <div class="paddle-top">
+                                                                    <div class="paddle-highlight"></div>
+                                                                </div>
+                                                                <div class="paddle-side-1"></div>
+                                                                <div class="paddle-side-2"></div>
+                                                            </div>
+                                                        </label>
+                                                        <div class="switch-bar"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    <style>
+                                        /* Scoped toggle styles */
+                                        .uiverse-switch-wrapper {
+                                            width: 60px;
+                                            height: 34px;
+                                            overflow: hidden;
+                                            position: relative;
+                                            border-radius: 8px;
+                                        }
+
+                                        .uiverse-switch {
+                                            transform: scale(0.31);
+                                            transform-origin: top left;
+                                            position: absolute;
+                                            top: 0;
+                                            left: 0;
+                                        }
+
+                                        /* Converted and simplified CSS */
+                                        .switch-body {
+                                            width: 12rem; /* w-48 */
+                                            aspect-ratio: 16/9;
+                                            border-radius: 0.75rem; /* rounded-xl */
+                                            background-color: #FFF0E6; /* var(--blush) */
+                                            border: 4px solid #40322c; /* var(--foreground) */
+                                            transition: background-color 0.3s;
+                                        }
+
+                                        /* Checkbox state handling */
+                                        .switch-body:has(.switch-input:checked) {
+                                            background-color: #5A7EB8; /* var(--majorelle) */
+                                        }
+
+                                        .switch-content {
+                                            display: flex;
+                                            height: 100%;
+                                            width: 100%;
+                                            padding: 0 0.5rem; /* px-2 */
+                                            align-items: center;
+                                            gap: 0.5rem; /* gap-x-2 */
+                                        }
+
+                                        .switch-circle {
+                                            width: 1.5rem; /* w-6 */
+                                            height: 1.5rem; /* h-6 */
+                                            flex-shrink: 0;
+                                            border-radius: 9999px; /* rounded-full */
+                                            border: 4px solid #40322c;
+                                        }
+
+                                        .switch-paddle {
+                                            width: 100%;
+                                            height: 2.5rem; /* h-10 */
+                                            border: 4px solid #40322c;
+                                            border-radius: 0.25rem; /* rounded */
+                                            cursor: pointer;
+                                            position: relative;
+                                            overflow: hidden;
+                                        }
+
+                                        /* Flip the paddle when checked */
+                                        .switch-body:has(.switch-input:checked) .switch-paddle {
+                                            transform: scaleX(-1);
+                                        }
+
+                                        .switch-input {
+                                            display: none;
+                                        }
+
+                                        .paddle-body {
+                                            width: 100%;
+                                            height: 100%;
+                                            background-color: #D87A4F; /* var(--terracotta) */
+                                            position: relative;
+                                        }
+
+                                        .paddle-top {
+                                            width: 0;
+                                            height: 0;
+                                            position: relative;
+                                            z-index: 20;
+                                            border-left: 24px solid transparent;
+                                            border-right: 24px solid transparent;
+                                            border-top: 20px solid #40322c;
+                                        }
+
+                                        .paddle-highlight {
+                                            width: 0;
+                                            height: 0;
+                                            position: absolute;
+                                            border-left: 18px solid transparent;
+                                            border-right: 18px solid transparent;
+                                            border-top: 15px solid #E5C888; /* var(--sable) */
+                                            top: -20px; /* -top-5 */
+                                            left: -18px; /* -left-[18px] */
+                                        }
+
+                                        .paddle-side-1 {
+                                            width: 24px;
+                                            height: 2.25rem; /* h-9 */
+                                            z-index: 10;
+                                            position: absolute;
+                                            top: 9px;
+                                            left: 0;
+                                            background-color: #D87A4F; /* var(--terracotta) */
+                                            border-right: 2px solid #40322c;
+                                            border-bottom: 4px solid #40322c;
+                                            transform: skewY(39deg);
+                                        }
+
+                                        .paddle-side-2 {
+                                            width: 25px;
+                                            height: 2.25rem; /* h-9 */
+                                            z-index: 10;
+                                            position: absolute;
+                                            top: 9px;
+                                            left: 24px;
+                                            background-color: #B06543; /* Darker terracotta */
+                                            border-right: 4px solid #40322c;
+                                            border-left: 2px solid #40322c; /* border-l-2 */
+                                            border-bottom: 4px solid #40322c;
+                                            transform: skewY(-39deg);
+                                        }
+
+                                        .switch-bar {
+                                            width: 1.5rem; /* w-6 */
+                                            height: 0.25rem; /* h-1 */
+                                            flex-shrink: 0;
+                                            background-color: #40322c;
+                                            border-radius: 9999px;
+                                        }
+
+                                        /* New Retro Button Styles */
+                                        .btn-retro {
+                                            border: 3px solid #40322c;
+                                            border-radius: 8px;
+                                            font-weight: 700;
+                                            text-transform: uppercase;
+                                            font-size: 0.75rem;
+                                            letter-spacing: 0.5px;
+                                            position: relative;
+                                            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                                            box-shadow: 2px 2px 0px #40322c;
+                                            display: inline-flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            
+                                            /* Fixed Size to match Switch */
+                                            width: 60px;
+                                            height: 38px; /* 34px + 4px border roughly, visually matching the switch wrapper height */
+                                            padding: 0; /* Remove padding to center icon */
+                                        }
+
+                                        .btn-retro i {
+                                            font-size: 1.1rem;
+                                        }
+
+                                        .btn-retro:active {
+                                            transform: translate(2px, 2px);
+                                            box-shadow: 0px 0px 0px #40322c;
+                                        }
+
+                                        .btn-retro-primary {
+                                            background-color: #5A7EB8; /* Majorelle */
+                                            color: white;
+                                        }
+                                        
+                                        .btn-retro-primary:hover {
+                                            background-color: #4a6da3;
+                                            color: white;
+                                        }
+
+                                        .btn-retro-outline {
+                                            background-color: #FFF0E6; /* Blush */
+                                            color: #40322c;
+                                        }
+
+                                        .btn-retro-outline:hover {
+                                            background-color: #E5C888; /* Sand highlight */
+                                            color: #40322c;
+                                        }
+                                    </style>
                                     </div>
                                 </div>
                             </div>
@@ -386,12 +585,12 @@
                 let currentIndex = 0;
                 images[currentIndex].classList.add('active');
                 
-                // Rotate every 3 seconds
+                // Rotate every 6 seconds
                 setInterval(() => {
                     images[currentIndex].classList.remove('active');
                     currentIndex = (currentIndex + 1) % images.length;
                     images[currentIndex].classList.add('active');
-                }, 3000);
+                }, 6000);
             });
         });
     </script>

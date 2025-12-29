@@ -293,55 +293,94 @@ namespace Projet__E_commerce
                 return View(model);
             }
 
+            using var transaction = _context.Database.BeginTransaction();
             try
             {
                 var adminId = GetAdminId();
-                string? photoPath = null;
-
-                // Handle file upload
-                if (photoFile != null && photoFile.Length > 0)
+                
+                // 1. Create and Save Product
+                var produit = new Produit
                 {
-                    var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "products");
-                    Directory.CreateDirectory(uploadsFolder);
-
-                    var uniqueFileName = $"{Guid.NewGuid()}_{photoFile.FileName}";
-                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await photoFile.CopyToAsync(fileStream);
-                    }
-
-                    photoPath = $"/uploads/products/{uniqueFileName}";
-                }
-
-                // Call stored procedure
-                var parameters = new[]
-                {
-                    new SqlParameter("@idAdmin", adminId),
-                    new SqlParameter("@nomP", model.NomP),
-                    new SqlParameter("@description", (object?)model.Description ?? DBNull.Value),
-                    new SqlParameter("@seuil_alerte", model.SeuilAlerte),
-                    new SqlParameter("@idC", model.IdC),
-                    new SqlParameter("@prix", model.Prix),
-                    new SqlParameter("@taille", (object?)model.Taille ?? DBNull.Value),
-                    new SqlParameter("@couleur", (object?)model.Couleur ?? DBNull.Value),
-                    new SqlParameter("@photo", (object?)photoPath ?? DBNull.Value),
-                    new SqlParameter("@quantite", model.Quantite),
-                    new SqlParameter("@poids", (object?)model.Poids ?? DBNull.Value)
+                    idAdmin = adminId,
+                    nomP = model.NomP,
+                    description = model.Description,
+                    seuil_alerte = model.SeuilAlerte,
+                    idC = model.IdC,
+                    statut = model.Statut,
+                    created_at = DateTime.Now,
+                    updated_at = DateTime.Now
                 };
 
-                await _context.Database.ExecuteSqlRawAsync(
-                    "EXEC sp_create_product @idAdmin, @nomP, @description, @seuil_alerte, @idC, @prix, @taille, @couleur, @photo, @quantite, @poids",
-                    parameters);
+                _context.Produits.Add(produit);
+                await _context.SaveChangesAsync();
+                
+                // Get the generated ID
+                int newProductId = produit.idP;
 
-                TempData["SuccessMessage"] = "Produit créé avec succès";
+                // 2. Handle Main Photo Upload
+                string? mainPhotoPath = null;
+                if (photoFile != null && photoFile.Length > 0)
+                {
+                    mainPhotoPath = await SaveUploadedFileAsync(photoFile, "products");
+                }
+
+                // 3. Create Main Variant
+                var mainVariant = new Variante
+                {
+                    idP = newProductId,
+                    prix = model.Prix,
+                    quantite = model.Quantite,
+                    taille = model.Taille,
+                    couleur = model.Couleur,
+                    poids = model.Poids,
+                    photo = mainPhotoPath,
+                    created_at = DateTime.Now,
+                    updated_at = DateTime.Now
+                };
+
+                _context.Variantes.Add(mainVariant);
+
+                // 4. Create Additional Variants
+                if (model.Variantes != null && model.Variantes.Any())
+                {
+                    foreach (var variantModel in model.Variantes)
+                    {
+                        // Filter out empty entries if client-side validation failed or if empty rows were submitted
+                         if (variantModel.prix <= 0 && variantModel.quantite <= 0) continue;
+
+                        string? variantPhotoPath = null;
+                        if (variantModel.PhotoFile != null && variantModel.PhotoFile.Length > 0)
+                        {
+                             variantPhotoPath = await SaveUploadedFileAsync(variantModel.PhotoFile, "products");
+                        }
+
+                        var additionalVariant = new Variante
+                        {
+                            idP = newProductId,
+                            prix = variantModel.prix,
+                            quantite = variantModel.quantite,
+                            taille = variantModel.taille,
+                            couleur = variantModel.couleur,
+                            poids = variantModel.poids,
+                            photo = variantPhotoPath,
+                            created_at = DateTime.Now,
+                            updated_at = DateTime.Now
+                        };
+                        _context.Variantes.Add(additionalVariant);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                transaction.Commit();
+
+                TempData["SuccessMessage"] = "Produit et variantes créés avec succès";
                 return RedirectToAction(nameof(Products));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating product");
-                ModelState.AddModelError("", "Erreur lors de la création du produit");
+                transaction.Rollback();
+                _logger.LogError(ex, "Error creating product with variants");
+                ModelState.AddModelError("", "Erreur lors de la création du produit: " + ex.Message);
                 model.Categories = await _context.Categories.ToListAsync();
                 return View(model);
             }
@@ -372,7 +411,8 @@ namespace Projet__E_commerce
                 IdC = product.idC,
                 Statut = product.statut,
                 Categories = await _context.Categories.ToListAsync(),
-                Variantes = product.Variantes.ToList()
+                Variantes = product.Variantes.ToList(),
+                StockTotal = product.Variantes.Sum(v => v.quantite)
             };
 
             ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
@@ -384,45 +424,71 @@ namespace Projet__E_commerce
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProduct(ProductManagementViewModel model)
         {
+            // Remove validation for fields that are not part of the Edit Product form
+            // These fields (Prix, Quantite) are only used for creating the initial variant
+            ModelState.Remove("Prix");
+            ModelState.Remove("Quantite");
+
             if (!ModelState.IsValid)
             {
                 model.Categories = await _context.Categories.ToListAsync();
+                // Reload variants so they don't disappear
+                var adminId = GetAdminId();
+
+                model.Variantes = await _context.Variantes
+                    .Where(v => v.idP == model.IdP)
+                    .ToListAsync();
+                model.StockTotal = model.Variantes.Sum(v => v.quantite);
                 return View(model);
             }
 
             try
             {
                 var adminId = GetAdminId();
-                var parameters = new[]
-                {
-                    new SqlParameter("@idP", model.IdP),
-                    new SqlParameter("@idAdmin", adminId),
-                    new SqlParameter("@nomP", model.NomP),
-                    new SqlParameter("@description", (object?)model.Description ?? DBNull.Value),
-                    new SqlParameter("@seuil_alerte", model.SeuilAlerte),
-                    new SqlParameter("@idC", model.IdC),
-                    new SqlParameter("@statut", model.Statut)
-                };
+                
+                var product = await _context.Produits
+                    .Where(p => p.idP == model.IdP && p.idAdmin == adminId)
+                    .FirstOrDefaultAsync();
 
-                await _context.Database.ExecuteSqlRawAsync(
-                    "EXEC sp_update_product @idP, @idAdmin, @nomP, @description, @seuil_alerte, @idC, @statut",
-                    parameters);
+                if (product == null)
+                {
+                    TempData["ErrorMessage"] = "Produit non trouvé";
+                    return RedirectToAction(nameof(Products));
+                }
+
+                // Update properties
+                product.nomP = model.NomP;
+                product.description = model.Description;
+                product.seuil_alerte = model.SeuilAlerte;
+                product.idC = model.IdC;
+                product.statut = model.Statut;
+                product.updated_at = DateTime.Now;
+
+                await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "Produit modifié avec succès";
-                return RedirectToAction(nameof(Products));
+                // Stay on the edit page so the user can see variants
+                return RedirectToAction(nameof(EditProduct), new { id = model.IdP });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating product");
                 ModelState.AddModelError("", "Erreur lors de la modification du produit");
                 model.Categories = await _context.Categories.ToListAsync();
+                // Reload variants in catch block too
+                var adminId = GetAdminId();
+
+                model.Variantes = await _context.Variantes
+                    .Where(v => v.idP == model.IdP)
+                    .ToListAsync();
+                model.StockTotal = model.Variantes.Sum(v => v.quantite);
                 return View(model);
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteProduct(int id)
+        public async Task<IActionResult> ToggleProductStatus(int id)
         {
             try
             {
@@ -439,18 +505,19 @@ namespace Projet__E_commerce
                     return RedirectToAction(nameof(Products));
                 }
 
-                // Soft delete: change status to inactive
-                product.statut = "inactive";
+                // Toggle status
+                product.statut = product.statut == "active" ? "inactive" : "active";
                 product.updated_at = DateTime.Now;
                 
                 await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = "Produit désactivé avec succès";
+                
+                var action = product.statut == "active" ? "activé" : "désactivé";
+                TempData["SuccessMessage"] = $"Produit {action} avec succès";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting product");
-                TempData["ErrorMessage"] = "Erreur lors de la suppression du produit";
+                _logger.LogError(ex, "Error toggling product status");
+                TempData["ErrorMessage"] = "Erreur lors du changement de statut du produit";
             }
 
             return RedirectToAction(nameof(Products));
@@ -798,6 +865,7 @@ namespace Projet__E_commerce
                     NumeroCommande = $"CMD-{commande.idCommande:D6}",
                     IdClient = commande.idClient,
                     NomClient = commande.Client.nom,
+                    PrenomClient = commande.Client.prenom,
                     TelephoneClient = commande.Client.telephone,
                     Statut = commande.statut,
                     StatusLabel = GetStatusLabel(commande.statut),
