@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Projet__E_commerce.Filters;
+using Microsoft.EntityFrameworkCore;
 using Projet__E_commerce.Models.ViewModels;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using Projet__E_commerce.Filters;
 
 namespace Projet__E_commerce.Controllers
 {
@@ -25,6 +26,7 @@ namespace Projet__E_commerce.Controllers
             ViewBag.ActiveTab = "dashboard";
 
             var model = await GetCompleteDashboardDataAsync();
+            model.UserEmail = HttpContext.Session.GetString("UserEmail");
             return View("~/Views/SuperAdmin/SuperAdminDashboard.cshtml", model);
         }
 
@@ -58,14 +60,14 @@ namespace Projet__E_commerce.Controllers
             return View("~/Views/SuperAdmin/SuperAdminDashboard.cshtml", analytics);
         }
 
-        public async Task<IActionResult> Alerts()
+        public async Task<IActionResult> DeliveriesAndOrders()
         {
             ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
             ViewBag.UserId = HttpContext.Session.GetInt32("UserId");
-            ViewBag.ActiveTab = "alerts";
+            ViewBag.ActiveTab = "deliveries_orders";
 
-            var alerts = await GetAlertsAsync();
-            return View("~/Views/SuperAdmin/SuperAdminDashboard.cshtml", alerts);
+            var data = await GetDeliveriesAndOrdersAsync();
+            return View("~/Views/SuperAdmin/SuperAdminDashboard.cshtml", data);
         }
 
         public async Task<IActionResult> CooperativeDetails(int id)
@@ -93,25 +95,25 @@ namespace Projet__E_commerce.Controllers
                 await connection.OpenAsync();
 
                 // Get total cooperatives
-                using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Admins", connection))
+                using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM admins", connection))
                 {
                     model.TotalCooperatives = (int)await cmd.ExecuteScalarAsync();
                 }
 
                 // Get total users (clients)
-                using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Clients", connection))
+                using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM clients", connection))
                 {
                     model.TotalUsers = (int)await cmd.ExecuteScalarAsync();
                 }
 
                 // Get total orders
-                using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Commandes", connection))
+                using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM commandes", connection))
                 {
                     model.TotalOrders = (int)await cmd.ExecuteScalarAsync();
                 }
 
                 // Get total revenue
-                using (SqlCommand cmd = new SqlCommand("SELECT ISNULL(SUM(prixTotal), 0) FROM Commandes WHERE statut = 'valide'", connection))
+                using (SqlCommand cmd = new SqlCommand("SELECT ISNULL(SUM(prixTotal), 0) FROM commandes WHERE statut = 'valide'", connection))
                 {
                     model.TotalRevenue = (decimal)await cmd.ExecuteScalarAsync();
                 }
@@ -127,10 +129,10 @@ namespace Projet__E_commerce.Controllers
                         COUNT(DISTINCT p.idP) as TotalProduits,
                         COUNT(DISTINCT lc.idCommande) as TotalCommandes,
                         ISNULL(SUM(lc.prix_unitaire * lc.quantite), 0) as Revenue
-                    FROM Admins a
-                    LEFT JOIN Produits p ON a.id = p.idAdmin
-                    LEFT JOIN Variantes v ON p.idP = v.idP
-                    LEFT JOIN LignesCommande lc ON v.idV = lc.idV
+                    FROM admins a
+                    LEFT JOIN produits p ON a.id = p.idAdmin
+                    LEFT JOIN variantes v ON p.idP = v.idP
+                    LEFT JOIN lignescommande lc ON v.idV = lc.idV
                     GROUP BY a.id, a.nom_cooperative, a.ville, a.logo, a.created_at
                     ORDER BY Revenue DESC";
 
@@ -160,8 +162,8 @@ namespace Projet__E_commerce.Controllers
                         'Nouvelle commande' as Title,
                         CONCAT('Commande #', c.idCommande, ' - ', cl.prenom, ' ', cl.nom) as Detail,
                         c.created_at
-                    FROM Commandes c
-                    INNER JOIN Clients cl ON c.idClient = cl.id
+                    FROM commandes c
+                    INNER JOIN clients cl ON c.idClient = cl.id
                     ORDER BY c.created_at DESC";
 
                 using (SqlCommand cmd = new SqlCommand(activitiesQuery, connection))
@@ -208,10 +210,10 @@ namespace Projet__E_commerce.Controllers
                         COUNT(DISTINCT p.idP) as TotalProduits,
                         COUNT(DISTINCT lc.idCommande) as TotalCommandes,
                         ISNULL(SUM(lc.prix_unitaire * lc.quantite), 0) as Revenue
-                    FROM Admins a
-                    LEFT JOIN Produits p ON a.id = p.idAdmin
-                    LEFT JOIN Variantes v ON p.idP = v.idP
-                    LEFT JOIN LignesCommande lc ON v.idV = lc.idV
+                    FROM admins a
+                    LEFT JOIN produits p ON a.id = p.idAdmin
+                    LEFT JOIN variantes v ON p.idP = v.idP
+                    LEFT JOIN lignescommande lc ON v.idV = lc.idV
                     GROUP BY a.id, a.nom_cooperative, a.ville, a.logo, a.telephone, a.created_at
                     ORDER BY a.created_at DESC";
 
@@ -258,8 +260,8 @@ namespace Projet__E_commerce.Controllers
                         NULL as NomCooperative,
                         u.est_actif,
                         u.created_at
-                    FROM Utilisateurs u
-                    INNER JOIN Clients c ON u.id = c.id";
+                    FROM utilisateurs u
+                    INNER JOIN clients c ON u.id = c.id";
 
                 using (SqlCommand cmd = new SqlCommand(clientsQuery, connection))
                 using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
@@ -291,8 +293,8 @@ namespace Projet__E_commerce.Controllers
                         a.nom_cooperative,
                         u.est_actif,
                         u.created_at
-                    FROM Utilisateurs u
-                    INNER JOIN Admins a ON u.id = a.id";
+                    FROM utilisateurs u
+                    INNER JOIN admins a ON u.id = a.id";
 
                 using (SqlCommand cmd = new SqlCommand(adminsQuery, connection))
                 using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
@@ -332,7 +334,7 @@ namespace Projet__E_commerce.Controllers
                         FORMAT(created_at, 'yyyy-MM') as Month,
                         COUNT(*) as Orders,
                         ISNULL(SUM(prixTotal), 0) as Revenue
-                    FROM Commandes
+                    FROM commandes
                     WHERE created_at >= DATEADD(MONTH, -6, GETDATE())
                     GROUP BY FORMAT(created_at, 'yyyy-MM')
                     ORDER BY Month";
@@ -358,10 +360,10 @@ namespace Projet__E_commerce.Controllers
                         COUNT(DISTINCT p.idP) as TotalProducts,
                         COUNT(DISTINCT lc.idCommande) as TotalSales,
                         ISNULL(SUM(lc.prix_unitaire * lc.quantite), 0) as Revenue
-                    FROM Categories c
-                    LEFT JOIN Produits p ON c.idC = p.idC
-                    LEFT JOIN Variantes v ON p.idP = v.idP
-                    LEFT JOIN LignesCommande lc ON v.idV = lc.idV
+                    FROM categories c
+                    LEFT JOIN produits p ON c.idC = p.idC
+                    LEFT JOIN variantes v ON p.idP = v.idP
+                    LEFT JOIN lignescommande lc ON v.idV = lc.idV
                     GROUP BY c.nom
                     ORDER BY Revenue DESC";
 
@@ -384,48 +386,55 @@ namespace Projet__E_commerce.Controllers
             return model;
         }
 
-        private async Task<List<AlertViewModel>> GetAlertsAsync()
+        private async Task<List<OrderDetailsViewModel>> GetDeliveriesAndOrdersAsync()
         {
-            var alerts = new List<AlertViewModel>();
+            var list = new List<OrderDetailsViewModel>();
             string connectionString = _configuration.GetConnectionString("DefaultConnection");
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 await connection.OpenAsync();
 
-                // Low stock alerts
-                string lowStockQuery = @"
+                string query = @"
                     SELECT 
-                        p.idP,
-                        'stock' as Type,
-                        CONCAT('Stock faible - ', p.nomP) as Title,
-                        CONCAT('Quantité restante: ', ISNULL(SUM(v.quantite), 0), ' unités') as Message,
-                        'warning' as Severity,
-                        p.updated_at
-                    FROM Produits p
-                    INNER JOIN Variantes v ON p.idP = v.idP
-                    GROUP BY p.idP, p.nomP, p.seuil_alerte, p.updated_at
-                    HAVING ISNULL(SUM(v.quantite), 0) <= p.seuil_alerte";
+                        c.idCommande, c.created_at, c.statut, c.prixTotal,
+                        cl.nom, cl.prenom, u.email, cl.telephone,
+                        al.adresse_complete, al.ville, al.code_postal, 
+                        l.statut, l.mode_livraison
+                    FROM Commandes c
+                    INNER JOIN Clients cl ON c.idClient = cl.id
+                    INNER JOIN Utilisateurs u ON cl.id = u.id
+                    LEFT JOIN Livraisons l ON c.idCommande = l.idCommande
+                    LEFT JOIN AdressesLivraison al ON l.idAdresse = al.idAdresse
+                    ORDER BY c.created_at DESC";
 
-                using (SqlCommand cmd = new SqlCommand(lowStockQuery, connection))
+                using (SqlCommand cmd = new SqlCommand(query, connection))
                 using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
                     {
-                        alerts.Add(new AlertViewModel
+                        list.Add(new OrderDetailsViewModel
                         {
-                            Id = reader.GetInt32(0),
-                            Type = reader.GetString(1),
-                            Title = reader.GetString(2),
-                            Message = reader.GetString(3),
-                            Severity = reader.GetString(4),
-                            CreatedAt = reader.GetDateTime(5)
+                            IdCommande = reader.GetInt32(0),
+                            DateCommande = reader.GetDateTime(1),
+                            Statut = reader.GetString(2),
+                            MontantTotal = reader.GetDecimal(3),
+                            ClientNom = reader.GetString(4),
+                            ClientPrenom = reader.GetString(5),
+                            ClientEmail = reader.GetString(6),
+                            ClientTelephone = reader.IsDBNull(7) ? "" : reader.GetString(7),
+                            AdresseLivraison = reader.IsDBNull(8) ? "" : reader.GetString(8),
+                            VilleLivraison = reader.IsDBNull(9) ? "" : reader.GetString(9),
+                            CodePostalLivraison = reader.IsDBNull(10) ? "" : reader.GetString(10),
+                            HasDelivery = !reader.IsDBNull(11),
+                            DeliveryStatus = reader.IsDBNull(11) ? null : reader.GetString(11),
+                            DeliveryMode = reader.IsDBNull(12) ? null : reader.GetString(12)
                         });
                     }
                 }
             }
 
-            return alerts;
+            return list;
         }
 
         private async Task<CooperativeDetailsViewModel?> GetCooperativeDetailsAsync(int id)
@@ -442,8 +451,8 @@ namespace Projet__E_commerce.Controllers
                     SELECT 
                         a.id, a.nom_cooperative, u.email, a.ville, a.localisation, 
                         a.telephone, a.logo, a.description, u.est_actif, a.created_at
-                    FROM Admins a
-                    INNER JOIN Utilisateurs u ON a.id = u.id
+                    FROM admins a
+                    INNER JOIN utilisateurs u ON a.id = u.id
                     WHERE a.id = @Id";
 
                 using (SqlCommand cmd = new SqlCommand(coopQuery, connection))
@@ -477,10 +486,10 @@ namespace Projet__E_commerce.Controllers
                         COUNT(DISTINCT p.idP) as TotalProduits,
                         COUNT(DISTINCT lc.idCommande) as TotalCommandes,
                         ISNULL(SUM(lc.prix_unitaire * lc.quantite), 0) as Revenue
-                    FROM Admins a
-                    LEFT JOIN Produits p ON a.id = p.idAdmin
-                    LEFT JOIN Variantes v ON p.idP = v.idP
-                    LEFT JOIN LignesCommande lc ON v.idV = lc.idV
+                    FROM admins a
+                    LEFT JOIN produits p ON a.id = p.idAdmin
+                    LEFT JOIN variantes v ON p.idP = v.idP
+                    LEFT JOIN lignescommande lc ON v.idV = lc.idV
                     WHERE a.id = @Id";
 
                 using (SqlCommand cmd = new SqlCommand(statsQuery, connection))
@@ -502,13 +511,13 @@ namespace Projet__E_commerce.Controllers
                     SELECT 
                         p.idP, p.nomP, p.description, MIN(v.prix) as prix, 
                         ISNULL(SUM(v.quantite), 0) as Stock,
-                        (SELECT TOP 1 v2.photo FROM Variantes v2 WHERE v2.idP = p.idP) as image_url, 
+                        (SELECT TOP 1 v2.photo FROM variantes v2 WHERE v2.idP = p.idP) as image_url, 
                         c.nom as Categorie,
-                        (SELECT AVG(CAST(note as FLOAT)) FROM Avis WHERE idProduit = p.idP) as MoyenneAvis,
-                        (SELECT COUNT(*) FROM Avis WHERE idProduit = p.idP) as NombreAvis
-                    FROM Produits p
-                    LEFT JOIN Variantes v ON p.idP = v.idP
-                    LEFT JOIN Categories c ON p.idC = c.idC
+                        (SELECT AVG(CAST(note as FLOAT)) FROM avis WHERE idProduit = p.idP) as MoyenneAvis,
+                        (SELECT COUNT(*) FROM avis WHERE idProduit = p.idP) as NombreAvis
+                    FROM produits p
+                    LEFT JOIN variantes v ON p.idP = v.idP
+                    LEFT JOIN categories c ON p.idC = c.idC
                     WHERE p.idAdmin = @Id
                     GROUP BY p.idP, p.nomP, p.description, c.nom";
 
@@ -535,8 +544,8 @@ namespace Projet__E_commerce.Controllers
                             // Get reviews for this product
                             string avisQuery = @"
                                 SELECT a.idAvis, cl.prenom, cl.nom, a.note, a.commentaire, a.created_at
-                                FROM Avis a
-                                INNER JOIN Clients cl ON a.idClient = cl.id
+                                FROM avis a
+                                INNER JOIN clients cl ON a.idClient = cl.id
                                 WHERE a.idProduit = @ProductId
                                 ORDER BY a.created_at DESC";
 
@@ -585,8 +594,8 @@ namespace Projet__E_commerce.Controllers
                     SELECT 
                         COUNT(*) as Total,
                         COUNT(CASE WHEN u.est_actif = 1 THEN 1 END) as Actives
-                    FROM Admins a 
-                    INNER JOIN Utilisateurs u ON a.id = u.id", connection))
+                    FROM admins a 
+                    INNER JOIN utilisateurs u ON a.id = u.id", connection))
                 using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                 {
                     if (await reader.ReadAsync())
@@ -601,8 +610,8 @@ namespace Projet__E_commerce.Controllers
                     SELECT 
                         COUNT(*) as TotalUsers,
                         ISNULL(SUM(CASE WHEN est_actif = 1 THEN 1 ELSE 0 END), 0) as UsersActifs,
-                        (SELECT COUNT(*) FROM Clients) as TotalClients
-                    FROM Utilisateurs", connection))
+                        (SELECT COUNT(*) FROM clients) as TotalClients
+                    FROM utilisateurs", connection))
                 using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                 {
                     if (await reader.ReadAsync())
@@ -630,6 +639,8 @@ namespace Projet__E_commerce.Controllers
                         model.ProduitsEnStock = reader.GetInt32(1);
                         model.ProduitsStockFaible = reader.GetInt32(2);
                         model.ProduitsRupture = reader.GetInt32(3);
+                        // NEW: derive "stock OK" count for the dashboard
+                        model.ProduitsStockOk = Math.Max(0, model.ProduitsEnStock - model.ProduitsStockFaible);
                     }
                 }
 
@@ -648,19 +659,56 @@ namespace Projet__E_commerce.Controllers
                     }
                 }
 
+                // ===== TOP COOPÉRATIVES =====
+                string topCoopsQuery = @"
+                    SELECT TOP 5 
+                        a.id, 
+                        a.nom_cooperative, 
+                        a.ville,
+                        a.logo,
+                        a.created_at,
+                        COUNT(DISTINCT p.idP) as TotalProduits,
+                        COUNT(DISTINCT lc.idCommande) as TotalCommandes,
+                        ISNULL(SUM(lc.prix_unitaire * lc.quantite), 0) as Revenue
+                    FROM Admins a
+                    LEFT JOIN Produits p ON a.id = p.idAdmin
+                    LEFT JOIN Variantes v ON p.idP = v.idP
+                    LEFT JOIN LignesCommande lc ON v.idV = lc.idV
+                    GROUP BY a.id, a.nom_cooperative, a.ville, a.logo, a.created_at
+                    ORDER BY Revenue DESC";
+
+                using (SqlCommand cmd = new SqlCommand(topCoopsQuery, connection))
+                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        model.TopCooperatives.Add(new CooperativeStatsViewModel
+                        {
+                            Id = reader.GetInt32(0),
+                            NomCooperative = reader.GetString(1),
+                            Ville = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                            Logo = reader.IsDBNull(3) ? null : reader.GetString(3),
+                            CreatedAt = reader.GetDateTime(4),
+                            TotalProduits = reader.GetInt32(5),
+                            TotalCommandes = reader.GetInt32(6),
+                            Revenue = reader.GetDecimal(7)
+                        });
+                    }
+                }
+
                 // ===== TOP PRODUITS =====
                 string topProduitsQuery = @"
                     SELECT TOP 5
                         p.idP, p.nomP, a.nom_cooperative, 
-                        (SELECT TOP 1 v.photo FROM Variantes v WHERE v.idP = p.idP) as image_url,
+                        (SELECT TOP 1 v.photo FROM variantes v WHERE v.idP = p.idP) as image_url,
                         MIN(v.prix) as prix,
                         COUNT(DISTINCT lc.idCommande) as NombreVentes,
                         ISNULL(SUM(lc.prix_unitaire * lc.quantite), 0) as RevenusGeneres,
-                        (SELECT AVG(CAST(note as FLOAT)) FROM Avis WHERE idProduit = p.idP) as MoyenneAvis
-                    FROM Produits p
-                    INNER JOIN Admins a ON p.idAdmin = a.id
-                    LEFT JOIN Variantes v ON p.idP = v.idP
-                    LEFT JOIN LignesCommande lc ON v.idV = lc.idV
+                        (SELECT AVG(CAST(note as FLOAT)) FROM avis WHERE idProduit = p.idP) as MoyenneAvis
+                    FROM produits p
+                    INNER JOIN admins a ON p.idAdmin = a.id
+                    LEFT JOIN variantes v ON p.idP = v.idP
+                    LEFT JOIN lignescommande lc ON v.idV = lc.idV
                     WHERE v.idV IS NOT NULL
                     GROUP BY p.idP, p.nomP, a.nom_cooperative
                     ORDER BY NombreVentes DESC";
@@ -683,6 +731,73 @@ namespace Projet__E_commerce.Controllers
                         });
                     }
                 }
+
+                // ===== COMMANDES RÉCENTES =====
+                string recentOrdersQuery = @"
+                    SELECT TOP 10
+                        c.idCommande, c.created_at, c.statut, c.prixTotal,
+                        cl.nom, cl.prenom, u.email, cl.telephone,
+                        al.adresse_complete, al.ville, al.code_postal, l.notes
+                    FROM commandes c
+                    INNER JOIN clients cl ON c.idClient = cl.id
+                    INNER JOIN utilisateurs u ON cl.id = u.id
+                    LEFT JOIN livraisons l ON c.idCommande = l.idCommande
+                    LEFT JOIN adresseslivraison al ON l.idAdresse = al.idAdresse
+                    ORDER BY c.created_at DESC";
+
+                using (SqlCommand cmd = new SqlCommand(recentOrdersQuery, connection))
+                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var order = new OrderDetailsViewModel
+                        {
+                            IdCommande = reader.GetInt32(0),
+                            DateCommande = reader.GetDateTime(1),
+                            Statut = reader.GetString(2),
+                            MontantTotal = reader.GetDecimal(3),
+                            ClientNom = reader.GetString(4),
+                            ClientPrenom = reader.GetString(5),
+                            ClientEmail = reader.GetString(6),
+                            ClientTelephone = reader.IsDBNull(7) ? "" : reader.GetString(7),
+                            AdresseLivraison = reader.IsDBNull(8) ? "" : reader.GetString(8),
+                            VilleLivraison = reader.IsDBNull(9) ? "" : reader.GetString(9),
+                            CodePostalLivraison = reader.IsDBNull(10) ? "" : reader.GetString(10),
+                            Notes = reader.IsDBNull(11) ? null : reader.GetString(11)
+                        };
+
+                        // Get order items
+                        string orderItemsQuery = @"
+                            SELECT p.idP, p.nomP, a.nom_cooperative, lc.quantite, lc.prix_unitaire, (lc.quantite * lc.prix_unitaire) as sousTotal
+                            FROM lignescommande lc
+                            INNER JOIN variantes v ON lc.idV = v.idV
+                            INNER JOIN produits p ON v.idP = p.idP
+                            INNER JOIN admins a ON p.idAdmin = a.id
+                            WHERE lc.idCommande = @orderId";
+
+                        using (SqlCommand itemsCmd = new SqlCommand(orderItemsQuery, connection))
+                        {
+                            itemsCmd.Parameters.AddWithValue("@orderId", order.IdCommande);
+                            using (SqlDataReader itemsReader = await itemsCmd.ExecuteReaderAsync())
+                            {
+                                while (await itemsReader.ReadAsync())
+                                {
+                                    order.Items.Add(new OrderItemViewModel
+                                    {
+                                        IdProduit = itemsReader.GetInt32(0),
+                                        NomProduit = itemsReader.GetString(1),
+                                        NomCooperative = itemsReader.GetString(2),
+                                        Quantite = itemsReader.GetInt32(3),
+                                        PrixUnitaire = itemsReader.GetDecimal(4),
+                                        SousTotal = itemsReader.GetDecimal(5)
+                                    });
+                                }
+                            }
+                        }
+
+                        model.RecentOrders.Add(order);
+                    }
+                }
             }
 
             return model;
@@ -703,6 +818,182 @@ namespace Projet__E_commerce.Controllers
             if (timeSpan.TotalDays < 365)
                 return $"{(int)(timeSpan.TotalDays / 30)}mois";
             return $"{(int)(timeSpan.TotalDays / 365)}ans";
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleUserStatus(int userId)
+        {
+            try
+            {
+                var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    // Get current status
+                    string getStatusQuery = "SELECT est_actif FROM Utilisateurs WHERE id = @userId";
+                    bool currentStatus = false;
+
+                    using (SqlCommand cmd = new SqlCommand(getStatusQuery, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@userId", userId);
+                        var result = await cmd.ExecuteScalarAsync();
+                        if (result != null)
+                        {
+                            currentStatus = Convert.ToBoolean(result);
+                        }
+                        else
+                        {
+                            return Json(new { success = false, message = "Utilisateur non trouvé." });
+                        }
+                    }
+
+                    // Toggle status
+                    string updateQuery = "UPDATE Utilisateurs SET est_actif = @newStatus WHERE id = @userId";
+                    using (SqlCommand cmd = new SqlCommand(updateQuery, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@userId", userId);
+                        cmd.Parameters.AddWithValue("@newStatus", !currentStatus);
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                }
+
+                return Json(new { success = true, message = "Statut de l'utilisateur mis à jour avec succès." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de la mise à jour du statut utilisateur");
+                return Json(new { success = false, message = "Erreur lors de la mise à jour du statut." });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ValidateOrder(int orderId)
+        {
+            try
+            {
+                var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    string updateQuery = "UPDATE Commande SET statut = 'valide' WHERE idCommande = @orderId";
+                    using (SqlCommand cmd = new SqlCommand(updateQuery, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@orderId", orderId);
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                }
+
+                return Json(new { success = true, message = "Commande validée avec succès." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de la validation de la commande");
+                return Json(new { success = false, message = "Erreur lors de la validation de la commande." });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelOrder(int orderId)
+        {
+            try
+            {
+                var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    string updateQuery = "UPDATE Commande SET statut = 'annule' WHERE idCommande = @orderId";
+                    using (SqlCommand cmd = new SqlCommand(updateQuery, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@orderId", orderId);
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                }
+
+                return Json(new { success = true, message = "Commande annulée avec succès." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de l'annulation de la commande");
+                return Json(new { success = false, message = "Erreur lors de l'annulation de la commande." });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateDelivery(int orderId)
+        {
+            try
+            {
+                var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    // Check if delivery already exists
+                    string checkQuery = "SELECT COUNT(*) FROM Livraison WHERE idCommande = @orderId";
+                    using (SqlCommand checkCmd = new SqlCommand(checkQuery, connection))
+                    {
+                        checkCmd.Parameters.AddWithValue("@orderId", orderId);
+                        int count = (int)await checkCmd.ExecuteScalarAsync();
+                        if (count > 0)
+                        {
+                            return Json(new { success = false, message = "Une livraison existe déjà pour cette commande." });
+                        }
+                    }
+
+                    // Get delivery address from order
+                    string addressQuery = @"SELECT TOP 1 al.idAdresse 
+                                           FROM Livraison l 
+                                           INNER JOIN AdressesLivraison al ON l.idAdresse = al.idAdresse 
+                                           WHERE l.idCommande = @orderId";
+                    int? addressId = null;
+                    using (SqlCommand addrCmd = new SqlCommand(addressQuery, connection))
+                    {
+                        addrCmd.Parameters.AddWithValue("@orderId", orderId);
+                        var result = await addrCmd.ExecuteScalarAsync();
+                        if (result != null)
+                        {
+                            addressId = (int)result;
+                        }
+                    }
+
+                    if (!addressId.HasValue)
+                    {
+                        return Json(new { success = false, message = "Aucune adresse de livraison trouvée pour cette commande." });
+                    }
+
+                    // Create delivery
+                    string insertQuery = @"INSERT INTO Livraison (idCommande, idAdresse, statut, dateDebutEstimation, dateFinEstimation, created_at)
+                                          VALUES (@orderId, @addressId, 'en_cours', GETDATE(), DATEADD(day, 3, GETDATE()), GETDATE())";
+                    using (SqlCommand cmd = new SqlCommand(insertQuery, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@orderId", orderId);
+                        cmd.Parameters.AddWithValue("@addressId", addressId.Value);
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+
+                    // Update order status
+                    string updateQuery = "UPDATE Commande SET statut = 'en_livraison' WHERE idCommande = @orderId";
+                    using (SqlCommand updateCmd = new SqlCommand(updateQuery, connection))
+                    {
+                        updateCmd.Parameters.AddWithValue("@orderId", orderId);
+                        await updateCmd.ExecuteNonQueryAsync();
+                    }
+                }
+
+                return Json(new { success = true, message = "Livraison créée avec succès." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de la création de la livraison");
+                return Json(new { success = false, message = "Erreur lors de la création de la livraison." });
+            }
         }
     }
 }

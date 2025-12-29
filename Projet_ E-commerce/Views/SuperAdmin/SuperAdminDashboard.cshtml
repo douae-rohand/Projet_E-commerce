@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
 </head>
 <body class="bg-dark shadow-inset">
+    @Html.AntiForgeryToken()
     <div class="d-flex">
         <!-- Sidebar -->
         <aside class="bg-dark vh-100 sticky-top d-none d-lg-block border-end border-secondary border-opacity-25" style="width: 280px;">
@@ -49,9 +50,9 @@
                    href="@Url.Action("Analytics", "SuperAdmin")">
                     <i class="bi bi-pie-chart"></i> Analytique
                 </a>
-                <a class="nav-link @(activeTab == "alerts" ? "active" : "text-white-50") rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
-                   href="@Url.Action("Alerts", "SuperAdmin")">
-                    <i class="bi bi-exclamation-triangle"></i> Alertes
+                <a class="nav-link @(activeTab == "deliveries_orders" ? "active" : "text-white-50") rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
+                   href="@Url.Action("DeliveriesAndOrders", "SuperAdmin")">
+                    <i class="bi bi-truck"></i> Appel Livraison et Commande
                 </a>
                 <div class="border-top border-secondary border-opacity-25 my-3"></div>
                 <a class="nav-link text-white-50 rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
@@ -104,12 +105,12 @@
                         <partial name="~/Views/SuperAdmin/_AnalyticsView.cshtml" model="analyticsModel" />
                     }
                 }
-                else if (activeTab == "alerts")
+                else if (activeTab == "deliveries_orders")
                 {
-                    var alertsModel = Model as List<AlertViewModel>;
-                    if (alertsModel != null)
+                    var ordersModel = Model as List<OrderDetailsViewModel>;
+                    if (ordersModel != null)
                     {
-                        <partial name="~/Views/SuperAdmin/_AlertsList.cshtml" model="alertsModel" />
+                        <partial name="~/Views/SuperAdmin/_DeliveriesOrdersList.cshtml" model="ordersModel" />
                     }
                 }
             </div>

@@ -23,8 +23,8 @@
                 <select class="form-select" id="filterRole">
                     <option value="">Tous les rôles</option>
                     <option value="CLIENT">Clients</option>
-                    <option value="ADMIN">Administrateurs</option>
-                    <option value="SUPER_ADMIN">Super Admins</option>
+                    <option value="ADMIN">Coopératives</option>
+                 
                 </select>
             </div>
             <div class="col-md-3">
@@ -93,6 +93,25 @@
                             <small class="text-muted">
                                 Inscrit le @user.CreatedAt.ToString("dd/MM/yyyy")
                             </small>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <div class="d-flex gap-2 justify-content-center">
+                                @if (user.EstActif)
+                                {
+                                    <button class="btn btn-sm btn-outline-warning" onclick="toggleUserStatus(@user.Id, false)">
+                                        <i class="bi bi-person-dash"></i> Désactiver
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-outline-success" onclick="toggleUserStatus(@user.Id, true)">
+                                        <i class="bi bi-person-check"></i> Activer
+                                    </button>
+                                }
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewUserDetails(@user.Id)">
+                                    <i class="bi bi-eye"></i> Détails
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -181,4 +200,36 @@
         filterStatus.addEventListener('change', filterUsers);
         sortBy.addEventListener('change', sortUsers);
     });
+
+    // Function to toggle user status
+    function toggleUserStatus(userId, newStatus) {
+        if (confirm(newStatus ? 'Êtes-vous sûr de vouloir activer cet utilisateur ?' : 'Êtes-vous sûr de vouloir désactiver cet utilisateur ?')) {
+            fetch('/SuperAdmin/ToggleUserStatus', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                },
+                body: JSON.stringify({ userId: userId, isActive: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Une erreur est survenue lors de la modification du statut.');
+            });
+        }
+    }
+
+    // Function to view user details
+    function viewUserDetails(userId) {
+        // Redirect to user details page or open modal
+        window.location.href = `/SuperAdmin/UserDetails/${userId}`;
+    }
 </script>

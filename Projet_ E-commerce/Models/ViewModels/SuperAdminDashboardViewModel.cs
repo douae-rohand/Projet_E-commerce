@@ -16,6 +16,14 @@ namespace Projet__E_commerce.Models.ViewModels
         public List<CooperativeStatsViewModel> TopCooperatives { get; set; } = new();
         public List<ProductPerformanceViewModel> TopProduits { get; set; } = new();
         public List<RecentActivityViewModel> RecentActivities { get; set; } = new();
+        public List<OrderDetailsViewModel> RecentOrders { get; set; } = new();
+        // NEW: bind user email from DB/Identity rather than ViewBag
+        // Added to satisfy _DashboardOverview.cshtml bindings
+        // Added: used by _DashboardOverview.cshtml header
+        public string? UserEmail { get; set; }
+
+        // Added: used by stock doughnut in _DashboardOverview.cshtml
+        public int ProduitsStockOk { get; set; }
     }
 
     public class CooperativeStatsViewModel
@@ -102,5 +110,44 @@ namespace Projet__E_commerce.Models.ViewModels
         public int NombreVentes { get; set; }
         public decimal RevenusGeneres { get; set; }
         public double? MoyenneAvis { get; set; }
+    }
+    public class OrderDetailsViewModel
+    {
+        public int IdCommande { get; set; }
+        public DateTime DateCommande { get; set; }
+        public string Statut { get; set; } = string.Empty;
+        public decimal MontantTotal { get; set; }
+        public string ClientNom { get; set; } = string.Empty;
+        public string ClientPrenom { get; set; } = string.Empty;
+        public string ClientEmail { get; set; } = string.Empty;
+        public string ClientTelephone { get; set; } = string.Empty;
+        public string AdresseLivraison { get; set; } = string.Empty;
+        public string VilleLivraison { get; set; } = string.Empty;
+        public string CodePostalLivraison { get; set; } = string.Empty;
+        public List<OrderItemViewModel> Items { get; set; } = new();
+        public string? Notes { get; set; }
+
+        // Properties for view compatibility
+        public string AdresseComplete => $"{AdresseLivraison}, {CodePostalLivraison} {VilleLivraison}";
+        public string VilleAdresse => VilleLivraison;
+        public decimal PrixTotal => MontantTotal;
+        public decimal SousTotal => MontantTotal; // Simplified
+        public decimal FraisLivraison => 0; // Simplified
+        public DateTime CreatedAt => DateCommande;
+        public List<OrderItemViewModel> OrderItems => Items;
+        public bool HasDelivery { get; set; }
+        public string? DeliveryStatus { get; set; }
+        public string? DeliveryMode { get; set; }
+    }
+
+    public class OrderItemViewModel
+    {
+        public int IdProduit { get; set; }
+        public string NomProduit { get; set; } = string.Empty;
+        public string NomCooperative { get; set; } = string.Empty;
+        public int Quantite { get; set; }
+        public decimal PrixUnitaire { get; set; }
+        public decimal SousTotal { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }
