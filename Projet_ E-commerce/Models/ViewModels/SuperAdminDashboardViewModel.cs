@@ -132,12 +132,18 @@ namespace Projet__E_commerce.Models.ViewModels
         public string VilleAdresse => VilleLivraison;
         public decimal PrixTotal => MontantTotal;
         public decimal SousTotal => MontantTotal; // Simplified
-        public decimal FraisLivraison => 0; // Simplified
         public DateTime CreatedAt => DateCommande;
         public List<OrderItemViewModel> OrderItems => Items;
         public bool HasDelivery { get; set; }
         public string? DeliveryStatus { get; set; }
         public string? DeliveryMode { get; set; }
+        public decimal FraisLivraison { get; set; }
+
+        // Facture and Bordereau
+        public string? NumeroFacture { get; set; }
+        public string? PathFacture { get; set; }
+        public string? NumeroBordereau { get; set; }
+        public string? PathBordereau { get; set; }
     }
 
     public class OrderItemViewModel
@@ -149,5 +155,9 @@ namespace Projet__E_commerce.Models.ViewModels
         public decimal PrixUnitaire { get; set; }
         public decimal SousTotal { get; set; }
         public string? ImageUrl { get; set; }
+        public string? Description { get; set; }
+        public string? Taille { get; set; }
+        public string? Couleur { get; set; }
+        public string? Poids { get; set; }
     }
 }

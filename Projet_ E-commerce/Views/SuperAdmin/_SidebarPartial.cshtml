@@ -1,0 +1,46 @@
+@using Projet__E_commerce.Models.ViewModels
+@{
+    var activeTab = ViewBag.ActiveTab ?? "dashboard";
+}
+
+<aside class="bg-dark vh-100 sticky-top d-none d-lg-block border-end border-secondary border-opacity-25 flex-shrink-0" style="width: 280px;">
+    <div class="p-4 mb-4">
+        <a href="/" class="d-flex align-items-center gap-3 text-decoration-none">
+            <div class="rounded-3 bg-terracotta d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                <i class="bi bi-shield-lock text-white h4 mb-0"></i>
+            </div>
+            <div>
+                <h5 class="fw-bold mb-0 text-white font-display">CoopMaroc</h5>
+                <p class="small text-white-50 mb-0" style="font-size: 10px; letter-spacing: 1px;">SUPER ADMIN</p>
+            </div>
+        </a>
+    </div>
+    
+    <nav class="nav flex-column p-3 gap-2 admin-nav">
+        <a class="nav-link @(activeTab == "dashboard" ? "active" : "text-white-50") rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
+           href="@Url.Action("Dashboard", "SuperAdmin")">
+            <i class="bi bi-activity"></i> Vue Globale
+        </a>
+        <a class="nav-link @(activeTab == "cooperatives" ? "active" : "text-white-50") rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
+           href="@Url.Action("Cooperatives", "SuperAdmin")">
+            <i class="bi bi-shop"></i> Coopératives
+        </a>
+        <a class="nav-link @(activeTab == "users" ? "active" : "text-white-50") rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
+           href="@Url.Action("Users", "SuperAdmin")">
+            <i class="bi bi-people"></i> Utilisateurs
+        </a>
+        <a class="nav-link @(activeTab == "analytics" ? "active" : "text-white-50") rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
+           href="@Url.Action("Analytics", "SuperAdmin")">
+            <i class="bi bi-pie-chart"></i> Analytique
+        </a>
+        <a class="nav-link @(activeTab == "deliveries_orders" ? "active" : "text-white-50") rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
+           href="@Url.Action("DeliveriesAndOrders", "SuperAdmin")">
+            <i class="bi bi-truck"></i> Commande & livraison
+        </a>
+        <div class="border-top border-secondary border-opacity-25 my-3"></div>
+        <a class="nav-link text-white-50 rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
+           href="@Url.Action("Logout", "Auth")">
+            <i class="bi bi-box-arrow-right"></i> Déconnexion
+        </a>
+    </nav>
+</aside>

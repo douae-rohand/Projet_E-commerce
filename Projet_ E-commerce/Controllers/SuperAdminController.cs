@@ -437,6 +437,157 @@ namespace Projet__E_commerce.Controllers
             return list;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> OrderDetailsModal(int id)
+        {
+            try
+            {
+                string connectionString = _configuration.GetConnectionString("DefaultConnection");
+                OrderDetailsViewModel? order = null;
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    string query = @"
+                        SELECT 
+                            c.idCommande, c.created_at, c.statut, c.prixTotal,
+                            cl.nom, cl.prenom, u.email, cl.telephone,
+                            al.adresse_complete, al.ville, al.code_postal, 
+                            l.statut as deliveryStatus, l.mode_livraison, l.frais as fraisLivraison,
+                            l.notes,
+                            f.numero_facture, f.path_facture,
+                            bl.numero_bordereau, bl.path_bordereau
+                        FROM Commandes c
+                        LEFT JOIN Clients cl ON c.idClient = cl.id
+                        LEFT JOIN Utilisateurs u ON cl.id = u.id
+                        LEFT JOIN Livraisons l ON c.idCommande = l.idCommande
+                        LEFT JOIN AdressesLivraison al ON l.idAdresse = al.idAdresse
+                        LEFT JOIN Factures f ON c.idCommande = f.idCommande
+                        LEFT JOIN BordereauxLivraison bl ON l.idLivraison = bl.idLivraison
+                        WHERE c.idCommande = @id";
+
+                    using (SqlCommand cmd = new SqlCommand(query, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@id", id);
+                        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                order = new OrderDetailsViewModel
+                                {
+                                    IdCommande = Convert.ToInt32(reader["idCommande"]),
+                                    DateCommande = Convert.ToDateTime(reader["created_at"]),
+                                    Statut = reader["statut"]?.ToString() ?? "N/A",
+                                    MontantTotal = Convert.ToDecimal(reader["prixTotal"]),
+                                    ClientNom = reader["nom"]?.ToString() ?? "N/A",
+                                    ClientPrenom = reader["prenom"]?.ToString() ?? "N/A",
+                                    ClientEmail = reader["email"]?.ToString() ?? "N/A",
+                                    ClientTelephone = reader["telephone"]?.ToString() ?? "N/A",
+                                    AdresseLivraison = reader["adresse_complete"]?.ToString() ?? "N/A",
+                                    VilleLivraison = reader["ville"]?.ToString() ?? "N/A",
+                                    CodePostalLivraison = reader["code_postal"]?.ToString() ?? "N/A",
+                                    HasDelivery = reader["deliveryStatus"] != DBNull.Value,
+                                    DeliveryStatus = reader["deliveryStatus"] == DBNull.Value ? null : reader["deliveryStatus"].ToString(),
+                                    DeliveryMode = reader["mode_livraison"] == DBNull.Value ? null : reader["mode_livraison"].ToString(),
+                                    FraisLivraison = reader["fraisLivraison"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["fraisLivraison"]),
+                                    Notes = reader["notes"] == DBNull.Value ? null : reader["notes"].ToString(),
+                                    NumeroFacture = reader["numero_facture"] == DBNull.Value ? null : reader["numero_facture"].ToString(),
+                                    PathFacture = reader["path_facture"] == DBNull.Value ? null : reader["path_facture"].ToString(),
+                                    NumeroBordereau = reader["numero_bordereau"] == DBNull.Value ? null : reader["numero_bordereau"].ToString(),
+                                    PathBordereau = reader["path_bordereau"] == DBNull.Value ? null : reader["path_bordereau"].ToString()
+                                };
+                            }
+                        }
+                    }
+
+                    if (order != null)
+                    {
+                        string itemsQuery = @"
+                            SELECT lc.idLC, p.nomP, p.description, a.nom_cooperative, lc.quantite, lc.prix_unitaire, (lc.quantite * lc.prix_unitaire) as sousTotal, v.photo, v.taille, v.couleur, v.poids
+                            FROM LignesCommande lc
+                            LEFT JOIN Variantes v ON lc.idV = v.idV
+                            LEFT JOIN Produits p ON v.idP = p.idP
+                            LEFT JOIN Admins a ON p.idAdmin = a.id
+                            WHERE lc.idCommande = @orderId";
+
+                        using (SqlCommand itemsCmd = new SqlCommand(itemsQuery, connection))
+                        {
+                            itemsCmd.Parameters.AddWithValue("@orderId", order.IdCommande);
+                            using (SqlDataReader itemsReader = await itemsCmd.ExecuteReaderAsync())
+                            {
+                                while (await itemsReader.ReadAsync())
+                                {
+                                    order.Items.Add(new OrderItemViewModel
+                                    {
+                                        IdProduit = itemsReader["idLC"] != DBNull.Value ? Convert.ToInt32(itemsReader["idLC"]) : 0,
+                                        NomProduit = itemsReader["nomP"]?.ToString() ?? "Produit inconnu",
+                                        NomCooperative = itemsReader["nom_cooperative"]?.ToString() ?? "N/A",
+                                        Quantite = itemsReader["quantite"] != DBNull.Value ? Convert.ToInt32(itemsReader["quantite"]) : 0,
+                                        PrixUnitaire = itemsReader["prix_unitaire"] != DBNull.Value ? Convert.ToDecimal(itemsReader["prix_unitaire"]) : 0,
+                                        SousTotal = itemsReader["sousTotal"] != DBNull.Value ? Convert.ToDecimal(itemsReader["sousTotal"]) : 0,
+                                        ImageUrl = itemsReader["photo"] == DBNull.Value ? null : itemsReader["photo"].ToString(),
+                                        Description = itemsReader["description"] == DBNull.Value ? null : itemsReader["description"].ToString(),
+                                        Taille = itemsReader["taille"] == DBNull.Value ? null : itemsReader["taille"].ToString(),
+                                        Couleur = itemsReader["couleur"] == DBNull.Value ? null : itemsReader["couleur"].ToString(),
+                                        Poids = itemsReader["poids"] == DBNull.Value ? null : itemsReader["poids"].ToString()
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (order == null) return Content("<div class='alert alert-info'>Commande introuvable ou aucune donnée associée.</div>");
+
+                return PartialView("~/Views/SuperAdmin/_OrderModalContent.cshtml", order);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de la récupération des détails de la commande");
+                return Content($"<div class='alert alert-danger'>Une erreur serveur est survenue : {ex.Message}</div>");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateDeliveryStatus(int idCommande, string newStatus)
+        {
+            try
+            {
+                string connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    string updateQuery = "UPDATE Livraisons SET statut = @status, updated_at = @updatedAt WHERE idCommande = @idCommande";
+
+                    using (SqlCommand cmd = new SqlCommand(updateQuery, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@status", newStatus);
+                        cmd.Parameters.AddWithValue("@updatedAt", DateTime.Now);
+                        cmd.Parameters.AddWithValue("@idCommande", idCommande);
+
+                        int rowsAffected = await cmd.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                        {
+                            return Json(new { success = true });
+                        }
+                        else
+                        {
+                            return Json(new { success = false, message = "Aucune livraison trouvée pour cette commande." });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de la mise à jour du statut de livraison");
+                return Json(new { success = false, message = "Une erreur est survenue lors de la mise à jour." });
+            }
+        }
+
         private async Task<CooperativeDetailsViewModel?> GetCooperativeDetailsAsync(int id)
         {
             var model = new CooperativeDetailsViewModel();
@@ -820,9 +971,17 @@ namespace Projet__E_commerce.Controllers
             return $"{(int)(timeSpan.TotalDays / 365)}ans";
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ToggleUserStatus(int userId)
+        public class UserStatusUpdateModel
         {
+            public int UserId { get; set; }
+            public bool IsActive { get; set; }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleUserStatus([FromBody] UserStatusUpdateModel model)
+        {
+            if (model == null) return Json(new { success = false, message = "Données invalides." });
+
             try
             {
                 var connectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -831,31 +990,17 @@ namespace Projet__E_commerce.Controllers
                 {
                     await connection.OpenAsync();
 
-                    // Get current status
-                    string getStatusQuery = "SELECT est_actif FROM Utilisateurs WHERE id = @userId";
-                    bool currentStatus = false;
-
-                    using (SqlCommand cmd = new SqlCommand(getStatusQuery, connection))
-                    {
-                        cmd.Parameters.AddWithValue("@userId", userId);
-                        var result = await cmd.ExecuteScalarAsync();
-                        if (result != null)
-                        {
-                            currentStatus = Convert.ToBoolean(result);
-                        }
-                        else
-                        {
-                            return Json(new { success = false, message = "Utilisateur non trouvé." });
-                        }
-                    }
-
-                    // Toggle status
                     string updateQuery = "UPDATE Utilisateurs SET est_actif = @newStatus WHERE id = @userId";
                     using (SqlCommand cmd = new SqlCommand(updateQuery, connection))
                     {
-                        cmd.Parameters.AddWithValue("@userId", userId);
-                        cmd.Parameters.AddWithValue("@newStatus", !currentStatus);
-                        await cmd.ExecuteNonQueryAsync();
+                        cmd.Parameters.AddWithValue("@userId", model.UserId);
+                        cmd.Parameters.AddWithValue("@newStatus", model.IsActive);
+                        int affectedRows = await cmd.ExecuteNonQueryAsync();
+                        
+                        if (affectedRows == 0)
+                        {
+                            return Json(new { success = false, message = "Utilisateur non trouvé." });
+                        }
                     }
                 }
 
@@ -879,7 +1024,7 @@ namespace Projet__E_commerce.Controllers
                 {
                     await connection.OpenAsync();
 
-                    string updateQuery = "UPDATE Commande SET statut = 'valide' WHERE idCommande = @orderId";
+                    string updateQuery = "UPDATE Commandes SET statut = 'valide' WHERE idCommande = @orderId";
                     using (SqlCommand cmd = new SqlCommand(updateQuery, connection))
                     {
                         cmd.Parameters.AddWithValue("@orderId", orderId);
@@ -907,7 +1052,7 @@ namespace Projet__E_commerce.Controllers
                 {
                     await connection.OpenAsync();
 
-                    string updateQuery = "UPDATE Commande SET statut = 'annule' WHERE idCommande = @orderId";
+                    string updateQuery = "UPDATE Commandes SET statut = 'annule' WHERE idCommande = @orderId";
                     using (SqlCommand cmd = new SqlCommand(updateQuery, connection))
                     {
                         cmd.Parameters.AddWithValue("@orderId", orderId);
@@ -936,7 +1081,7 @@ namespace Projet__E_commerce.Controllers
                     await connection.OpenAsync();
 
                     // Check if delivery already exists
-                    string checkQuery = "SELECT COUNT(*) FROM Livraison WHERE idCommande = @orderId";
+                    string checkQuery = "SELECT COUNT(*) FROM Livraisons WHERE idCommande = @orderId";
                     using (SqlCommand checkCmd = new SqlCommand(checkQuery, connection))
                     {
                         checkCmd.Parameters.AddWithValue("@orderId", orderId);
@@ -949,7 +1094,7 @@ namespace Projet__E_commerce.Controllers
 
                     // Get delivery address from order
                     string addressQuery = @"SELECT TOP 1 al.idAdresse 
-                                           FROM Livraison l 
+                                           FROM Livraisons l 
                                            INNER JOIN AdressesLivraison al ON l.idAdresse = al.idAdresse 
                                            WHERE l.idCommande = @orderId";
                     int? addressId = null;
@@ -969,7 +1114,7 @@ namespace Projet__E_commerce.Controllers
                     }
 
                     // Create delivery
-                    string insertQuery = @"INSERT INTO Livraison (idCommande, idAdresse, statut, dateDebutEstimation, dateFinEstimation, created_at)
+                    string insertQuery = @"INSERT INTO Livraisons (idCommande, idAdresse, statut, dateDebutEstimation, dateFinEstimation, created_at)
                                           VALUES (@orderId, @addressId, 'en_cours', GETDATE(), DATEADD(day, 3, GETDATE()), GETDATE())";
                     using (SqlCommand cmd = new SqlCommand(insertQuery, connection))
                     {
@@ -979,7 +1124,7 @@ namespace Projet__E_commerce.Controllers
                     }
 
                     // Update order status
-                    string updateQuery = "UPDATE Commande SET statut = 'en_livraison' WHERE idCommande = @orderId";
+                    string updateQuery = "UPDATE Commandes SET statut = 'en_livraison' WHERE idCommande = @orderId";
                     using (SqlCommand updateCmd = new SqlCommand(updateQuery, connection))
                     {
                         updateCmd.Parameters.AddWithValue("@orderId", orderId);

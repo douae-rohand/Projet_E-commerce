@@ -1,0 +1,195 @@
+@model Projet__E_commerce.Models.ViewModels.OrderDetailsViewModel
+
+<div class="row g-4">
+    <!-- Row 1: Status and Basic Info -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-4 border">
+            <div>
+                <span class="text-secondary small text-uppercase fw-bold d-block mb-1">Commande #</span>
+                <span class="fw-bold text-primary">#@Model.IdCommande</span>
+                <div class="small text-muted">@Model.DateCommande.ToString("dd MMMM yyyy à HH:mm")</div>
+            </div>
+            <div class="text-end">
+                <span class="text-secondary small text-uppercase fw-bold d-block mb-1">Statut global</span>
+                <span class="badge rounded-pill @(Model.Statut == "valide" ? "bg-success" : (Model.Statut == "annule" ? "bg-danger" : "bg-warning")) px-3">
+                    @Model.Statut.ToUpper()
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Client & Livraison -->
+    <div class="col-md-6">
+        <div class="card border shadow-none rounded-4 h-100">
+            <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                <h6 class="fw-bold mb-0 text-terracotta"><i class="bi bi-person me-2"></i>Informations Client</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-1 fw-bold">@Model.ClientPrenom @Model.ClientNom</p>
+                <p class="mb-1 small text-muted"><i class="bi bi-envelope me-2"></i>@Model.ClientEmail</p>
+                <p class="mb-0 small text-muted"><i class="bi bi-telephone me-2"></i>@Model.ClientTelephone</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border shadow-none rounded-4 h-100">
+            <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                <h6 class="fw-bold mb-0 text-terracotta"><i class="bi bi-truck me-2"></i>Détails Livraison</h6>
+            </div>
+            <div class="card-body">
+                @if (Model.HasDelivery)
+                {
+                    <div class="mb-2">
+                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1 small">
+                            @Model.DeliveryMode
+                        </span>
+                        <span class="badge @(Model.DeliveryStatus == "livre" ? "bg-success" : "bg-info") bg-opacity-10 @(Model.DeliveryStatus == "livre" ? "text-success" : "text-info") rounded-pill px-2 py-1 small">
+                            @Model.DeliveryStatus
+                        </span>
+                    </div>
+                    <p class="mb-1 small fw-medium">@Model.AdresseComplete</p>
+                    <p class="mb-0 small text-muted">Frais: @Model.FraisLivraison.ToString("N2") DH</p>
+                }
+                else
+                {
+                    <p class="text-muted small italic">Aucune information de livraison associée.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 3: Items -->
+    <div class="col-12">
+        <div class="card border shadow-none rounded-4">
+            <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                <h6 class="fw-bold mb-0 text-terracotta"><i class="bi bi-cart3 me-2"></i>Articles Commandés</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr class="small text-muted text-uppercase">
+                                <th class="ps-3 py-2 border-0">Produit</th>
+                                <th class="py-2 border-0">Détails</th>
+                                <th class="py-2 border-0">Coopérative</th>
+                                <th class="text-center py-2 border-0">Qté</th>
+                                <th class="text-end py-2 border-0">Unit.</th>
+                                <th class="text-end pe-3 py-2 border-0">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                            {
+                                                <img src="@item.ImageUrl" class="rounded shadow-sm" style="width: 32px; height: 32px; object-fit: cover;">
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                                    <i class="bi bi-box text-muted small"></i>
+                                                </div>
+                                            }
+                                            <span class="small fw-medium">@item.NomProduit</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="small text-muted">
+                                            @if (!string.IsNullOrEmpty(item.Description))
+                                            {
+                                                <div><strong>Desc:</strong> @item.Description</div>
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.Taille))
+                                            {
+                                                <div><strong>Taille:</strong> @item.Taille</div>
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.Couleur))
+                                            {
+                                                <div><strong>Couleur:</strong> @item.Couleur</div>
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.Poids))
+                                            {
+                                                <div><strong>Poids:</strong> @item.Poids</div>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-light text-dark fw-normal">@item.NomCooperative</span></td>
+                                    <td class="text-center small">@item.Quantite</td>
+                                    <td class="text-end small">@item.PrixUnitaire.ToString("N2")</td>
+                                    <td class="text-end pe-3 fw-bold small">@item.SousTotal.ToString("N2") DH</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="bg-light bg-opacity-50">
+                            <tr>
+                                <td colspan="5" class="text-end fw-bold py-3">MONTANT TOTAL</td>
+                                <td class="text-end pe-3 fw-bold text-terracotta fs-5 py-3">@Model.MontantTotal.ToString("N2") DH</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 4: Documents & Notes -->
+    <div class="col-md-6">
+        <div class="card border shadow-none rounded-4 h-100">
+            <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                <h6 class="fw-bold mb-0 text-terracotta"><i class="bi bi-file-earmark-text me-2"></i>Documents officiels</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    @if (!string.IsNullOrEmpty(Model.NumeroFacture))
+                    {
+                        <div class="d-flex justify-content-between align-items-center p-2 rounded bg-light border-start border-4 border-success">
+                            <div>
+                                <small class="text-muted d-block">Facture N°</small>
+                                <span class="fw-bold small">@Model.NumeroFacture</span>
+                            </div>
+                            <a href="@Model.PathFacture" class="btn btn-sm btn-outline-success" target="_blank"><i class="bi bi-download"></i></a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-2 rounded bg-light text-muted small italic text-center">Facture non générée</div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.NumeroBordereau))
+                    {
+                        <div class="d-flex justify-content-between align-items-center p-2 rounded bg-light border-start border-4 border-primary">
+                            <div>
+                                <small class="text-muted d-block">Bordereau N°</small>
+                                <span class="fw-bold small">@Model.NumeroBordereau</span>
+                            </div>
+                            <a href="@Model.PathBordereau" class="btn btn-sm btn-outline-primary" target="_blank"><i class="bi bi-printer"></i></a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-2 rounded bg-light text-muted small italic text-center">Bordereau non généré</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border shadow-none rounded-4 h-100">
+            <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                <h6 class="fw-bold mb-0 text-terracotta"><i class="bi bi-sticky me-2"></i>Notes & Commentaires</h6>
+            </div>
+            <div class="card-body">
+                <div class="bg-light p-3 rounded-4 h-100">
+                    <p class="small text-secondary mb-0">
+                        @(string.IsNullOrEmpty(Model.Notes) ? "Aucune note particulière pour cette commande." : Model.Notes)
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
