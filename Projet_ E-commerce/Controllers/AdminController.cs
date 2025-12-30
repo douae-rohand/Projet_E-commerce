@@ -133,6 +133,8 @@ namespace Projet__E_commerce
                     NumeroCommande = $"CMD-{c.idCommande:D6}",
                     NomClient = c.Client.nom,
                     Statut = c.statut,
+                    StatusLabel = GetStatusLabel(c.statut),
+                    StatusClass = GetStatusClass(c.statut),
                     PrixTotal = c.LignesCommande
                         .Where(lc => lc.Variante.Produit.idAdmin == adminId)
                         .Sum(lc => lc.quantite * lc.prix_unitaire),
@@ -693,7 +695,7 @@ namespace Projet__E_commerce
                         .ThenInclude(lc => lc.Variante)
                             .ThenInclude(v => v.Produit)
                     .Include(c => c.Livraison)
-                    .Where(c => c.LignesCommande.Any(lc => lc.Variante.Produit.idAdmin == adminId));
+                    .Where(c => c.LignesCommande.Any(lc => lc.Variante.Produit.idAdmin == adminId) && c.statut != "en_attente");
 
                 // Filtrer par statut si fourni
                 if (!string.IsNullOrEmpty(statut))
@@ -728,14 +730,14 @@ namespace Projet__E_commerce
                         NomClient = c.Client.nom,
                         TelephoneClient = c.Client.telephone,
                         Statut = c.statut,
-                        StatusLabel = GetStatusLabel(c.statut),
-                        StatusClass = GetStatusClass(c.statut),
+                        // StatusLabel = GetStatusLabel(c.statut),
+                        // StatusClass = GetStatusClass(c.statut),
                         PrixTotal = c.prixTotal,
                         PrixTotalAdmin = prixTotalAdmin,
                         Thumbnail = thumbnail,
                         CreatedAt = c.created_at,
                         UpdatedAt = c.updated_at,
-                        StatutLivraison = c.statut,
+                        //StatutLivraison = c.statut,
                         ModeLivraison = c.Livraison?.mode_livraison,
                         DateDebutEstimation = c.Livraison?.dateDebutEstimation,
                         DateFinEstimation = c.Livraison?.dateFinEstimation
@@ -793,6 +795,7 @@ namespace Projet__E_commerce
                         ligne.Variante.updated_at = DateTime.Now;
                     }
 
+                    commande.statut = "en_preparation";
                     commande.statut = "en_preparation";
                     commande.updated_at = DateTime.Now;
                 }
@@ -876,7 +879,7 @@ namespace Projet__E_commerce
                     PrixTotalAdmin = prixTotalAdmin,
                     CreatedAt = commande.created_at,
                     UpdatedAt = commande.updated_at,
-                    StatutLivraison = commande.statut,
+                    //StatutLivraison = commande.statut,
                     ModeLivraison = commande.Livraison?.mode_livraison,
                     DateDebutEstimation = commande.Livraison?.dateDebutEstimation,
                     DateFinEstimation = commande.Livraison?.dateFinEstimation,
