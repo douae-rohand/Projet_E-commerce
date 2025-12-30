@@ -256,5 +256,48 @@ namespace Projet__E_commerce.Controllers
 
             return PartialView("_OrderDetailsPartial", order);
         }
-}
+
+        [HttpPost("Account/SubmitReview")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitReview(int idProduit, int note, string commentaire)
+        {
+            if (HttpContext.Session.GetString("UserRole") != "CLIENT")
+            {
+                return Json(new { success = false, message = "Non autorisé" });
+            }
+
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return Json(new { success = false, message = "Non autorisé" });
+            }
+
+            if (note < 1 || note > 5)
+            {
+                return Json(new { success = false, message = "La note doit être comprise entre 1 et 5." });
+            }
+
+            try
+            {
+                var avis = new Avis
+                {
+                    idProduit = idProduit,
+                    idClient = userId.Value,
+                    note = note,
+                    commentaire = commentaire?.Trim(),
+                    created_at = DateTime.Now,
+                    updated_at = DateTime.Now
+                };
+
+                _db.Add(avis);
+                await _db.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Votre avis a été enregistré avec succès." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Une erreur est survenue : " + ex.Message });
+            }
+        }
+    }
 }

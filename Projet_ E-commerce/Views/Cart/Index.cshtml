@@ -1,6 +1,6 @@
 @model List<CartItemViewModel>
 @{
-    ViewData["Title"] = "Mon Panier - SoukDigital";
+    ViewData["Title"] = "Mon Panier - Souk 212";
     var cartItems = Model ?? new List<CartItemViewModel>();
     decimal subtotal = 0;
     foreach(var item in cartItems) subtotal += item.Price * item.Quantity;
