@@ -152,7 +152,7 @@
                                         </div>
                                     </div>
                                     <div class="r-col-qty text-center">x @item.Quantite</div>
-                                    <div class="r-col-price text-end">@item.SousTotal.ToString("N2") DH</div>
+                                    <div class="r-col-price text-end">@item.PrixUnitaire.ToString("N2") DH</div>
                                 </div>
                             }
                         </div>
@@ -163,13 +163,9 @@
 
                     <!-- Total Section -->
                     <div class="receipt-footer">
-                        <div class="footer-row">
-                            <span>Total Coopérative:</span>
-                            <span class="fw-bold">@Model.PrixTotalAdmin.ToString("N2") DH</span>
-                        </div>
                         <div class="footer-row highlight mt-2">
-                            <span>Total Client (TTC):</span>
-                            <span class="amount-admin">@Model.PrixTotal.ToString("N2") DH</span>
+                            <span>Total Coopérative:</span>
+                            <span class="amount-admin">@Model.PrixTotalAdmin.ToString("N2") DH</span>
                         </div>
                     </div>
 

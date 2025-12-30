@@ -772,14 +772,13 @@ namespace Projet__E_commerce
                         NomClient = c.Client.nom,
                         TelephoneClient = c.Client.telephone,
                         Statut = c.statut,
-                        // StatusLabel = GetStatusLabel(c.statut),
-                        // StatusClass = GetStatusClass(c.statut),
+                        StatusLabel = GetStatusLabel(c.statut),
+                        StatusClass = GetStatusClass(c.statut),
                         PrixTotal = c.prixTotal,
                         PrixTotalAdmin = prixTotalAdmin,
                         Thumbnail = thumbnail,
                         CreatedAt = c.created_at,
                         UpdatedAt = c.updated_at,
-                        //StatutLivraison = c.statut,
                         ModeLivraison = c.Livraison?.mode_livraison,
                         DateDebutEstimation = c.Livraison?.dateDebutEstimation,
                         DateFinEstimation = c.Livraison?.dateFinEstimation
@@ -838,7 +837,6 @@ namespace Projet__E_commerce
                     }
 
                     commande.statut = "en_preparation";
-                    commande.statut = "en_preparation";
                     commande.updated_at = DateTime.Now;
                 }
             }
@@ -865,11 +863,11 @@ namespace Projet__E_commerce
             return statut switch
             {
                 "en_attente" => "warning",
-                "acceptée" => "info",
                 "en_preparation" => "info",
                 "en_livraison" => "primary",
-                "livrée" => "success",
-                "annulée" => "danger",
+                "livre" => "success",
+                "valide" => "success",
+                "annule" => "danger",
                 _ => "secondary"
             };
         }
@@ -921,7 +919,6 @@ namespace Projet__E_commerce
                     PrixTotalAdmin = prixTotalAdmin,
                     CreatedAt = commande.created_at,
                     UpdatedAt = commande.updated_at,
-                    //StatutLivraison = commande.statut,
                     ModeLivraison = commande.Livraison?.mode_livraison,
                     DateDebutEstimation = commande.Livraison?.dateDebutEstimation,
                     DateFinEstimation = commande.Livraison?.dateFinEstimation,
