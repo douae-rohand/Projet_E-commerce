@@ -1,6 +1,6 @@
 @model Projet__E_commerce.Models.Client
 @{
-    ViewData["Title"] = "Mon Compte - SoukDigital";
+    ViewData["Title"] = "Mon Compte - Souk 212";
 }
 
 <div class="bg-dashboard min-vh-100 py-5 mt-4">
@@ -380,6 +380,50 @@
     </div>
 </div>
 
+<!-- Modal Noter un Produit -->
+<div class="modal fade" id="ratingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4xl">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold">Noter le produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <img id="ratingProductImage" src="" class="rounded-3 me-3 object-fit-cover" style="width: 60px; height: 60px;" alt="Produit">
+                    <h6 class="fw-bold mb-0" id="ratingProductName">Nom du produit</h6>
+                </div>
+                
+                <form id="ratingForm" onsubmit="return submitReview(event)">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="ratingProductId" name="idProduit">
+                    
+                    <div class="mb-4 text-center">
+                        <label class="form-label small fw-bold d-block mb-2">Votre note</label>
+                        <div class="rating-stars h2 text-warning" style="cursor: pointer;">
+                            <i class="bi bi-star" data-value="1"></i>
+                            <i class="bi bi-star" data-value="2"></i>
+                            <i class="bi bi-star" data-value="3"></i>
+                            <i class="bi bi-star" data-value="4"></i>
+                            <i class="bi bi-star" data-value="5"></i>
+                        </div>
+                        <input type="hidden" id="ratingValue" name="note" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Votre avis (optionnel)</label>
+                        <textarea class="form-control rounded-3" id="ratingComment" name="commentaire" rows="3" placeholder="Partagez votre expérience..."></textarea>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary rounded-pill py-3 fw-bold">Publier l'avis</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
     body {
         background-color: #f9f8f4 !important;
@@ -614,5 +658,87 @@
                 </div>
             `;
         }
+    }
+
+
+    // Rating System Logic
+    const stars = document.querySelectorAll('.rating-stars i');
+    const ratingInput = document.getElementById('ratingValue');
+
+    stars.forEach(star => {
+        star.addEventListener('mouseover', function() {
+            const value = this.getAttribute('data-value');
+            highlightStars(value);
+        });
+
+        star.addEventListener('mouseout', function() {
+            const value = ratingInput.value || 0;
+            highlightStars(value);
+        });
+
+        star.addEventListener('click', function() {
+            const value = this.getAttribute('data-value');
+            ratingInput.value = value;
+            highlightStars(value);
+        });
+    });
+
+    function highlightStars(value) {
+        stars.forEach(star => {
+            const starValue = star.getAttribute('data-value');
+            if (starValue <= value) {
+                star.classList.remove('bi-star');
+                star.classList.add('bi-star-fill');
+            } else {
+                star.classList.remove('bi-star-fill');
+                star.classList.add('bi-star');
+            }
+        });
+    }
+
+    function openRatingModal(productId, productName, productImage) {
+        document.getElementById('ratingProductId').value = productId;
+        document.getElementById('ratingProductName').textContent = productName;
+        document.getElementById('ratingProductImage').src = productImage;
+        
+        // Reset form
+        document.getElementById('ratingForm').reset();
+        ratingInput.value = '';
+        highlightStars(0);
+        
+        const modal = new bootstrap.Modal(document.getElementById('ratingModal'));
+        modal.show();
+    }
+
+    async function submitReview(event) {
+        event.preventDefault();
+        
+        if (!ratingInput.value) {
+            alert('Veuillez sélectionner une note.');
+            return false;
+        }
+
+        const formData = new FormData(event.target);
+
+        try {
+            const response = await fetch('/Account/SubmitReview', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('ratingModal'));
+                modal.hide();
+                alert(result.message); // Or use a nicer toast notification
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            alert('Une erreur est survenue.');
+        }
+        
+        return false;
     }
 </script>
