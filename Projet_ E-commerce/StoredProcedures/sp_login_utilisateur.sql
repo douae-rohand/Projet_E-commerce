@@ -9,16 +9,28 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Vérifier si l'utilisateur existe avec les bonnes credentials
+    -- 1. Vérifier si l'utilisateur existe avec les bonnes credentials
     IF NOT EXISTS (
         SELECT 1 
         FROM Utilisateurs
         WHERE email = @email
           AND password = @password
-          AND est_actif = 1
     )
     BEGIN
         RAISERROR('Email ou mot de passe incorrect', 16, 1);
+        RETURN;
+    END
+
+    -- 2. Vérifier si l'utilisateur est actif
+    IF EXISTS (
+        SELECT 1 
+        FROM Utilisateurs
+        WHERE email = @email
+          AND password = @password
+          AND est_actif = 0
+    )
+    BEGIN
+        RAISERROR('Votre compte est inactif.', 16, 1);
         RETURN;
     END
 

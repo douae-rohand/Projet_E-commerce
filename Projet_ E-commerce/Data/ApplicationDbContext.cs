@@ -171,6 +171,10 @@ namespace Projet__E_commerce.Data
             modelBuilder.Entity<Livraison>()
                 .ToTable(t =>
                 {
+
+                    t.HasCheckConstraint("CK_Livraison_Statut", "statut IN ('en_preparation', 'en_cours', 'livre', 'non_livre')");
+
+
                     t.HasCheckConstraint("CK_Livraison_ModeLivraison", "mode_livraison IN ('Standard', 'Express')");
                 });
 

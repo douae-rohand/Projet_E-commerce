@@ -58,12 +58,13 @@ namespace Projet__E_commerce
                 var lastMonthStart = currentMonthStart.AddMonths(-1);
                 var lastMonthEnd = currentMonthStart.AddDays(-1);
 
-                // Calculate sales for current month - TEMPORARILY INCLUDE ALL STATUSES FOR DEBUGGING
+                // Calculate sales for current month - EXCLUDING 'en_attente' and 'annule'
                 var currentMonthOrders = await _context.Commandes
                     .Include(c => c.LignesCommande)
                         .ThenInclude(lc => lc.Variante)
                             .ThenInclude(v => v.Produit)
                     .Where(c => c.created_at >= currentMonthStart &&
+                               c.statut != "en_attente" && c.statut != "annule" &&
                                c.LignesCommande.Any(lc => lc.Variante.Produit.idAdmin == adminId))
                     .ToListAsync();
 
@@ -82,6 +83,7 @@ namespace Projet__E_commerce
                         .ThenInclude(lc => lc.Variante)
                             .ThenInclude(v => v.Produit)
                     .Where(c => c.created_at >= lastMonthStart && c.created_at <= lastMonthEnd &&
+                               c.statut != "en_attente" && c.statut != "annule" &&
                                c.LignesCommande.Any(lc => lc.Variante.Produit.idAdmin == adminId))
                     .ToListAsync();
 
@@ -90,26 +92,38 @@ namespace Projet__E_commerce
                     .Sum(lc => lc.quantite * lc.prix_unitaire);
 
                 model.VentesMois = currentMonthSales;
-                model.VentesPourcentage = lastMonthSales > 0 
-                    ? ((currentMonthSales - lastMonthSales) / lastMonthSales) * 100 
-                    : 0;
+                if (lastMonthSales > 0)
+                {
+                    model.VentesPourcentage = ((currentMonthSales - lastMonthSales) / lastMonthSales) * 100;
+                }
+                else
+                {
+                    model.VentesPourcentage = currentMonthSales > 0 ? 100 : 0;
+                }
 
                 // Count orders for current month
                 var currentMonthOrdersCount = await _context.Commandes
                     .Where(c => c.created_at >= currentMonthStart &&
+                               c.statut != "en_attente" && c.statut != "annule" &&
                                c.LignesCommande.Any(lc => lc.Variante.Produit.idAdmin == adminId))
                     .CountAsync();
 
                 // Count orders for last month
                 var lastMonthOrdersCount = await _context.Commandes
                     .Where(c => c.created_at >= lastMonthStart && c.created_at <= lastMonthEnd &&
+                               c.statut != "en_attente" && c.statut != "annule" &&
                                c.LignesCommande.Any(lc => lc.Variante.Produit.idAdmin == adminId))
                     .CountAsync();
 
                 model.CommandesMois = currentMonthOrdersCount;
-                model.CommandesPourcentage = lastMonthOrdersCount > 0
-                    ? ((decimal)(currentMonthOrdersCount - lastMonthOrdersCount) / lastMonthOrdersCount) * 100
-                    : 0;
+                if (lastMonthOrdersCount > 0)
+                {
+                    model.CommandesPourcentage = ((decimal)(currentMonthOrdersCount - lastMonthOrdersCount) / lastMonthOrdersCount) * 100;
+                }
+                else
+                {
+                    model.CommandesPourcentage = currentMonthOrdersCount > 0 ? 100 : 0;
+                }
 
                 // Count active products
                 model.ProduitsActifs = await _context.Produits
@@ -171,6 +185,34 @@ namespace Projet__E_commerce
                 {
                     model.CooperativeName = admin.nom_cooperative;
                     model.Location = $"{admin.ville}, Maroc";
+                }
+
+                // Calculate monthly revenue for the current year
+                model.MonthlyRevenue = new List<decimal>();
+                for (int month = 1; month <= 12; month++)
+                {
+                    var monthStart = new DateTime(now.Year, month, 1);
+                    var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+                    
+                    // Only query if month is not in future
+                    if (monthStart <= now)
+                    {
+                         var monthSales = await _context.Commandes
+                            .Include(c => c.LignesCommande)
+                                .ThenInclude(lc => lc.Variante)
+                                    .ThenInclude(v => v.Produit)
+                            .Where(c => c.created_at >= monthStart && c.created_at <= monthEnd &&
+                                       c.statut != "en_attente" && c.statut != "annule" &&
+                                       c.LignesCommande.Any(lc => lc.Variante.Produit.idAdmin == adminId))
+                            .SelectMany(c => c.LignesCommande.Where(lc => lc.Variante.Produit.idAdmin == adminId))
+                            .SumAsync(lc => lc.quantite * lc.prix_unitaire);
+                        
+                        model.MonthlyRevenue.Add(monthSales);
+                    }
+                    else
+                    {
+                        model.MonthlyRevenue.Add(0);
+                    }
                 }
 
                 ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
@@ -808,12 +850,12 @@ namespace Projet__E_commerce
         {
             return statut switch
             {
-                "en_attente" => "En attente",
-                "acceptée" => "Acceptée",
+                "en_attente" => "Non livrée",
                 "en_preparation" => "En préparation",
                 "en_livraison" => "En livraison",
-                "livrée" => "Livrée",
-                "annulée" => "Annulée",
+                "livre" => "Livrée",
+                "valide" => "Validée", // Garder pour compatibilité temporaire
+                "annule" => "Non livrée",
                 _ => statut
             };
         }

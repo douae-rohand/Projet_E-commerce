@@ -1,129 +1,56 @@
 @using Projet__E_commerce.Models.ViewModels
 @{
-    Layout = null;
+    Layout = "~/Views/SuperAdmin/_SuperAdminLayout.cshtml";
     ViewData["Title"] = "Super Admin - CoopMaroc";
     var activeTab = ViewBag.ActiveTab ?? "dashboard";
 }
 
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
-</head>
-<body class="bg-dark shadow-inset">
-    <div class="d-flex">
-        <!-- Sidebar -->
-        <aside class="bg-dark vh-100 sticky-top d-none d-lg-block border-end border-secondary border-opacity-25" style="width: 280px;">
-            <div class="p-4 mb-4">
-                <a href="/" class="d-flex align-items-center gap-3 text-decoration-none">
-                    <div class="rounded-3 bg-terracotta d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
-                        <i class="bi bi-shield-lock text-white h4 mb-0"></i>
-                    </div>
-                    <div>
-                        <h5 class="fw-bold mb-0 text-white font-display">CoopMaroc</h5>
-                        <p class="small text-white-50 mb-0" style="font-size: 10px; letter-spacing: 1px;">SUPER ADMIN</p>
-                    </div>
-                </a>
-            </div>
-            
-            <nav class="nav flex-column p-3 gap-2 admin-nav">
-                <a class="nav-link @(activeTab == "dashboard" ? "active" : "text-white-50") rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
-                   href="@Url.Action("Dashboard", "SuperAdmin")">
-                    <i class="bi bi-activity"></i> Vue Globale
-                </a>
-                <a class="nav-link @(activeTab == "cooperatives" ? "active" : "text-white-50") rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
-                   href="@Url.Action("Cooperatives", "SuperAdmin")">
-                    <i class="bi bi-shop"></i> Coopératives
-                </a>
-                <a class="nav-link @(activeTab == "users" ? "active" : "text-white-50") rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
-                   href="@Url.Action("Users", "SuperAdmin")">
-                    <i class="bi bi-people"></i> Utilisateurs
-                </a>
-                <a class="nav-link @(activeTab == "analytics" ? "active" : "text-white-50") rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
-                   href="@Url.Action("Analytics", "SuperAdmin")">
-                    <i class="bi bi-pie-chart"></i> Analytique
-                </a>
-                <a class="nav-link @(activeTab == "alerts" ? "active" : "text-white-50") rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
-                   href="@Url.Action("Alerts", "SuperAdmin")">
-                    <i class="bi bi-exclamation-triangle"></i> Alertes
-                </a>
-                <div class="border-top border-secondary border-opacity-25 my-3"></div>
-                <a class="nav-link text-white-50 rounded-3 d-flex align-items-center gap-3 py-3 px-3" 
-                   href="@Url.Action("Logout", "Auth")">
-                    <i class="bi bi-box-arrow-right"></i> Déconnexion
-                </a>
-            </nav>
-        </aside>
+@if (activeTab == "dashboard")
+{
+    var dashboardModel = Model as SuperAdminDashboardViewModel;
+    if (dashboardModel != null)
+    {
+        <partial name="~/Views/SuperAdmin/_DashboardOverview.cshtml" model="dashboardModel" />
+    }
+}
+else if (activeTab == "cooperatives")
+{
+    var coopModel = Model as List<CooperativeStatsViewModel>;
+    if (coopModel != null)
+    {
+        <partial name="~/Views/SuperAdmin/_CooperativesList.cshtml" model="coopModel" />
+    }
+}
+else if (activeTab == "users")
+{
+    var usersModel = Model as List<UserStatsViewModel>;
+    if (usersModel != null)
+    {
+        <partial name="~/Views/SuperAdmin/_UsersList.cshtml" model="usersModel" />
+    }
+}
+else if (activeTab == "analytics")
+{
+    var analyticsModel = Model as AnalyticsViewModel;
+    if (analyticsModel != null)
+    {
+        <partial name="~/Views/SuperAdmin/_AnalyticsView.cshtml" model="analyticsModel" />
+    }
+}
+else if (activeTab == "deliveries_orders")
+{
+    var ordersModel = Model as List<OrderDetailsViewModel>;
+    if (ordersModel != null)
+    {
+        <partial name="~/Views/SuperAdmin/_DeliveriesOrdersList.cshtml" model="ordersModel" />
+    }
+}
+else if (activeTab == "alerts")
+{
+    var alertsModel = Model as List<AlertViewModel>;
+    if (alertsModel != null)
+    {
+        <partial name="~/Views/SuperAdmin/_AlertsList.cshtml" model="alertsModel" />
+    }
+}
 
-        <!-- Main Content -->
-        <main class="flex-grow-1 bg-white rounded-start-5 overflow-hidden shadow-lg" style="margin-top: 10px; margin-bottom: 10px; margin-right: 10px; min-height: calc(100vh - 20px);">
-            <div class="p-4 p-md-5">
-                @if (TempData["SuccessMessage"] != null)
-                {
-                    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
-                        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                }
-
-                @if (activeTab == "dashboard")
-                {
-                    var dashboardModel = Model as SuperAdminDashboardViewModel;
-                    if (dashboardModel != null)
-                    {
-                        <partial name="~/Views/SuperAdmin/_DashboardOverview.cshtml" model="dashboardModel" />
-                    }
-                }
-                else if (activeTab == "cooperatives")
-                {
-                    var coopModel = Model as List<CooperativeStatsViewModel>;
-                    if (coopModel != null)
-                    {
-                        <partial name="~/Views/SuperAdmin/_CooperativesList.cshtml" model="coopModel" />
-                    }
-                }
-                else if (activeTab == "users")
-                {
-                    var usersModel = Model as List<UserStatsViewModel>;
-                    if (usersModel != null)
-                    {
-                        <partial name="~/Views/SuperAdmin/_UsersList.cshtml" model="usersModel" />
-                    }
-                }
-                else if (activeTab == "analytics")
-                {
-                    var analyticsModel = Model as AnalyticsViewModel;
-                    if (analyticsModel != null)
-                    {
-                        <partial name="~/Views/SuperAdmin/_AnalyticsView.cshtml" model="analyticsModel" />
-                    }
-                }
-                else if (activeTab == "alerts")
-                {
-                    var alertsModel = Model as List<AlertViewModel>;
-                    if (alertsModel != null)
-                    {
-                        <partial name="~/Views/SuperAdmin/_AlertsList.cshtml" model="alertsModel" />
-                    }
-                }
-            </div>
-        </main>
-    </div>
-
-    <style>
-        .rounded-start-5 { border-top-left-radius: 2.5rem !important; border-bottom-left-radius: 2.5rem !important; }
-        .admin-nav .nav-link { color: rgba(255,255,255,0.6) !important; font-weight: 500; transition: 0.3s; }
-        .admin-nav .nav-link:hover { color: white !important; background: rgba(255,255,255,0.05); }
-        .admin-nav .nav-link.active { color: white !important; background: var(--terracotta); box-shadow: 0 4px 15px rgba(216, 122, 79, 0.4); }
-        .shadow-inset { box-shadow: inset 0 0 100px rgba(0,0,0,0.5); }
-    </style>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>

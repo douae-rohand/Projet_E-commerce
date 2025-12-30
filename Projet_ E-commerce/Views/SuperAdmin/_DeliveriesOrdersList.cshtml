@@ -3,14 +3,10 @@
 <div class="mb-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold text-dark font-display mb-1">Appel Livraison et Commande</h2>
+            <h2 class="fw-bold text-dark font-display mb-1">Commande & livraison </h2>
             <p class="text-secondary mb-0">Gestion et suivi des commandes et des livraisons</p>
         </div>
-        <div>
-            <button class="btn btn-outline-secondary rounded-pill px-4 text-uppercase small fw-bold">
-                <i class="bi bi-download me-2"></i>Exporter
-            </button>
-        </div>
+        
     </div>
 
     <!-- Stats Summary Cards -->
@@ -23,7 +19,20 @@
                     </div>
                     <div>
                         <h6 class="text-secondary small text-uppercase mb-1">Total Commandes</h6>
-                        <h4 class="fw-bold mb-0">@Model.Count</h4>
+                        <h4 class="fw-bold mb-0">@Model.Count(m => m.Statut != "annule")</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+             <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-info bg-opacity-10 p-3 text-info">
+                        <i class="bi bi-box-seam h4 mb-0"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-secondary small text-uppercase mb-1">En Préparation</h6>
+                        <h4 class="fw-bold mb-0">@Model.Count(m => m.DeliveryStatus == "en_preparation" && m.Statut != "annule")</h4>
                     </div>
                 </div>
             </div>
@@ -36,7 +45,7 @@
                     </div>
                     <div>
                         <h6 class="text-secondary small text-uppercase mb-1">En Livraison</h6>
-                        <h4 class="fw-bold mb-0">@Model.Count(m => m.DeliveryStatus == "en_cours" || m.DeliveryStatus == "en_preparation")</h4>
+                        <h4 class="fw-bold mb-0">@Model.Count(m => m.DeliveryStatus == "en_cours" && m.Statut != "annule")</h4>
                     </div>
                 </div>
             </div>
@@ -49,21 +58,32 @@
                     </div>
                     <div>
                         <h6 class="text-secondary small text-uppercase mb-1">Livrées</h6>
-                        <h4 class="fw-bold mb-0">@Model.Count(m => m.DeliveryStatus == "livre")</h4>
+                        <h4 class="fw-bold mb-0">@Model.Count(m => m.DeliveryStatus == "livre" && m.Statut != "annule")</h4>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-             <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="rounded-circle bg-danger bg-opacity-10 p-3 text-danger">
-                        <i class="bi bi-x-circle h4 mb-0"></i>
+    </div>
+
+    <!-- NEW: Filters -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-3">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" id="orderSearchInput" class="form-control border-start-0" placeholder="Rechercher par # ID, Client (nom, prénom ou email)...">
                     </div>
-                    <div>
-                        <h6 class="text-secondary small text-uppercase mb-1">Annulées</h6>
-                        <h4 class="fw-bold mb-0">@Model.Count(m => m.Statut == "annule")</h4>
-                    </div>
+                </div>
+                <div class="col-md-6">
+                    <select id="orderStatusFilterSelect" class="form-select">
+                        <option value="">Tous les statuts de commande</option>
+                      
+                        <option value="en_preparation">Préparation</option>
+                        <option value="en_livraison">En livraison</option>
+                        <option value="livre">Livré</option>
+                        <option value="annule">Non Livré</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -71,14 +91,12 @@
 
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0" id="ordersTable">
                 <thead class="bg-light">
                     <tr>
                         <th class="border-0 py-3 ps-4 text-secondary small text-uppercase fw-bold">Commande</th>
                         <th class="border-0 py-3 text-secondary small text-uppercase fw-bold">Client</th>
-                        <th class="border-0 py-3 text-secondary small text-uppercase fw-bold">Adresse</th>
                         <th class="border-0 py-3 text-secondary small text-uppercase fw-bold">Statut Commande</th>
-                        <th class="border-0 py-3 text-secondary small text-uppercase fw-bold">Statut Livraison</th>
                         <th class="border-0 py-3 text-secondary small text-uppercase fw-bold">Total</th>
                         <th class="border-0 py-3 pe-4 text-end text-secondary small text-uppercase fw-bold">Actions</th>
                     </tr>
@@ -86,7 +104,10 @@
                 <tbody>
                     @foreach (var item in Model)
                     {
-                        <tr>
+                        <tr class="order-row" 
+                            data-search="@(item.IdCommande) @(item.ClientNom.ToLower()) @(item.ClientPrenom.ToLower()) @(item.ClientEmail.ToLower())"
+                            data-order-status="@item.Statut"
+                            data-delivery-status="@(item.HasDelivery ? item.DeliveryStatus : "no_delivery")">
                             <td class="ps-4">
                                 <span class="fw-bold text-dark">#@item.IdCommande</span>
                                 <div class="small text-secondary">@item.CreatedAt.ToString("dd/MM/yyyy")</div>
@@ -95,45 +116,28 @@
                                 <div class="fw-medium text-dark">@item.ClientPrenom @item.ClientNom</div>
                                 <div class="small text-secondary">@item.ClientEmail</div>
                             </td>
-                             <td>
-                                <div class="text-truncate" style="max-width: 200px;" title="@item.AdresseComplete">
-                                    @item.VilleLivraison
-                                </div>
-                                <div class="small text-secondary">@item.DeliveryMode</div>
-                            </td>
                             <td>
-                                @{
-                                    var orderBadgeClass = item.Statut switch {
-                                        "valide" => "bg-success bg-opacity-10 text-success",
-                                        "en_attente" => "bg-warning bg-opacity-10 text-warning",
-                                        "annule" => "bg-danger bg-opacity-10 text-danger",
-                                        _ => "bg-secondary bg-opacity-10 text-secondary"
-                                    };
-                                }
-                                <span class="badge rounded-pill @orderBadgeClass px-3 py-2 fw-normal">
-                                    @item.Statut
-                                </span>
-                            </td>
-                             <td>
-                                @if(item.HasDelivery) {
-                                    var deliveryBadgeClass = item.DeliveryStatus switch {
-                                        "livre" => "bg-success bg-opacity-10 text-success",
-                                        "en_cours" => "bg-primary bg-opacity-10 text-primary",
-                                        "en_preparation" => "bg-info bg-opacity-10 text-info",
-                                        "non_livre" => "bg-danger bg-opacity-10 text-danger",
-                                        _ => "bg-secondary bg-opacity-10 text-secondary"
-                                    };
-                                    <span class="badge rounded-pill @deliveryBadgeClass px-3 py-2 fw-normal">
-                                        @(item.DeliveryStatus ?? "N/A")
-                                    </span>
-                                } else {
-                                    <span class="text-secondary small footer-text">-</span>
-                                }
+                                <select class="form-select form-select-sm rounded-pill border-0 shadow-sm px-3 py-2 fw-semibold order-status-select" 
+                                        data-order-id="@item.IdCommande"
+                                        style="width: 140px; font-size: 0.85rem;">
+                                    
+                                    <option value="en_preparation" selected="@(item.Statut == "en_preparation")">Préparation</option>
+                                    <option value="en_livraison" selected="@(item.Statut == "en_livraison")">En livraison</option>
+                                    <option value="livre" selected="@(item.Statut == "livre")">Livré</option>
+                                    <option value="annule" selected="@(item.Statut == "annule")">Non Livré</option>
+                                </select>
                             </td>
                             <td class="fw-bold text-dark">@item.MontantTotal.ToString("N2") DH</td>
                             <td class="pe-4 text-end">
-                                <button class="btn btn-sm btn-light rounded-circle" data-bs-toggle="tooltip" title="Voir détails">
+                                <button class="btn btn-sm btn-light rounded-circle shadow-sm hover-terracotta" 
+                                        onclick="showOrderDetails(@item.IdCommande)" 
+                                        data-bs-toggle="tooltip" title="Voir détails">
                                     <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary rounded-circle shadow-sm ms-1" 
+                                        onclick="showOrderDetails(@item.IdCommande)" 
+                                        data-bs-toggle="tooltip" title="Imprimer Bordereau">
+                                    <i class="bi bi-printer"></i>
                                 </button>
                             </td>
                         </tr>
@@ -143,3 +147,135 @@
         </div>
     </div>
 </div>
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title font-display fw-bold" id="modalTitle">Détails de la Commande</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="modalContent">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-terracotta" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-terracotta:hover { color: white !important; background-color: var(--terracotta) !important; border-color: var(--terracotta) !important; }
+    
+    /* Dynamic select styling */
+    .order-status-select { transition: all 0.3s; }
+  
+    .order-status-select[data-val="en_preparation"] { background-color: rgba(255, 193, 7, 0.1); color: #ffc107; }
+    .order-status-select[data-val="en_livraison"] { background-color: rgba(13, 202, 240, 0.1); color: #0dcaf0; }
+    .order-status-select[data-val="livre"] { background-color: rgba(25, 135, 84, 0.1); color: #198754; }
+    .order-status-select[data-val="annule"] { background-color: rgba(220, 53, 69, 0.1); color: #dc3545; }
+</style>
+
+<script>
+    function showOrderDetails(id) {
+        const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+        const content = document.getElementById('modalContent');
+        const title = document.getElementById('modalTitle');
+        
+        title.innerText = `Détails de la Commande #${id}`;
+        content.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-terracotta" role="status"></div></div>';
+        modal.show();
+
+        fetch(`/SuperAdmin/OrderDetailsModal/${id}`)
+            .then(response => response.text())
+            .then(html => {
+                content.innerHTML = html;
+            })
+            .catch(err => {
+                content.innerHTML = '<div class="alert alert-danger">Erreur lors du chargement des détails.</div>';
+            });
+    }
+
+    function updateSelectStyle(select) {
+        const val = select.value;
+        select.setAttribute('data-val', val);
+    }
+
+    function filterOrders() {
+        const searchText = document.getElementById('orderSearchInput').value.toLowerCase();
+        const orderStatusFilter = document.getElementById('orderStatusFilterSelect').value;
+        const rows = document.querySelectorAll('.order-row');
+
+        rows.forEach(row => {
+            const searchData = row.getAttribute('data-search');
+            const orderStatus = row.getAttribute('data-order-status');
+            
+            const matchSearch = searchData.includes(searchText);
+            // By default, exclude 'en_attente' orders unless specifically filtered
+            const matchOrderStatus = orderStatusFilter === "" ? orderStatus !== "en_attente" : orderStatus === orderStatusFilter;
+
+            if (matchSearch && matchOrderStatus) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filter events
+        document.getElementById('orderSearchInput').addEventListener('input', filterOrders);
+        document.getElementById('orderStatusFilterSelect').addEventListener('change', filterOrders);
+
+        const orderSelects = document.querySelectorAll('.order-status-select');
+        orderSelects.forEach(select => {
+            updateSelectStyle(select);
+            
+            select.addEventListener('change', function() {
+                const orderId = this.dataset.orderId;
+                const newStatus = this.value;
+                const originalStatus = this.getAttribute('data-original-status') || newStatus;
+
+                if (!confirm('Voulez-vous vraiment modifier le statut de la commande ?')) {
+                    this.value = originalStatus;
+                    updateSelectStyle(this);
+                    return;
+                }
+
+                updateSelectStyle(this);
+
+                fetch('/SuperAdmin/UpdateOrderStatus', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    },
+                    body: JSON.stringify({ IdCommande: parseInt(orderId), NewStatus: newStatus })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.setAttribute('data-original-status', newStatus);
+                    } else {
+                        alert('Erreur: ' + data.message);
+                        this.value = originalStatus;
+                        updateSelectStyle(this);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur est survenue lors de la mise à jour.');
+                    this.value = originalStatus;
+                    updateSelectStyle(this);
+                });
+            });
+            select.setAttribute('data-original-status', select.value);
+        });
+    });
+</script>
