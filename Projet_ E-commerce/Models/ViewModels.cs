@@ -21,6 +21,7 @@ namespace Projet__E_commerce.Models
         public string Cooperative { get; set; } = string.Empty;
         public bool IsBestSeller { get; set; }
         public bool IsNew { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public class OrderViewModel
@@ -36,13 +37,18 @@ namespace Projet__E_commerce.Models
 
     public class CartItemViewModel
     {
-        public int Id { get; set; }
+        public int ProductId { get; set; }
+        public int VariantId { get; set; }
         public string Name { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public int Quantity { get; set; }
         public string Size { get; set; } = string.Empty;
         public string Color { get; set; } = string.Empty;
+        public string Weight { get; set; } = string.Empty;
         public string Image { get; set; } = string.Empty;
+
+        // Legacy compatibility (if needed)
+        public int Id { get => ProductId; set => ProductId = value; }
     }
 
     public class ActivityViewModel
@@ -66,6 +72,7 @@ namespace Projet__E_commerce.Models
         public decimal Price { get; set; }
         public string Size { get; set; } = string.Empty;
         public string Color { get; set; } = string.Empty;
+        public string Weight { get; set; } = string.Empty;
         public int Stock { get; set; }
         public string? Photo { get; set; }
     }

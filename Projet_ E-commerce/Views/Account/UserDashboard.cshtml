@@ -108,9 +108,6 @@
                                 <button type="button" class="nav-link active rounded-pill px-3 py-2" data-status="tous" onclick="filterOrders('tous')">Tous</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button type="button" class="nav-link rounded-pill px-3 py-2" data-status="valide" onclick="filterOrders('valide')">Validé</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
                                 <button type="button" class="nav-link rounded-pill px-3 py-2" data-status="en_preparation" onclick="filterOrders('en_preparation')">En préparation</button>
                             </li>
                             <li class="nav-item" role="presentation">
@@ -135,10 +132,8 @@
                             switch (statusValue)
                             {
                                 case "en_attente":
-                                case "valide":
-                                    statusLabel = "Validé";
+                                    statusLabel = "En attente";
                                     statusClass = "bg-warning-subtle text-warning";
-                                    statusValue = "valide";
                                     break;
                                 case "en_preparation":
                                     statusLabel = "En préparation";
@@ -563,7 +558,6 @@
                 // Update empty state message based on filter
                 const statusMessages = {
                     'tous': 'Vous n\'avez aucune commande pour le moment.',
-                    'valide': 'Aucune commande validée.',
                     'en_preparation': 'Aucune commande en préparation.',
                     'en_livraison': 'Aucune commande en livraison.',
                     'livre': 'Aucune commande livrée.',

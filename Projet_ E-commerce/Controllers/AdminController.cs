@@ -735,7 +735,7 @@ namespace Projet__E_commerce
                         Thumbnail = thumbnail,
                         CreatedAt = c.created_at,
                         UpdatedAt = c.updated_at,
-                        StatutLivraison = c.Livraison?.statut,
+                        StatutLivraison = c.statut,
                         ModeLivraison = c.Livraison?.mode_livraison,
                         DateDebutEstimation = c.Livraison?.dateDebutEstimation,
                         DateFinEstimation = c.Livraison?.dateFinEstimation
@@ -793,7 +793,7 @@ namespace Projet__E_commerce
                         ligne.Variante.updated_at = DateTime.Now;
                     }
 
-                    commande.statut = "acceptée";
+                    commande.statut = "en_preparation";
                     commande.updated_at = DateTime.Now;
                 }
             }
@@ -807,7 +807,8 @@ namespace Projet__E_commerce
             {
                 "en_attente" => "En attente",
                 "acceptée" => "Acceptée",
-                "en_cours" => "En cours",
+                "en_preparation" => "En préparation",
+                "en_livraison" => "En livraison",
                 "livrée" => "Livrée",
                 "annulée" => "Annulée",
                 _ => statut
@@ -820,7 +821,8 @@ namespace Projet__E_commerce
             {
                 "en_attente" => "warning",
                 "acceptée" => "info",
-                "en_cours" => "primary",
+                "en_preparation" => "info",
+                "en_livraison" => "primary",
                 "livrée" => "success",
                 "annulée" => "danger",
                 _ => "secondary"
@@ -874,7 +876,7 @@ namespace Projet__E_commerce
                     PrixTotalAdmin = prixTotalAdmin,
                     CreatedAt = commande.created_at,
                     UpdatedAt = commande.updated_at,
-                    StatutLivraison = commande.Livraison?.statut,
+                    StatutLivraison = commande.statut,
                     ModeLivraison = commande.Livraison?.mode_livraison,
                     DateDebutEstimation = commande.Livraison?.dateDebutEstimation,
                     DateFinEstimation = commande.Livraison?.dateFinEstimation,

@@ -40,7 +40,8 @@ namespace Projet__E_commerce.Controllers
 
             var cartItems = order.LignesCommande.Select(lc => new CartItemViewModel
             {
-                Id = lc.Variante.idP,
+                ProductId = lc.Variante.idP,
+                VariantId = lc.idV,
                 Name = lc.Variante.Produit.nomP,
                 Price = lc.prix_unitaire,
                 Quantity = lc.quantite,
@@ -48,6 +49,16 @@ namespace Projet__E_commerce.Controllers
                 Color = lc.Variante.couleur ?? "",
                 Image = lc.Variante.photo ?? ""
             }).ToList();
+
+            // Validate Stock in Index too
+            foreach (var line in order.LignesCommande)
+            {
+                if (line.Variante.quantite < line.quantite)
+                {
+                    TempData["CartError"] = $"Stock insuffisant pour {line.Variante.Produit.nomP}.";
+                    return RedirectToAction("Index", "Cart");
+                }
+            }
 
             ViewBag.CartTotal = order.prixTotal;
             ViewBag.CartItems = cartItems;
@@ -81,7 +92,8 @@ namespace Projet__E_commerce.Controllers
 
             var cartItems = order.LignesCommande.Select(lc => new CartItemViewModel
             {
-                Id = lc.Variante.idP,
+                ProductId = lc.Variante.idP,
+                VariantId = lc.idV,
                 Name = lc.Variante.Produit.nomP,
                 Price = lc.prix_unitaire,
                 Quantity = lc.quantite,
@@ -149,7 +161,7 @@ namespace Projet__E_commerce.Controllers
             }
 
             // 2. Finalize Order
-            order.statut = "valide";
+            order.statut = "en_preparation";
             order.updated_at = DateTime.Now;
 
             // 3. Create Livraison
@@ -157,7 +169,6 @@ namespace Projet__E_commerce.Controllers
             {
                 idCommande = order.idCommande,
                 idAdresse = finalAddressId,
-                statut = "en_preparation",
                 mode_livraison = model.DeliveryMode,
                 notes = "Commande e-commerce",
                 created_at = DateTime.Now,
@@ -175,7 +186,8 @@ namespace Projet__E_commerce.Controllers
             {
                 livraison.dateDebutEstimation = DateTime.Now.AddDays(3);
                 livraison.dateFinEstimation = DateTime.Now.AddDays(5);
-                livraison.frais = 0;
+                livraison.frais = 30;
+                order.prixTotal += 30;
             }
             _db.Livraisons.Add(livraison);
             

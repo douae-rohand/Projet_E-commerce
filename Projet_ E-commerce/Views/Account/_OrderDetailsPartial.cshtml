@@ -15,8 +15,7 @@
                 switch (Model.statut.ToLower())
                 {
                     case "en_attente":
-                    case "valide":
-                        statusLabel = "Validé";
+                        statusLabel = "En attente";
                         statusClass = "bg-warning-subtle text-warning";
                         break;
                     case "en_preparation":
@@ -112,7 +111,18 @@
     <!-- Total -->
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-2">
-            <span class="fw-bold">Total TTC</span>
+            <span class="text-muted">Sous-total</span>
+            <span class="fw-bold">@((Model.prixTotal - (Model.Livraison?.frais ?? 0)).ToString("N2")) MAD</span>
+        </div>
+        @if (Model.Livraison != null && Model.Livraison.frais > 0)
+        {
+            <div class="d-flex justify-content-between align-items-center mt-2">
+                <span class="text-muted">Frais de livraison (@Model.Livraison.mode_livraison)</span>
+                <span class="fw-bold text-success">+ @Model.Livraison.frais.ToString("N2") MAD</span>
+            </div>
+        }
+        <div class="d-flex justify-content-between align-items-center mt-2">
+            <span class="fw-bold fs-5">Total TTC</span>
             <span class="h5 fw-bold text-primary mb-0">@Model.prixTotal.ToString("N2") MAD</span>
         </div>
     </div>
