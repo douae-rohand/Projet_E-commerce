@@ -327,7 +327,7 @@ namespace Projet__E_commerce.Controllers
                         c.idCommande, c.created_at, c.statut, c.prixTotal,
                         cl.nom, cl.prenom, u.email, cl.telephone,
                         al.adresse_complete, al.ville, al.code_postal, 
-                        l.statut, l.mode_livraison
+                        l.mode_livraison
                     FROM Commandes c
                     INNER JOIN Clients cl ON c.idClient = cl.id
                     INNER JOIN Utilisateurs u ON cl.id = u.id
@@ -355,8 +355,8 @@ namespace Projet__E_commerce.Controllers
                             VilleLivraison = reader.IsDBNull(9) ? "" : reader.GetString(9),
                             CodePostalLivraison = reader.IsDBNull(10) ? "" : reader.GetString(10),
                             HasDelivery = !reader.IsDBNull(11),
-                            DeliveryStatus = reader.IsDBNull(11) ? null : reader.GetString(11),
-                            DeliveryMode = reader.IsDBNull(12) ? null : reader.GetString(12)
+                            //DeliveryStatus = reader.IsDBNull(11) ? null : reader.GetString(11),
+                            DeliveryMode = reader.IsDBNull(11) ? null : reader.GetString(11)
                         });
                     }
                 }
@@ -382,7 +382,7 @@ namespace Projet__E_commerce.Controllers
                             c.idCommande, c.created_at, c.statut, c.prixTotal,
                             cl.nom, cl.prenom, u.email, cl.telephone,
                             al.adresse_complete, al.ville, al.code_postal, 
-                            l.statut as deliveryStatus, l.mode_livraison, l.frais as fraisLivraison,
+                            l.mode_livraison, l.frais as fraisLivraison,
                             l.notes,
                             f.numero_facture, f.path_facture,
                             bl.numero_bordereau, bl.path_bordereau
@@ -415,8 +415,8 @@ namespace Projet__E_commerce.Controllers
                                     AdresseLivraison = reader["adresse_complete"]?.ToString() ?? "N/A",
                                     VilleLivraison = reader["ville"]?.ToString() ?? "N/A",
                                     CodePostalLivraison = reader["code_postal"]?.ToString() ?? "N/A",
-                                    HasDelivery = reader["deliveryStatus"] != DBNull.Value,
-                                    DeliveryStatus = reader["deliveryStatus"] == DBNull.Value ? null : reader["deliveryStatus"].ToString(),
+                                    HasDelivery = reader["mode_livraison"] != DBNull.Value,
+                                    DeliveryStatus = reader["mode_livraison"] != DBNull.Value ? "Pris en charge" : null,
                                     DeliveryMode = reader["mode_livraison"] == DBNull.Value ? null : reader["mode_livraison"].ToString(),
                                     FraisLivraison = reader["fraisLivraison"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["fraisLivraison"]),
                                     Notes = reader["notes"] == DBNull.Value ? null : reader["notes"].ToString(),
@@ -490,7 +490,9 @@ namespace Projet__E_commerce.Controllers
                 {
                     await connection.OpenAsync();
 
-                    string updateQuery = "UPDATE Livraisons SET statut = @status, updated_at = @updatedAt WHERE idCommande = @idCommande";
+                    // Livraison status is now tied to Commande status. 
+                    // Let's update the Commande status instead if this is called.
+                    string updateQuery = "UPDATE Commandes SET statut = @status, updated_at = @updatedAt WHERE idCommande = @idCommande";
 
                     using (SqlCommand cmd = new SqlCommand(updateQuery, connection))
                     {
@@ -1293,8 +1295,8 @@ namespace Projet__E_commerce.Controllers
                     }
 
                     // Create delivery
-                    string insertQuery = @"INSERT INTO Livraisons (idCommande, idAdresse, statut, dateDebutEstimation, dateFinEstimation, created_at)
-                                          VALUES (@orderId, @addressId, 'en_cours', GETDATE(), DATEADD(day, 3, GETDATE()), GETDATE())";
+                    string insertQuery = @"INSERT INTO Livraisons (idCommande, idAdresse, dateDebutEstimation, dateFinEstimation, created_at)
+                                          VALUES (@orderId, @addressId, GETDATE(), DATEADD(day, 3, GETDATE()), GETDATE())";
                     using (SqlCommand cmd = new SqlCommand(insertQuery, connection))
                     {
                         cmd.Parameters.AddWithValue("@orderId", orderId);

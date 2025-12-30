@@ -136,7 +136,7 @@
                                     </h5>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <span class="h5 fw-bold mb-0">@prod.Price MAD</span>
-                                        <button class="btn btn-light rounded-circle p-2 shadow-sm text-primary" onclick="addToCart(@prod.Id)">
+                                        <button class="btn btn-light rounded-circle p-2 shadow-sm text-primary" onclick="window.location.href='@Url.Action("Detail", "Catalog", new { id = prod.Id })'">
                                             <i class="bi bi-cart-plus"></i>
                                         </button>
                                     </div>

@@ -57,7 +57,7 @@
                     <span class="product-price-original">@originalPrice DH</span>
                 }
             </div>
-            <span class="product-add-btn" role="button" tabindex="0" onclick="event.preventDefault(); addToCart(@productId);">
+            <span class="product-add-btn" role="button" tabindex="0" onclick="event.preventDefault(); window.location.href='@Url.Action("Detail", "Catalog", new { id = productId })';">
                 <i class="bi bi-cart-plus"></i>
             </span>
         </div>
