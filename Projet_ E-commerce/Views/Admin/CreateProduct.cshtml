@@ -334,7 +334,53 @@
                                 </div>
                             </div>
                             
-                            <div id="variants-container"></div>
+                            <div id="variants-container">
+                                @if (Model.Variantes != null)
+                                {
+                                    for (int i = 0; i < Model.Variantes.Count; i++)
+                                    {
+                                        <div class="variant-item mb-4 position-relative border rounded-3 p-3 bg-light" id="variant-@i">
+                                            <button type="button" class="btn-close position-absolute top-0 end-0 m-2" aria-label="Supprimer" onclick="removeVariant(@i)"></button>
+                                            <div class="section-divider my-3">
+                                                <span>Variante supplémentaire</span>
+                                            </div>
+                                            
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label"><i class="bi bi-currency-exchange"></i> Prix (MAD)</label>
+                                                    <input name="Variantes[@i].prix" value="@Model.Variantes[i].prix" type="number" step="0.01" class="form-control" placeholder="0.00" required />
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label"><i class="bi bi-box"></i> Stock</label>
+                                                    <input name="Variantes[@i].quantite" value="@Model.Variantes[i].quantite" type="number" class="form-control" placeholder="0" required />
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <label class="form-label"><i class="bi bi-rulers"></i> Taille</label>
+                                                    <input name="Variantes[@i].taille" value="@Model.Variantes[i].taille" type="text" class="form-control" placeholder="Ex: 100ml" />
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label"><i class="bi bi-palette"></i> Couleur</label>
+                                                    <input name="Variantes[@i].couleur" value="@Model.Variantes[i].couleur" type="text" class="form-control" placeholder="Ex: Doré" />
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label"><i class="bi bi-weight"></i> Poids</label>
+                                                    <input name="Variantes[@i].poids" value="@Model.Variantes[i].poids" type="text" class="form-control" placeholder="Ex: 100g" />
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row g-3 mt-1">
+                                                <div class="col-12">
+                                                     <label class="form-label"><i class="bi bi-image"></i> Photo de la variante</label>
+                                                     <input name="Variantes[@i].PhotoFile" type="file" class="form-control" accept="image/*" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
 
                             <button type="button" class="btn btn-outline-secondary w-100 mb-4" onclick="addVariant()">
                                 <i class="bi bi-plus-lg me-2"></i>Ajouter une variante
@@ -355,7 +401,7 @@
                                     <small class="text-muted d-block mt-2">JPG, PNG, WEBP (max. 5MB)</small>
                                 </div>
                             </div>
-
+                            
                             <div class="d-flex gap-3 flex-wrap">
                                 <button type="submit" class="btn btn-primary px-5">
                                     <i class="bi bi-check-lg me-2"></i>Créer le produit
@@ -401,7 +447,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let variantCount = 0;
+        let variantCount = @(Model.Variantes?.Count ?? 0);
 
         function addVariant() {
             const container = document.getElementById('variants-container');
