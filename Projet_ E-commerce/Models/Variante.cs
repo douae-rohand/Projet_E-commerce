@@ -34,7 +34,7 @@ namespace Projet__E_commerce.Models
         public DateTime updated_at { get; set; } = DateTime.Now;
 
         // Navigation properties
-        public virtual Produit Produit { get; set; } = null!;
+        public virtual Produit? Produit { get; set; } = null!;
         public virtual ICollection<LigneCommande> LignesCommande { get; set; } = new List<LigneCommande>();
 
         [NotMapped]

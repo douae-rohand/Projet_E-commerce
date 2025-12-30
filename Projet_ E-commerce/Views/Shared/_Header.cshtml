@@ -4,10 +4,10 @@
         <div class="d-flex align-items-center justify-content-between" style="min-height: 64px;">
             <!-- Logo -->
             <a asp-controller="Home" asp-action="Index" class="d-flex align-items-center gap-2 text-decoration-none">
-                <img src="~/images/logo.png" alt="CoopMaroc Logo" style="height: 70px; width: auto;" />
+                <img src="~/images/logo.png" alt="Souk 212 Logo" style="height: 70px; width: auto;" />
                 <div class="d-none d-sm-block">
                     <span class="font-display fs-5 fw-bold text-dark">
-                        Coop<span class="text-terracotta">Maroc</span>
+                        Souk<span class="text-terracotta"> 212</span>
                     </span>
                     <p class="mb-0 text-muted" style="font-size: 10px; margin-top: -4px;">Trésors des Coopératives</p>
                 </div>
@@ -41,7 +41,7 @@
                     <a asp-controller="Cart" asp-action="Index" class="btn btn-ghost btn-icon position-relative me-2">
                         <i class="bi bi-cart3 fs-5"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-terracotta border border-2 border-white" style="font-size: 10px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; padding: 0;">
-                            3
+                            @await Component.InvokeAsync("CartCount")
                         </span>
                     </a>
 

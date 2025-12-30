@@ -775,7 +775,7 @@ namespace Projet__E_commerce.Controllers
                                 IdP = reader.GetInt32(0),
                                 NomP = reader.GetString(1),
                                 Description = reader.IsDBNull(2) ? null : reader.GetString(2),
-                                Prix = reader.GetDecimal(3),
+                                Prix = reader.IsDBNull(3) ? 0 : reader.GetDecimal(3),
                                 Stock = reader.GetInt32(4),
                                 ImageUrl = reader.IsDBNull(5) ? null : reader.GetString(5),
                                 Categorie = reader.GetString(6),

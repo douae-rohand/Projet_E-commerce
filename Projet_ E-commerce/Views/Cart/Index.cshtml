@@ -1,6 +1,6 @@
 @model List<CartItemViewModel>
 @{
-    ViewData["Title"] = "Mon Panier - SoukDigital";
+    ViewData["Title"] = "Mon Panier - Souk 212";
     var cartItems = Model ?? new List<CartItemViewModel>();
     decimal subtotal = 0;
     foreach(var item in cartItems) subtotal += item.Price * item.Quantity;
@@ -85,11 +85,6 @@
         <div class="col-lg-4">
             <div class="card border-0 shadow-soft rounded-4 p-4 sticky-top" style="top: 100px;">
                 <h2 class="h4 fw-bold mb-4 font-display">Récapitulatif</h2>
-
-                <div class="input-group mb-4">
-                    <input type="text" class="form-control border-end-0 py-2 rounded-start-3" placeholder="Code promo">
-                    <button class="btn btn-outline-dark px-3 rounded-end-3" type="button">Appliquer</button>
-                </div>
 
                 <div class="d-flex justify-content-between mb-3 small">
                     <span class="text-muted">Sous-total</span>
