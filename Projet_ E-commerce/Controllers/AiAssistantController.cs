@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace Projet__E_commerce.Controllers
 {
@@ -10,11 +11,13 @@ namespace Projet__E_commerce.Controllers
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
+        private readonly Projet__E_commerce.Data.ApplicationDbContext _db;
 
-        public AiAssistantController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public AiAssistantController(IHttpClientFactory httpClientFactory, IConfiguration configuration, Projet__E_commerce.Data.ApplicationDbContext db)
         {
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
+            _db = db;
         }
 
         [HttpPost("chat")]
@@ -28,9 +31,28 @@ namespace Projet__E_commerce.Controllers
                 var client = _httpClientFactory.CreateClient();
                 
                 // Get webhook URL from configuration
-                var baseUrl = _configuration["N8n:WebhookUrl"] ?? "https://shopitri.app.n8n.cloud/webhook/3dc65d23-466f-47a6-828e-e3f4f5c4e0fd";
+                var baseUrl = _configuration["N8n:WebhookUrl"] ?? "http://localhost:5678/webhook/3dc65d23-466f-47a6-828e-e3f4f5c4e0fd";
                 var sessionId = HttpContext.Session.Id;
                 var webhookUrl = $"{baseUrl}?sessionId={sessionId}";
+
+                // User Info
+                var userId = HttpContext.Session.GetInt32("UserId");
+                var userRole = HttpContext.Session.GetString("UserRole");
+                var userEmail = HttpContext.Session.GetString("UserEmail");
+                string? userName = null;
+
+                if (userId.HasValue)
+                {
+                    if (userRole == "CLIENT")
+                    {
+                        var profil = await _db.Clients.FirstOrDefaultAsync(c => c.id == userId.Value);
+                        if (profil != null)
+                        {
+                            userName = $"{profil.prenom} {profil.nom}".Trim();
+                        }
+                    }
+                    userName ??= userEmail?.Split('@')[0] ?? "Utilisateur";
+                }
 
                 // Force session initialization to get a stable ID
                 if (string.IsNullOrEmpty(HttpContext.Session.GetString("_SessionStarted")))
@@ -42,8 +64,14 @@ namespace Projet__E_commerce.Controllers
                 var n8nRequest = new
                 {
                     chatInput = request.Message,
-                    query = request.Message, // Some n8n nodes expect 'query' by default
-                    sessionId = HttpContext.Session.Id
+                    query = request.Message,
+                    sessionId = HttpContext.Session.Id,
+                    user = new {
+                        isLoggedIn = userId.HasValue,
+                        name = userName,
+                        role = userRole,
+                        email = userEmail
+                    }
                 };
 
                 var content = new StringContent(

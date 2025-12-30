@@ -2,6 +2,7 @@
 @{
     Layout = null;
     ViewData["Title"] = "Tableau de bord - " + Model.CooperativeName;
+    ViewData["ActivePage"] = "Dashboard";
 }
 
 <!DOCTYPE html>
@@ -25,7 +26,6 @@
             background: white;
             border-radius: 20px;
             overflow: hidden;
-            /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); Handled by bootstrap card */
         }
 
         #chart3d {
@@ -89,106 +89,32 @@
             color: #5A7EB8;
         }
 
-        .chart-legend {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 10px 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            z-index: 10;
-            max-height: 100px;
-            overflow-y: auto;
-        }
-
-        .legend-title {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: #6c757d;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .legend-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
         .legend-item {
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 4px 10px;
-            background: rgba(90, 126, 184, 0.05);
+            padding: 6px 14px;
+            background: white;
+            border: 1px solid rgba(90, 126, 184, 0.1);
             border-radius: 20px;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             transition: all 0.2s ease;
             cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         .legend-item:hover {
-            background: rgba(90, 126, 184, 0.15);
+            background: #f8f9fa;
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-color: rgba(90, 126, 184, 0.3);
         }
 
         .legend-color {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .chart-controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            z-index: 10;
-        }
-
-        .control-btn {
-            width: 35px;
-            height: 35px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: none;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            color: #5A7EB8;
-            font-size: 1rem;
-        }
-
-        .control-btn:hover {
-            background: #5A7EB8;
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .chart-title {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 8px 16px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            z-index: 10;
-            font-weight: 700;
-            color: #40322c;
-            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -197,39 +123,8 @@
     
     <div class="d-flex">
         <!-- Sidebar -->
-        <aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block shadow-sm" style="width: 280px; z-index: 1000;">
-            <div class="p-4 border-bottom">
-                 <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
-                    <div class="rounded-3 bg-terracotta p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
-                        <i class="bi bi-flower1 text-white h5 mb-0"></i>
-                    </div>
-                    <div>
-                        <h6 class="fw-bold mb-0 text-dark">CoopMaroc</h6>
-                        <p class="small text-muted mb-0" style="font-size: 10px;">ESPACE ADMIN</p>
-                    </div>
-                </a>
-            </div>
-            
-            <nav class="nav flex-column p-3 gap-1">
-                <a class="nav-link active rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 shadow-sm" href="@Url.Action("Dashboard", "Admin")">
-                    <i class="bi bi-speedometer2"></i> Tableau de bord
-                </a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Products", "Admin")">
-                    <i class="bi bi-box-seam"></i> Produits
-                </a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Orders", "Admin")">
-                    <i class="bi bi-cart3"></i> Commandes
-                </a>
-                <a class="nav-link text-muted rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1 hover-effect" href="@Url.Action("Profile", "Admin")">
-                    <i class="bi bi-gear"></i> Profil
-                </a>
-                <div class="mt-auto pt-4 border-top">
-                    <a class="nav-link text-danger rounded-3 d-flex align-items-center gap-3 py-2 px-3 hover-effect" href="@Url.Action("Logout", "Account")">
-                        <i class="bi bi-box-arrow-right"></i> Déconnexion
-                    </a>
-                </div>
-            </nav>
-        </aside>
+        <!-- Sidebar -->
+        <partial name="_AdminSidebar" />
 
         <!-- Main Content -->
         <main class="flex-grow-1 p-4 p-md-5">
@@ -317,13 +212,13 @@
             <!-- Charts Section -->
             <div class="row g-4 mb-5">
                 <!-- Sales Chart -->
-                <div class="col-lg-8">
+                <div class="col-lg-12">
                     <div class="card card-premium border-0 rounded-4 h-100">
                         <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
                             <h5 class="fw-bold text-dark mb-0">Aperçu des Ventes</h5>
                             <select class="form-select form-select-sm w-auto border-0 bg-light rounded-pill">
                                 <option>Cette année</option>
-                                <option>Ce mois</option>
+                                
                             </select>
                         </div>
                         <div class="card-body p-4">
@@ -335,34 +230,40 @@
                 </div>
 
                 <!-- Top Products Chart (3D) -->
-                <div class="col-lg-6">
-                    <div class="card card-premium border-0 rounded-4 h-100 p-0 overflow-hidden">
-                        <div class="chart-container h-100">
-                             <div class="chart-title">📊 Performance des Produits (3D)</div>
-        
-                            <div id="product-info">
-                                <div class="info-title">Produit Sélectionné</div>
-                                <div class="info-name" id="info-product-name">-</div>
-                                <div class="info-stat">
-                                    <span class="info-stat-label">Ventes</span>
-                                    <span class="info-stat-value" id="info-sales">-</span>
+                <div class="col-lg-12">
+                    <div class="card card-premium border-0 rounded-4 h-100 overflow-hidden">
+                        <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold text-dark mb-0">Performance Produits (3D)</h5>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-light rounded-circle shadow-sm" id="btn-reset" title="Réinitialiser la vue"><i class="bi bi-arrow-counterclockwise"></i></button>
+                                <button class="btn btn-sm btn-light rounded-circle shadow-sm" id="btn-rotate" title="Auto-rotation"><i class="bi bi-arrow-repeat"></i></button>
+                            </div>
+                        </div>
+                        <div class="card-body p-0 position-relative">
+                            <!-- 3D Canvas Container -->
+                            <div class="chart-container" style="height: 500px; position: relative;">
+                                <div id="product-info">
+                                    <div class="info-title">Produit Sélectionné</div>
+                                    <div class="info-name" id="info-product-name">-</div>
+                                    <div class="info-stat">
+                                        <span class="info-stat-label">Ventes</span>
+                                        <span class="info-stat-value" id="info-sales">-</span>
+                                    </div>
+                                    <div class="info-stat">
+                                        <span class="info-stat-label">Part de marché</span>
+                                        <span class="info-stat-value" id="info-percentage">-</span>
+                                    </div>
                                 </div>
-                                <div class="info-stat">
-                                    <span class="info-stat-label">Part de marché</span>
-                                    <span class="info-stat-value" id="info-percentage">-</span>
-                                </div>
+
+                                <canvas id="chart3d"></canvas>
                             </div>
 
-                            <div class="chart-controls">
-                                <button class="control-btn" id="btn-reset" title="Réinitialiser la vue">🔄</button>
-                                <button class="control-btn" id="btn-rotate" title="Auto-rotation">🔁</button>
-                            </div>
-
-                            <canvas id="chart3d"></canvas>
-
-                            <div class="chart-legend">
-                                <div class="legend-title">Produits • Cliquez pour mettre en évidence</div>
-                                <div class="legend-items" id="legend-container"></div>
+                            <!-- Legend Below -->
+                            <div class="p-4 bg-light bg-opacity-50 border-top">
+                                <h6 class="text-muted text-uppercase small fw-bold mb-3">Détails des Produits</h6>
+                                <div class="legend-items d-flex flex-wrap gap-3 justify-content-start" id="legend-container">
+                                    <!-- Legend items will be injected here -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -390,7 +291,7 @@
                 labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
                 datasets: [{
                     label: 'Chiffre d\'affaires (MAD)',
-                    data: [12000, 19000, 15000, 25000, 22000, 30000, 28000, 35000, 32000, 40000, 45000, @Model.VentesMois],
+                    data: @Html.Raw(Json.Serialize(Model.MonthlyRevenue)),
                     borderColor: '#5A7EB8',
                     backgroundColor: gradientSales,
                     tension: 0.4,

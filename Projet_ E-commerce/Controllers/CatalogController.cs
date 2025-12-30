@@ -14,7 +14,7 @@ namespace Projet__E_commerce.Controllers
             _db = db;
         }
 
-        public async Task<IActionResult> Index(int? category, string? priceRange, bool? inStock, bool? isPromo, bool? isNew, int? cooperative, string search)
+        public async Task<IActionResult> Index(int? category, bool? inStock, bool? isPromo, bool? isNew, int? cooperative, string search, string? sort)
         {
             var categories = await _db.Categories
                 .AsNoTracking()
@@ -31,6 +31,7 @@ namespace Projet__E_commerce.Controllers
             ViewBag.Cooperatives = cooperatives;
             ViewBag.SelectedCooperative = cooperative;
             ViewBag.SearchTerm = search;
+            ViewBag.Sort = sort;
 
             var query = _db.Produits
                 .AsNoTracking()
@@ -59,26 +60,6 @@ namespace Projet__E_commerce.Controllers
                                          p.Admin.nom_cooperative.ToLower().Contains(search));
             }
 
-            // Price Filtering
-            if (!string.IsNullOrEmpty(priceRange))
-            {
-                // Expected format: "min-max" or "min+"
-                if (priceRange.Contains("-"))
-                {
-                    var parts = priceRange.Split('-');
-                    if (decimal.TryParse(parts[0], out decimal min) && decimal.TryParse(parts[1], out decimal max))
-                    {
-                         query = query.Where(p => p.Variantes.Any(v => v.prix >= min && v.prix <= max));
-                    }
-                }
-                else if (priceRange.EndsWith("+"))
-                {
-                     if (decimal.TryParse(priceRange.TrimEnd('+'), out decimal min))
-                     {
-                         query = query.Where(p => p.Variantes.Any(v => v.prix >= min));
-                     }
-                }
-            }
 
             if (inStock == true)
             {
@@ -91,23 +72,32 @@ namespace Projet__E_commerce.Controllers
                 query = query.Where(p => p.created_at >= thresholdDate);
             }
 
-            var products = await query
-                .Select(p => new ProductViewModel
-                {
-                    Id = p.idP,
-                    Name = p.nomP,
-                    Category = p.Categorie.nom,
-                    Cooperative = p.Admin.nom_cooperative,
-                    Price = p.Variantes.OrderBy(v => v.prix).Select(v => v.prix).FirstOrDefault(),
-                    Image = p.Variantes.OrderBy(v => v.idV).Select(v => v.photo).FirstOrDefault() ?? "https://picsum.photos/seed/placeholder/300/300.jpg",
-                    Rating = p.Avis.Where(a => a.note.HasValue).Average(a => (double?)a.note) ?? 0,
-                    Reviews = p.Avis.Count(a => a.note.HasValue),
-                    IsBestSeller = false, // Logic for bestseller can be added later
-                    IsNew = p.created_at >= DateTime.Now.AddDays(-30)
-                })
-                .OrderByDescending(p => p.IsNew)
-                .ThenBy(p => p.Name)
-                .ToListAsync();
+            var productQuery = query.Select(p => new ProductViewModel
+            {
+                Id = p.idP,
+                Name = p.nomP,
+                Category = p.Categorie.nom ?? "Divers",
+                Cooperative = p.Admin != null ? p.Admin.nom_cooperative ?? "Coopérative" : "Coopérative",
+                Price = p.Variantes.OrderBy(v => v.prix).Select(v => v.prix).FirstOrDefault(),
+                Image = p.Variantes.OrderBy(v => v.idV).Select(v => v.photo).FirstOrDefault() ?? "https://picsum.photos/seed/placeholder/300/300.jpg",
+                Rating = p.Avis.Where(a => a.note.HasValue).Average(a => (double?)a.note) ?? 0,
+                Reviews = p.Avis.Count(a => a.note.HasValue),
+                IsBestSeller = false,
+                IsNew = p.created_at >= DateTime.Now.AddDays(-30),
+                CreatedAt = p.created_at
+            });
+
+            // Apply Sorting
+            productQuery = sort switch
+            {
+                "price-asc" => productQuery.OrderBy(p => p.Price),
+                "price-desc" => productQuery.OrderByDescending(p => p.Price),
+                "newest" => productQuery.OrderByDescending(p => p.CreatedAt),
+                "popular" => productQuery.OrderByDescending(p => p.Reviews),
+                _ => productQuery.OrderByDescending(p => p.IsNew).ThenBy(p => p.Name)
+            };
+
+            var products = await productQuery.ToListAsync();
 
             return View("~/Views/Product/Catalog.cshtml", products);
         }
@@ -132,14 +122,16 @@ namespace Projet__E_commerce.Controllers
                 Id = product.idP,
                 Name = product.nomP,
                 Description = product.description ?? string.Empty,
-                Category = product.Categorie.nom,
-                Cooperative = product.Admin.nom_cooperative,
+                Category = product.Categorie.nom ?? "Divers",
+                Cooperative = product.Admin != null ? product.Admin.nom_cooperative ?? "Coopérative" : "Coopérative",
                 Price = product.Variantes.OrderBy(v => v.prix).Select(v => v.prix).FirstOrDefault(),
-                Rating = product.Avis.Where(a => a.note.HasValue).Average(a => (double?)a.note) ?? 0,
-                Reviews = product.Avis.Count(a => a.note.HasValue),
+                Rating = product.Avis != null && product.Avis.Any(a => a.note.HasValue) 
+                           ? product.Avis.Where(a => a.note.HasValue).Average(a => (double?)a.note) ?? 0 
+                           : 0,
+                Reviews = product.Avis?.Count(a => a.note.HasValue) ?? 0,
                 Images = product.Variantes
                             .Where(v => !string.IsNullOrEmpty(v.photo))
-                            .Select(v => v.photo!)
+                            .Select(v => v.photo ?? "https://picsum.photos/seed/placeholder/800/800.jpg")
                             .Distinct()
                             .ToList(),
                 Variants = product.Variantes.Select(v => new VarianteViewModel
@@ -148,6 +140,7 @@ namespace Projet__E_commerce.Controllers
                     Price = v.prix,
                     Size = v.taille ?? string.Empty,
                     Color = v.couleur ?? string.Empty,
+                    Weight = v.poids ?? string.Empty,
                     Stock = v.quantite,
                     Photo = v.photo
                 }).ToList(),

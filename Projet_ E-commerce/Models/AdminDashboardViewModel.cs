@@ -15,6 +15,7 @@ namespace Projet__E_commerce.Models
         
         public string CooperativeName { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
+        public List<decimal> MonthlyRevenue { get; set; } = new();
     }
 
     public class RecentOrderDto

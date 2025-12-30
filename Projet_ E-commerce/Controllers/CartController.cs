@@ -28,12 +28,14 @@ namespace Projet__E_commerce.Controllers
                 .Where(lc => lc.Commande.idClient == userId && lc.Commande.statut == "en_attente")
                 .Select(lc => new CartItemViewModel
                 {
-                    Id = lc.Variante.idP,
+                    ProductId = lc.Variante.idP,
+                    VariantId = lc.idV,
                     Name = lc.Variante.Produit.nomP,
                     Price = lc.prix_unitaire,
                     Quantity = lc.quantite,
                     Size = lc.Variante.taille ?? "",
                     Color = lc.Variante.couleur ?? "",
+                    Weight = lc.Variante.poids ?? "",
                     Image = lc.Variante.photo ?? ""
                 })
                 .ToListAsync();
@@ -42,12 +44,12 @@ namespace Projet__E_commerce.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddToCart(int productId, int quantity, string size, string color)
+        public async Task<IActionResult> AddToCart(int productId, int variantId, int quantity)
         {
             int? userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null)
             {
-                var pendingItem = new { productId, quantity, size, color };
+                var pendingItem = new { productId, variantId, quantity };
                 HttpContext.Session.SetString("PendingCartItem", JsonSerializer.Serialize(pendingItem));
                 return RedirectToAction("Login", "auth", new { returnUrl = Url.Action("ProcessPendingItem", "Cart") });
             }
@@ -70,24 +72,24 @@ namespace Projet__E_commerce.Controllers
                 await _db.SaveChangesAsync();
             }
 
-            // Find specific variant or first available
-            var variantQuery = _db.Variantes.Where(v => v.idP == productId);
-            
-            if (!string.IsNullOrEmpty(size))
-                variantQuery = variantQuery.Where(v => v.taille == size);
-            
-            if (!string.IsNullOrEmpty(color))
-                variantQuery = variantQuery.Where(v => v.couleur == color);
-
-            var variant = await variantQuery.FirstOrDefaultAsync();
-
-            if (variant == null)
-            {
-                // Fallback: just get the first variant for this product
-                variant = await _db.Variantes.FirstOrDefaultAsync(v => v.idP == productId);
-            }
+            // Find specific variant
+            var variant = await _db.Variantes
+                .Include(v => v.Produit)
+                .FirstOrDefaultAsync(v => v.idV == variantId && v.idP == productId);
 
             if (variant == null) return NotFound("Produit ou variante non trouvé.");
+            
+            // Stock Validation
+            int currentQtyInCart = await _db.LignesCommande
+                .Where(lc => lc.idCommande == (order != null ? order.idCommande : 0) && lc.idV == variant.idV)
+                .Select(lc => (int?)lc.quantite)
+                .FirstOrDefaultAsync() ?? 0;
+
+            if (variant.quantite < (currentQtyInCart + quantity))
+            {
+                TempData["CartError"] = $"Stock insuffisant. Disponible: {variant.quantite}";
+                return RedirectToAction("Details", "Product", new { id = productId });
+            }
 
             // Check if item already exists in the order
             var existingLine = await _db.LignesCommande
@@ -124,39 +126,82 @@ namespace Projet__E_commerce.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RemoveFromCart(int productId, string size, string color)
+        public async Task<IActionResult> UpdateQuantity(int variantId, int change)
         {
             int? userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToAction("Login", "auth");
 
-            var variant = await _db.Variantes
-                .FirstOrDefaultAsync(v => v.idP == productId && v.taille == size && v.couleur == color);
+            var variant = await _db.Variantes.Include(v => v.Produit).FirstOrDefaultAsync(v => v.idV == variantId);
+            if (variant == null) return NotFound();
 
-            if (variant != null)
+            var order = await _db.Commandes
+                .FirstOrDefaultAsync(c => c.idClient == userId && c.statut == "en_attente");
+
+            if (order != null)
             {
-                var order = await _db.Commandes
-                    .FirstOrDefaultAsync(c => c.idClient == userId && c.statut == "en_attente");
+                var line = await _db.LignesCommande
+                    .FirstOrDefaultAsync(lc => lc.idCommande == order.idCommande && lc.idV == variant.idV);
 
-                if (order != null)
+                if (line != null)
                 {
-                    var line = await _db.LignesCommande
-                        .FirstOrDefaultAsync(lc => lc.idCommande == order.idCommande && lc.idV == variant.idV);
+                    if (change > 0 && line.Variante.quantite < (line.quantite + change))
+                    {
+                        TempData["CartError"] = $"Stock insuffisant pour {line.Variante.Produit.nomP}.";
+                        return RedirectToAction("Index");
+                    }
 
-                    if (line != null)
+                    line.quantite += change;
+                    if (line.quantite <= 0)
                     {
                         _db.LignesCommande.Remove(line);
-                        await _db.SaveChangesAsync();
-
-                        // Update Total Price
-                        order.prixTotal = await _db.LignesCommande
-                            .Where(lc => lc.idCommande == order.idCommande)
-                            .SumAsync(lc => lc.prix_unitaire * lc.quantite);
-
-                        // If no more lines, maybe delete the order? Or keep it. 
-                        // Let's keep it but with total 0.
-                        _db.Commandes.Update(order);
-                        await _db.SaveChangesAsync();
                     }
+                    else
+                    {
+                        _db.LignesCommande.Update(line);
+                    }
+                    await _db.SaveChangesAsync();
+
+                    // Update Total Price
+                    order.prixTotal = await _db.LignesCommande
+                        .Where(lc => lc.idCommande == order.idCommande)
+                        .SumAsync(lc => lc.prix_unitaire * lc.quantite);
+
+                    _db.Commandes.Update(order);
+                    await _db.SaveChangesAsync();
+                }
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveFromCart(int variantId)
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login", "auth");
+
+            var variant = await _db.Variantes.FirstOrDefaultAsync(v => v.idV == variantId);
+            if (variant == null) return NotFound();
+
+            var order = await _db.Commandes
+                .FirstOrDefaultAsync(c => c.idClient == userId && c.statut == "en_attente");
+
+            if (order != null)
+            {
+                var line = await _db.LignesCommande
+                    .FirstOrDefaultAsync(lc => lc.idCommande == order.idCommande && lc.idV == variant.idV);
+
+                if (line != null)
+                {
+                    _db.LignesCommande.Remove(line);
+                    await _db.SaveChangesAsync();
+
+                    order.prixTotal = await _db.LignesCommande
+                        .Where(lc => lc.idCommande == order.idCommande)
+                        .SumAsync(lc => lc.prix_unitaire * lc.quantite);
+
+                    _db.Commandes.Update(order);
+                    await _db.SaveChangesAsync();
                 }
             }
 
@@ -178,12 +223,11 @@ namespace Projet__E_commerce.Controllers
                 if (item != null)
                 {
                     int productId = item["productId"].GetInt32();
+                    int variantId = item["variantId"].GetInt32();
                     int quantity = item["quantity"].GetInt32();
-                    string size = item["size"].GetString() ?? "";
-                    string color = item["color"].GetString() ?? "";
 
                     HttpContext.Session.Remove("PendingCartItem");
-                    return await AddToCart(productId, quantity, size, color);
+                    return await AddToCart(productId, variantId, quantity);
                 }
             }
             return RedirectToAction("Index");

@@ -11,6 +11,14 @@
 <div class="container py-5 mt-4">
     <h1 class="font-display display-5 fw-bold mb-5">Mon Panier</h1>
 
+    @if (TempData["CartError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["CartError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="row g-5">
         <!-- Cart Items -->
         <div class="col-lg-8">
@@ -34,23 +42,36 @@
                                         <div class="d-flex justify-content-between gap-3 mb-3">
                                             <div>
                                                 <h5 class="fw-bold mb-1">@item.Name</h5>
-                                                <p class="small text-muted mb-0">@item.Size • @item.Color</p>
+                                                <p class="small text-muted mb-0">
+                                                    @if(!string.IsNullOrEmpty(item.Size)) { <span>@item.Size</span> }
+                                                    @if(!string.IsNullOrEmpty(item.Color)) { <span> • @item.Color</span> }
+                                                    @if(!string.IsNullOrEmpty(item.Weight)) { <span> • @item.Weight</span> }
+                                                </p>
                                             </div>
                                             <form asp-controller="Cart" asp-action="RemoveFromCart" method="post" class="d-inline">
-                                                <input type="hidden" name="productId" value="@item.Id" />
-                                                <input type="hidden" name="size" value="@item.Size" />
-                                                <input type="hidden" name="color" value="@item.Color" />
+                                                <input type="hidden" name="variantId" value="@item.VariantId" />
                                                 <button type="submit" class="btn btn-link text-muted p-0 hover-danger"><i class="bi bi-trash h5"></i></button>
                                             </form>
                                         </div>
                                         
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <div class="input-group input-group-sm border rounded-3 overflow-hidden" style="max-width: 120px;">
-                                                 <!-- Note: Quantity updates would need AJAX or Form submission, kept simple for now -->
-                                                <span class="form-control border-0 text-center fw-bold small">Qté: @item.Quantity</span>
-                                            </div>
-                                            <p class="h5 fw-bold mb-0">@((item.Price * item.Quantity).ToString("N2")) MAD</p>
-                                        </div>
+                                             <div class="d-flex align-items-center gap-3 bg-light rounded-pill px-3 py-2 border">
+                                                 <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" class="d-inline">
+                                                     <input type="hidden" name="variantId" value="@item.VariantId" />
+                                                     <input type="hidden" name="change" value="-1" />
+                                                     <button type="submit" class="btn btn-link text-dark p-0" style="width: 20px; line-height: 1;"><i class="bi bi-dash fw-bold"></i></button>
+                                                 </form>
+                                                 
+                                                 <span class="fw-bold small">@item.Quantity</span>
+                                                 
+                                                 <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" class="d-inline">
+                                                     <input type="hidden" name="variantId" value="@item.VariantId" />
+                                                     <input type="hidden" name="change" value="1" />
+                                                     <button type="submit" class="btn btn-link text-dark p-0" style="width: 20px; line-height: 1;"><i class="bi bi-plus fw-bold"></i></button>
+                                                 </form>
+                                             </div>
+                                             <p class="h5 fw-bold mb-0">@((item.Price * item.Quantity).ToString("N2")) MAD</p>
+                                         </div>
                                     </div>
                                 </div>
                             </div>

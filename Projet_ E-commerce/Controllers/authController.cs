@@ -33,8 +33,8 @@ namespace Projet__E_commerce.Controllers
         public async Task<IActionResult> Login(string email, string password, string? returnUrl = null, bool rememberMe = false)
         {
             // Nettoyage des entrées
-            email = email?.Trim();
-            password = password?.Trim();
+            email = (email ?? "").Trim();
+            password = (password ?? "").Trim();
 
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
@@ -69,8 +69,8 @@ namespace Projet__E_commerce.Controllers
 
                                 // Connexion (Session)
                                 HttpContext.Session.SetInt32("UserId", userId);
-                                HttpContext.Session.SetString("UserEmail", userEmail);
-                                HttpContext.Session.SetString("UserRole", role);
+                                HttpContext.Session.SetString("UserEmail", userEmail ?? "");
+                                HttpContext.Session.SetString("UserRole", role ?? "CLIENT");
 
                                 TempData["SuccessMessage"] = "Connexion réussie !";
 
@@ -142,9 +142,9 @@ namespace Projet__E_commerce.Controllers
             // Commun
             string? telephone)
         {
-            email = email?.Trim();
-            password = password?.Trim();
-            confirmPassword = confirmPassword?.Trim();
+            email = (email ?? "").Trim();
+            password = (password ?? "").Trim();
+            confirmPassword = (confirmPassword ?? "").Trim();
 
             // Sauvegarder les données pour réaffichage en cas d'erreur
             ViewData["UserType"] = userType;
@@ -198,7 +198,7 @@ namespace Projet__E_commerce.Controllers
                                     if (message == "INSCRIPTION_CLIENT_OK")
                                     {
                                         HttpContext.Session.SetInt32("UserId", newUserId);
-                                        HttpContext.Session.SetString("UserEmail", email);
+                                        HttpContext.Session.SetString("UserEmail", email ?? "");
                                         HttpContext.Session.SetString("UserRole", "CLIENT");
 
                                         TempData["SuccessMessage"] = "Inscription réussie ! Bienvenue.";
@@ -251,7 +251,7 @@ namespace Projet__E_commerce.Controllers
                                     if (message == "INSCRIPTION_ADMIN_OK")
                                     {
                                         HttpContext.Session.SetInt32("UserId", newUserId);
-                                        HttpContext.Session.SetString("UserEmail", email);
+                                        HttpContext.Session.SetString("UserEmail", email ?? "");
                                         HttpContext.Session.SetString("UserRole", "ADMIN");
 
                                         TempData["SuccessMessage"] = "Inscription réussie ! Bienvenue.";

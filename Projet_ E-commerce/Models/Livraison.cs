@@ -15,10 +15,6 @@ namespace Projet__E_commerce.Models
         public int idAdresse { get; set; }
 
         [Required]
-        [StringLength(20)]
-        public string statut { get; set; } = "en_cours";
-
-        [Required]
         public DateTime dateDebutEstimation { get; set; }
 
         [Required]

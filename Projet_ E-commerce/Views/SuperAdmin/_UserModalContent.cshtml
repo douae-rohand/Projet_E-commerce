@@ -1,0 +1,184 @@
+@model Projet__E_commerce.Models.ViewModels.UserDetailsViewModel
+
+<div class="modal-header bg-terracotta text-white">
+    <h5 class="modal-title">
+        <i class="bi bi-person-circle me-2"></i>
+        @if (Model.Role == "CLIENT")
+        {
+            @if (!string.IsNullOrEmpty(Model.Prenom) && !string.IsNullOrEmpty(Model.Nom))
+            {
+                @Model.Prenom @Model.Nom
+            }
+            else
+            {
+                @Model.Email
+            }
+        }
+        else if (Model.Role == "ADMIN")
+        {
+            @Model.NomCooperative
+        }
+        else
+        {
+            @Model.Email
+        }
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body p-0">
+    <div class="row g-0">
+        <!-- User Info -->
+        <div class="col-md-8">
+            <div class="p-4">
+                <!-- Basic Info -->
+                <div class="card border shadow-none rounded-4 mb-4">
+                    <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                        <h6 class="fw-bold mb-0 text-terracotta"><i class="bi bi-info-circle me-2"></i>Informations générales</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-envelope text-muted"></i>
+                                    <small class="text-muted">Email</small>
+                                </div>
+                                <p class="mb-0 fw-medium">@Model.Email</p>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-person-badge text-muted"></i>
+                                    <small class="text-muted">Rôle</small>
+                                </div>
+                                <span class="badge @(Model.Role == "SUPER_ADMIN" ? "bg-danger" : Model.Role == "ADMIN" ? "bg-warning text-dark" : "bg-primary") rounded-pill px-3 py-2">
+                                    @Model.Role
+                                </span>
+                            </div>
+                            @if (Model.Role == "CLIENT")
+                            {
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="bi bi-telephone text-muted"></i>
+                                        <small class="text-muted">Téléphone</small>
+                                    </div>
+                                    <p class="mb-0 fw-medium">@(Model.Telephone ?? "Non spécifié")</p>
+                                </div>
+                            }
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-calendar-event text-muted"></i>
+                                    <small class="text-muted">Inscrit le</small>
+                                </div>
+                                <p class="mb-0 fw-medium">@Model.CreatedAt.ToString("dd/MM/yyyy")</p>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-geo-alt text-muted"></i>
+                                    <small class="text-muted">Adresse</small>
+                                </div>
+                                <p class="mb-0 fw-medium">
+                                    @if (!string.IsNullOrEmpty(Model.Adresse))
+                                    {
+                                        @Model.Adresse
+                                        @if (!string.IsNullOrEmpty(Model.Ville))
+                                        {
+                                            <br><small class="text-muted">@Model.Ville @(Model.CodePostal ?? "")</small>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Non spécifiée</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="card border shadow-none rounded-4 mb-4">
+                    <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                        <h6 class="fw-bold mb-0 text-terracotta"><i class="bi bi-bar-chart me-2"></i>Statistiques</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 text-center">
+                            <div class="col-4">
+                                <div class="p-3 bg-primary bg-opacity-10 rounded-3">
+                                    <div class="h4 mb-1 text-primary">@Model.TotalOrders</div>
+                                    <small class="text-muted">Commandes</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 bg-success bg-opacity-10 rounded-3">
+                                    <div class="h4 mb-1 text-success">@Model.TotalSpent.ToString("N0") DH</div>
+                                    <small class="text-muted">Total dépensé</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 bg-info bg-opacity-10 rounded-3">
+                                    <div class="h4 mb-1 text-info">
+                                        @(Model.LastOrderDate.HasValue ? Model.LastOrderDate.Value.ToString("dd/MM") : "-")
+                                    </div>
+                                    <small class="text-muted">Dernière commande</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="col-md-4 bg-light">
+            <div class="p-4 h-100">
+                <h6 class="fw-bold mb-3 text-terracotta"><i class="bi bi-clock-history me-2"></i>Commandes récentes</h6>
+
+                @if (Model.RecentOrders.Any())
+                {
+                    <div class="vstack gap-3">
+                        @foreach (var order in Model.RecentOrders)
+                        {
+                            <div class="card border shadow-sm">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <small class="text-muted">#{order.IdCommande}</small>
+                                        <span class="badge @(order.Statut == "livre" ? "bg-success" : (order.Statut == "annule" ? "bg-danger" : "bg-warning")) rounded-pill small">
+                                            @order.Statut
+                                        </span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">@order.DateCommande.ToString("dd/MM/yyyy")</small>
+                                        <small class="fw-medium">@order.MontantTotal.ToString("N0") DH</small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-receipt display-6 text-muted mb-2"></i>
+                        <p class="text-muted small mb-0">Aucune commande</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+    @if (Model.EstActif)
+    {
+        <button type="button" class="btn btn-outline-warning" onclick="toggleUserStatus(@Model.Id, false)">
+            <i class="bi bi-person-dash"></i> Désactiver
+        </button>
+    }
+    else
+    {
+        <button type="button" class="btn btn-outline-success" onclick="toggleUserStatus(@Model.Id, true)">
+            <i class="bi bi-person-check"></i> Activer
+        </button>
+    }
+</div>

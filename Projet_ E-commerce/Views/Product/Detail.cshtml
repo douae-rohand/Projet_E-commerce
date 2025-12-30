@@ -1,9 +1,11 @@
+@using System.Text.Json
 @model ProductDetailViewModel
 @{
     ViewData["Title"] = $"{Model.Name} - Artisanat Marocain";
     var mainImage = Model.Images.FirstOrDefault();
     var sizes = Model.Variants.Select(v => v.Size).Where(s => !string.IsNullOrEmpty(s)).Distinct().ToList();
     var colors = Model.Variants.Select(v => v.Color).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList();
+    var weights = Model.Variants.Select(v => v.Weight).Where(w => !string.IsNullOrEmpty(w)).Distinct().ToList();
 }
 
 <!-- Breadcrumb -->
@@ -19,20 +21,41 @@
     </div>
 </div>
 
+<div class="container py-3">
+    @if (TempData["CartError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 mb-0" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["CartError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+</div>
+
 <div class="container py-5">
     <div class="row g-5">
         <!-- Images -->
         <div class="col-lg-6">
             <div class="sticky-top" style="top: 100px;">
-                <div class="rounded-4 overflow-hidden shadow-soft mb-3">
-                    <img id="main-product-image" src="@mainImage" class="img-fluid w-100" alt="@Model.Name">
+                <div class="rounded-4 overflow-hidden shadow-soft mb-3 border bg-white">
+                    <img id="main-product-image" src="@mainImage" class="img-fluid w-100 object-fit-contain" style="height: 500px;" alt="@Model.Name">
                 </div>
-                <div class="d-flex gap-2 pe-2 overflow-auto hide-scrollbar">
-                    @foreach (var img in Model.Images) {
-                        var safeImg = img.Replace("\\", "/");
-                        <button class="btn p-0 border rounded-3 overflow-hidden thumbnail-btn flex-shrink-0" style="width: 80px; height: 80px;" onclick="document.getElementById('main-product-image').src='@safeImg'">
-                            <img src="@safeImg" class="img-fluid h-100 w-100 object-fit-cover" alt="Thumbnail">
+                <!-- Variant Thumbnails -->
+                <div class="d-flex gap-2 pe-2 pb-2 overflow-auto hide-scrollbar">
+                    @foreach (var variant in Model.Variants.Where(v => !string.IsNullOrEmpty(v.Photo))) {
+                        var safeImg = variant.Photo.Replace("\\", "/");
+                        <button type="button" class="btn p-0 border rounded-3 overflow-hidden thumbnail-btn flex-shrink-0" 
+                                style="width: 80px; height: 80px;" 
+                                onclick="selectVariant(@variant.Id)">
+                            <img src="@safeImg" class="img-fluid h-100 w-100 object-fit-cover" alt="Variant image">
                         </button>
+                    }
+                    @if(!Model.Variants.Any(v => !string.IsNullOrEmpty(v.Photo)) && Model.Images.Any()) {
+                         @foreach (var img in Model.Images) {
+                            var safeImg = img.Replace("\\", "/");
+                            <button class="btn p-0 border rounded-3 overflow-hidden thumbnail-btn flex-shrink-0" style="width: 80px; height: 80px;" onclick="document.getElementById('main-product-image').src='@safeImg'">
+                                <img src="@safeImg" class="img-fluid h-100 w-100 object-fit-cover" alt="Thumbnail">
+                            </button>
+                        }
                     }
                 </div>
             </div>
@@ -41,7 +64,12 @@
         <!-- Info -->
         <div class="col-lg-6">
             <div class="ps-lg-4">
-                <span class="text-terracotta fw-bold small text-uppercase mb-2 d-block">@Model.Category</span>
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="text-terracotta fw-bold small text-uppercase">@Model.Category</span>
+                    <span id="stock-badge" class="badge @(Model.Variants.Any(v => v.Stock > 0) ? "bg-success-subtle text-success border border-success-subtle" : "bg-danger-subtle text-danger border border-danger-subtle") px-3 py-2 rounded-pill">
+                        @(Model.Variants.Any(v => v.Stock > 0) ? "En stock" : "Rupture de stock")
+                    </span>
+                </div>
                 <h1 class="font-display display-5 fw-bold mb-3">@Model.Name</h1>
                 
                 <div class="d-flex align-items-center gap-3 mb-4">
@@ -57,7 +85,7 @@
                 </div>
 
                 <div class="d-flex align-items-baseline gap-3 mb-4">
-                    <span class="display-6 fw-bold text-dark">@Model.Price.ToString("N2") MAD</span>
+                    <span id="product-price" class="display-6 fw-bold text-dark">@Model.Price.ToString("N2") MAD</span>
                     @if(Model.OriginalPrice > Model.Price) {
                         <span class="h4 text-muted text-decoration-line-through">@Model.OriginalPrice.ToString("N2") MAD</span>
                     }
@@ -67,20 +95,24 @@
                     @Model.Description
                 </p>
 
-                <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                <form id="addToCartForm" asp-controller="Cart" asp-action="AddToCart" method="post">
                     <input type="hidden" name="productId" value="@Model.Id" />
+                    <input type="hidden" name="variantId" id="selectedVariantId" value="" />
                     
                     <!-- Variants -->
                     @if (sizes.Any())
                     {
                         <div class="mb-4 pt-4 border-top">
-                            <label class="form-label fw-bold small text-uppercase">Taille</label>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-bold small text-uppercase mb-0">Taille</label>
+                                <span id="selected-size" class="text-muted small fw-bold text-uppercase"></span>
+                            </div>
                             <div class="d-flex flex-wrap gap-2">
                                 @for (int i = 0; i < sizes.Count; i++)
                                 {
                                     var size = sizes[i];
-                                    <input type="radio" class="btn-check" name="size" value="@size" id="size@(i)" @(i==0?"checked":"")>
-                                    <label class="btn btn-outline-dark px-4 rounded-3" for="size@(i)">@size</label>
+                                    <input type="radio" class="btn-check" name="size_attr" value="@size" id="size@(i)" @(i==0?"checked":"") onchange="onAttributeChange()">
+                                    <label class="btn btn-variant px-4 rounded-3 border-2" for="size@(i)">@size</label>
                                 }
                             </div>
                         </div>
@@ -88,14 +120,35 @@
 
                     @if (colors.Any())
                     {
-                        <div class="mb-5">
-                            <label class="form-label fw-bold small text-uppercase">Couleur</label>
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-bold small text-uppercase mb-0">Couleur</label>
+                                <span id="selected-color" class="text-muted small fw-bold text-uppercase"></span>
+                            </div>
                             <div class="d-flex flex-wrap gap-2">
                                 @for (int i = 0; i < colors.Count; i++)
                                 {
                                     var color = colors[i];
-                                    <input type="radio" class="btn-check" name="color" value="@color" id="color@(i)" @(i==0?"checked":"")>
-                                    <label class="btn btn-outline-dark px-4 rounded-3" for="color@(i)">@color</label>
+                                    <input type="radio" class="btn-check" name="color_attr" value="@color" id="color@(i)" @(i==0?"checked":"") onchange="onAttributeChange()">
+                                    <label class="btn btn-variant px-4 rounded-3 border-2" for="color@(i)">@color</label>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (weights.Any())
+                    {
+                        <div class="mb-5">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-bold small text-uppercase mb-0">Poids</label>
+                                <span id="selected-weight" class="text-muted small fw-bold text-uppercase"></span>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                @for (int i = 0; i < weights.Count; i++)
+                                {
+                                    var weight = weights[i];
+                                    <input type="radio" class="btn-check" name="weight_attr" value="@weight" id="weight@(i)" @(i==0?"checked":"") onchange="onAttributeChange()">
+                                    <label class="btn btn-variant px-4 rounded-3 border-2" for="weight@(i)">@weight</label>
                                 }
                             </div>
                         </div>
@@ -144,6 +197,8 @@
 </div>
 
 <script>
+    var variants = @Html.Raw(JsonSerializer.Serialize(Model.Variants));
+
     function incrementQty() {
         var input = document.getElementById('quantityInput');
         input.value = parseInt(input.value) + 1;
@@ -155,46 +210,128 @@
         }
     }
 
-    // Map variants to images
-    var variantImages = {};
-    @foreach(var v in Model.Variants) {
-        if(!string.IsNullOrEmpty(v.Photo)) {
-            var safePhoto = v.Photo.Replace("\\", "/");
-            <text>
-            variantImages['@v.Size-@v.Color'] = '@safePhoto';
-            </text>
+    function selectVariant(variantId) {
+        const variant = variants.find(v => v.Id === variantId);
+        if (!variant) return;
+
+        // Update radios
+        if (variant.Size) {
+            const sizeRadio = document.querySelector(`input[name="size_attr"][value="${variant.Size}"]`);
+            if (sizeRadio) sizeRadio.checked = true;
         }
+        if (variant.Color) {
+            const colorRadio = document.querySelector(`input[name="color_attr"][value="${variant.Color}"]`);
+            if (colorRadio) colorRadio.checked = true;
+        }
+        if (variant.Weight) {
+            const weightRadio = document.querySelector(`input[name="weight_attr"][value="${variant.Weight}"]`);
+            if (weightRadio) weightRadio.checked = true;
+        }
+
+        updateUI(variant);
     }
 
-    function updateVariantImage() {
-        var size = document.querySelector('input[name="size"]:checked')?.value || '';
-        var color = document.querySelector('input[name="color"]:checked')?.value || '';
-        var key = size + '-' + color;
+    function updateUI(variant) {
+        if (variant.Photo) {
+            document.getElementById('main-product-image').src = variant.Photo.replace(/\\/g, '/');
+        }
         
-        if (variantImages[key]) {
-            document.getElementById('main-product-image').src = variantImages[key];
+        // Update price
+        document.getElementById('product-price').textContent = variant.Price.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' MAD';
+        
+        // Update stock info
+        const stockEl = document.getElementById('stock-badge');
+        const submitBtn = document.querySelector('#addToCartForm button[type="submit"]');
+        if (stockEl) {
+            if (variant.Stock > 0) {
+                stockEl.textContent = 'En stock (' + variant.Stock + ')';
+                stockEl.className = 'badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill';
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-cart3"></i> Ajouter au panier';
+                }
+            } else {
+                stockEl.textContent = 'Rupture de stock';
+                stockEl.className = 'badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill';
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="bi bi-x-circle"></i> En rupture';
+                }
+            }
+        }
+
+        // Update selected labels
+        document.getElementById('selected-size') && (document.getElementById('selected-size').textContent = variant.Size || '');
+        document.getElementById('selected-color') && (document.getElementById('selected-color').textContent = variant.Color || '');
+        document.getElementById('selected-weight') && (document.getElementById('selected-weight').textContent = variant.Weight || '');
+
+        // Update hidden input
+        document.getElementById('selectedVariantId').value = variant.Id;
+
+        // Highlight thumbnails
+        document.querySelectorAll('.thumbnail-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (variant.Photo && btn.querySelector('img').src.includes(variant.Photo.replace(/\\/g, '/'))) {
+                btn.classList.add('active');
+            }
+        });
+    }
+
+    function onAttributeChange() {
+        const size = document.querySelector('input[name="size_attr"]:checked')?.value || '';
+        const color = document.querySelector('input[name="color_attr"]:checked')?.value || '';
+        const weight = document.querySelector('input[name="weight_attr"]:checked')?.value || '';
+
+        // Find matching variant
+        const variant = variants.find(v => 
+            (v.Size === size || (!v.Size && !size)) && 
+            (v.Color === color || (!v.Color && !color)) &&
+            (v.Weight === weight || (!v.Weight && !weight))
+        );
+
+        if (variant) {
+            updateUI(variant);
         }
     }
 
-    // Attach listeners
+    // Initialize with first variant if exists
     document.addEventListener('DOMContentLoaded', function() {
-        var radios = document.querySelectorAll('input[name="size"], input[name="color"]');
-        radios.forEach(function(radio) {
-            radio.addEventListener('change', updateVariantImage);
-        });
+        onAttributeChange();
     });
 </script>
 
 <style>
-    .thumbnail-btn:focus { border-color: var(--primary) !important; box-shadow: none; }
-    .btn-check:checked + .btn-outline-dark { background-color: var(--primary); border-color: var(--primary); color: white; }
-    /* Hide scrollbar for Chrome, Safari and Opera */
-    .hide-scrollbar::-webkit-scrollbar {
-        display: none;
+    .btn-variant {
+        background-color: transparent;
+        border-color: #dee2e6;
+        color: #212529;
+        transition: all 0.2s ease;
+        font-weight: 500;
     }
-    /* Hide scrollbar for IE, Edge and Firefox */
-    .hide-scrollbar {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
+    .btn-variant:hover {
+        border-color: var(--majorelle);
+        background-color: #f8f9fa;
     }
+    .btn-check:checked + .btn-variant {
+        border-color: var(--majorelle);
+        background-color: var(--majorelle);
+        color: white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transform: translateY(-1px);
+    }
+    .thumbnail-btn { 
+        transition: all 0.3s ease; 
+        border-width: 2px !important;
+    }
+    .thumbnail-btn:hover { 
+        transform: scale(1.05); 
+        border-color: var(--majorelle) !important; 
+    }
+    .thumbnail-btn.active { 
+        transform: scale(1.1);
+        border-color: var(--majorelle) !important;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
