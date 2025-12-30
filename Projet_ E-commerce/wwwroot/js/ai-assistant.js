@@ -75,13 +75,13 @@ document.addEventListener('DOMContentLoaded', function () {
             let aiText = findText(data);
             
             if (!aiText || aiText.trim() === "") {
-                aiText = "L'assistant n'a pas pu formuler de réponse. Vérifiez que votre node 'Respond to Webhook' dans n8n renvoie bien le texte de l'agent.";
+                aiText = "L'assistant n'a pas pu formuler de réponse textuelle. \n\n**Données reçues (Debug) :**\n```json\n" + JSON.stringify(data, null, 2).substring(0, 300) + "\n```\n\nVérifiez votre node 'Respond to Webhook'.";
             }
 
             addMessage(aiText, 'ai');
         } catch (error) {
             removeTyping(typingId);
-            addMessage("Oups! Une erreur s'est produite. Réessayez plus tard.", 'ai');
+            addMessage(`Oups! Une erreur s'est produite : ${error.message}`, 'ai');
         }
     }
 

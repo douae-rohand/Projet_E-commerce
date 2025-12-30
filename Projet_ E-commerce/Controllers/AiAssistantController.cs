@@ -86,24 +86,29 @@ namespace Projet__E_commerce.Controllers
                 {
                     var responseData = await response.Content.ReadAsStringAsync();
                     
+                    if (string.IsNullOrWhiteSpace(responseData))
+                    {
+                        return Ok(JsonSerializer.Serialize(new { output = "n8n returned an empty response. Check if your 'Respond to Webhook' node is reached and connected to the AI Agent." }));
+                    }
+
                     try 
                     {
-                        // Try to parse as JSON to ensure it's valid for the frontend fetch()
                         using var doc = JsonDocument.Parse(responseData);
                         return Ok(responseData);
                     }
                     catch
                     {
-                        // If not JSON (e.g. plain text from n8n), wrap it in a JSON object
                         return Ok(JsonSerializer.Serialize(new { output = responseData }));
                     }
                 }
 
-                return StatusCode((int)response.StatusCode, "Error communicating with AI Assistant");
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return StatusCode((int)response.StatusCode, $"n8n Error: {response.StatusCode} - {errorContent}");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                // In production, we need to know what's failing (Webhook URL, DB, etc.)
+                return StatusCode(500, $"Assistant Controller Error: {ex.Message}\nStack: {ex.StackTrace}");
             }
         }
 

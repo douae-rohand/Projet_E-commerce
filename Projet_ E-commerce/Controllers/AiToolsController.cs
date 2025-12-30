@@ -81,11 +81,36 @@ namespace Projet__E_commerce.Controllers
             return Ok(categories);
         }
 
-        [HttpGet("details/{id}")]
-        public async Task<IActionResult> GetProductDetails(string id)
+        [HttpGet("details/{id?}")]
+        public async Task<IActionResult> GetProductDetails(string? id)
         {
-            if (!int.TryParse(id, out int productId))
-                return BadRequest("Invalid Product ID format.");
+            // 1. Try path variable
+            string? rawId = id;
+
+            // 2. Try common query parameters
+            if (string.IsNullOrWhiteSpace(rawId)) rawId = Request.Query["id"].ToString();
+            if (string.IsNullOrWhiteSpace(rawId)) rawId = Request.Query["idP"].ToString();
+            if (string.IsNullOrWhiteSpace(rawId)) rawId = Request.Query["productId"].ToString();
+            if (string.IsNullOrWhiteSpace(rawId)) rawId = Request.Query["id_p"].ToString();
+            if (string.IsNullOrWhiteSpace(rawId)) rawId = Request.Query["product_id"].ToString();
+
+            // 3. ULTIMATE FALLBACK: If AI guessed a weird name, just take the first query param value
+            if (string.IsNullOrWhiteSpace(rawId))
+            {
+                var firstParam = Request.Query.FirstOrDefault();
+                if (!string.IsNullOrEmpty(firstParam.Key))
+                {
+                    rawId = firstParam.Value.ToString();
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(rawId))
+                return BadRequest("Missing Product ID. Please ensure your tool is sending a parameter.");
+
+            // Fuzzy parsing: extract number from "ID: 12", "Id 12", etc.
+            var match = System.Text.RegularExpressions.Regex.Match(rawId, @"\d+");
+            if (!match.Success || !int.TryParse(match.Value, out int productId))
+                return BadRequest($"Invalid ID format: {rawId}");
 
             var product = await _db.Produits
                 .Include(p => p.Categorie)
@@ -94,16 +119,16 @@ namespace Projet__E_commerce.Controllers
                 .FirstOrDefaultAsync(p => p.idP == productId);
 
             if (product == null)
-                return NotFound();
+                return NotFound($"Product #{productId} not found.");
 
             return Ok(new
             {
                 product.idP,
                 product.nomP,
                 product.description,
-                Category = product.Categorie.nom,
-                Cooperative = product.Admin.nom_cooperative,
-                Variants = product.Variantes.Select(v => new
+                Category = product.Categorie?.nom ?? "N/A",
+                Cooperative = product.Admin?.nom_cooperative ?? "Authentique Maroc",
+                Variants = product.Variantes?.Select(v => new
                 {
                     v.idV,
                     v.taille,
