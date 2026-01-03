@@ -27,7 +27,7 @@ namespace Projet__E_commerce.Controllers
 
             var model = await GetCompleteDashboardDataAsync();
             model.UserEmail = HttpContext.Session.GetString("UserEmail");
-            return View("~/Views/SuperAdmin/SuperAdminDashboard.cshtml", model);
+            return View("~/Views/SuperAdmin/Dashboard.cshtml", model);
         }
 
         public async Task<IActionResult> Cooperatives()
@@ -37,7 +37,7 @@ namespace Projet__E_commerce.Controllers
             ViewBag.ActiveTab = "cooperatives";
 
             var cooperatives = await GetCooperativesAsync();
-            return View("~/Views/SuperAdmin/SuperAdminDashboard.cshtml", cooperatives);
+            return View("~/Views/SuperAdmin/Dashboard.cshtml", cooperatives);
         }
 
         public async Task<IActionResult> Users()
@@ -47,7 +47,7 @@ namespace Projet__E_commerce.Controllers
             ViewBag.ActiveTab = "users";
 
             var users = await GetUsersAsync();
-            return View("~/Views/SuperAdmin/SuperAdminDashboard.cshtml", users);
+            return View("~/Views/SuperAdmin/Dashboard.cshtml", users);
         }
 
 
@@ -58,7 +58,7 @@ namespace Projet__E_commerce.Controllers
             ViewBag.ActiveTab = "deliveries_orders";
 
             var data = await GetDeliveriesAndOrdersAsync();
-            return View("~/Views/SuperAdmin/SuperAdminDashboard.cshtml", data);
+            return View("~/Views/SuperAdmin/Dashboard.cshtml", data);
         }
 
         public async Task<IActionResult> CooperativeDetails(int id)
