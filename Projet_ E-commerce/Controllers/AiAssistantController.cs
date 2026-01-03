@@ -31,7 +31,12 @@ namespace Projet__E_commerce.Controllers
                 var client = _httpClientFactory.CreateClient();
                 
                 // Get webhook URL from configuration
-                var baseUrl = _configuration["N8n:WebhookUrl"] ?? "http://localhost:5678/webhook/3dc65d23-466f-47a6-828e-e3f4f5c4e0fd";
+                var baseUrl = _configuration["N8n:WebhookUrl"];
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    return StatusCode(500, "Assistant configuration error: 'N8n:WebhookUrl' is missing from appsettings.json. Please ensure it is correctly set.");
+                }
+
                 var sessionId = HttpContext.Session.Id;
                 var webhookUrl = $"{baseUrl}?sessionId={sessionId}";
 

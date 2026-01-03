@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Projet__E_commerce.Data;
 using Projet__E_commerce.Models;
+using Projet__E_commerce.Services;
 
 namespace Projet__E_commerce.Controllers
 {
@@ -10,10 +11,41 @@ namespace Projet__E_commerce.Controllers
     public class AiToolsController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
+        private readonly DatabaseMetadataService _metadataService;
 
-        public AiToolsController(ApplicationDbContext db)
+        public AiToolsController(ApplicationDbContext db, DatabaseMetadataService metadataService)
         {
             _db = db;
+            _metadataService = metadataService;
+        }
+
+        [HttpGet("get_database_schema")]
+        public async Task<IActionResult> GetSchema()
+        {
+            var schema = await _metadataService.GetSchemaAsync();
+            return Ok(schema);
+        }
+
+        [HttpPost("execute_sql_query")]
+        public async Task<IActionResult> ExecuteQuery([FromBody] SqlQueryRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Query))
+                return BadRequest("Query is empty");
+
+            var results = await _metadataService.ExecuteReadOnlyQueryAsync(request.Query);
+            return Ok(results);
+        }
+
+        [HttpGet("list_services")]
+        public IActionResult ListServices()
+        {
+            var services = _metadataService.GetAvailableServices();
+            return Ok(services);
+        }
+
+        public class SqlQueryRequest
+        {
+            public string Query { get; set; } = string.Empty;
         }
 
         [HttpGet("search")]

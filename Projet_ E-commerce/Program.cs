@@ -25,6 +25,7 @@ builder.Services.AddSession(options =>
 
 // Configuration Services
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddScoped<DatabaseMetadataService>();
 
 var app = builder.Build();
 
