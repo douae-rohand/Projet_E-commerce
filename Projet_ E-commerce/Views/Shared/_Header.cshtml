@@ -1,0 +1,113 @@
+@using Microsoft.AspNetCore.Http
+<header class="sticky-top bg-white bg-opacity-95 border-bottom shadow-soft" style="backdrop-filter: blur(12px); z-index: 1050;">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between" style="min-height: 64px;">
+            <!-- Logo -->
+            <a asp-controller="Home" asp-action="Index" class="d-flex align-items-center gap-2 text-decoration-none">
+                <img src="~/images/logo.png" alt="Souk 212 Logo" style="height: 70px; width: auto;" />
+                <div class="d-none d-sm-block">
+                    <span class="font-display fs-5 fw-bold text-dark">
+                        Souk<span class="text-terracotta"> 212</span>
+                    </span>
+                    <p class="mb-0 text-muted" style="font-size: 10px; margin-top: -4px;">Trésors des Coopératives</p>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="d-none d-md-flex align-items-center gap-4">
+                <a asp-controller="Home" asp-action="Index" class="nav-link-custom">Accueil</a>
+                <a asp-controller="Catalog" asp-action="Index" class="nav-link-custom">Produits</a>
+                <a asp-controller="Cooperatives" asp-action="Index" class="nav-link-custom">Coopératives</a>
+                <a asp-controller="About" asp-action="Index" class="nav-link-custom">Notre Mission</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="d-flex align-items-center gap-2">
+                <!-- Search (Desktop) -->
+                <div class="d-none d-md-block">
+                    <button class="btn btn-ghost btn-icon" type="button" data-bs-toggle="collapse" data-bs-target="#searchCollapse">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+                @{
+                    var userId = Context.Session.GetInt32("UserId");
+                    var searchTerm = Context.Request.Query["search"].ToString();
+                }
+
+
+                @if (userId != null)
+                {
+                    <!-- Cart (Authenticated) -->
+                    <a asp-controller="Cart" asp-action="Index" class="btn btn-ghost btn-icon position-relative me-2">
+                        <i class="bi bi-cart3 fs-5"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-terracotta border border-2 border-white" style="font-size: 10px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; padding: 0;">
+                            @await Component.InvokeAsync("CartCount")
+                        </span>
+                    </a>
+
+                    <!-- Account (Authenticated) -->
+                    <a asp-controller="Account" asp-action="UserDashboard" class="btn btn-ghost btn-icon border-0">
+                        <i class="bi bi-person fs-4"></i>
+                    </a>
+                }
+                else
+                {
+                    <!-- Login Button (Not Authenticated) -->
+                    <a asp-controller="Auth" asp-action="Login" class="btn btn-primary px-3 py-2 d-none d-sm-flex">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Connexion
+                    </a>
+
+                    <!-- Register Button (Not Authenticated) -->
+                    <a asp-controller="Auth" asp-action="Register" class="btn btn-outline-primary px-3 py-2 d-none d-sm-flex ms-2">
+                        <i class="bi bi-person-plus me-2"></i>
+                        S'inscrire
+                    </a>
+
+                    <!-- Mobile Login Icon (Not Authenticated) -->
+                    <a asp-controller="Auth" asp-action="Login" class="btn btn-ghost btn-icon d-sm-none">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                    </a>
+                }
+
+                <!-- Mobile Menu Toggle -->
+                <button class="btn btn-ghost btn-icon d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Search Collapse (Desktop) -->
+        <div class="collapse" id="searchCollapse">
+            <form asp-controller="Catalog" asp-action="Index" method="get" class="d-flex align-items-center gap-2 py-3">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control border-end-0" placeholder="Huile d'argan, safran, coopérative..." value="@searchTerm" />
+                    <button class="btn btn-outline-secondary border-start-0" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+                <button class="btn btn-ghost btn-icon" type="button" data-bs-toggle="collapse" data-bs-target="#searchCollapse">
+                    <i class="bi bi-x h4 mb-0"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="collapse d-md-none" id="mobileMenu">
+            <div class="py-3 border-top">
+                <form asp-controller="Catalog" asp-action="Index" method="get" class="d-flex align-items-center gap-2 mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="search" class="form-control border-start-0" placeholder="Rechercher..." value="@searchTerm" />
+                    </div>
+                </form>
+                <nav class="d-flex flex-column gap-2">
+                    <a asp-controller="Home" asp-action="Index" class="mobile-nav-link">Accueil</a>
+                    <a asp-controller="Catalog" asp-action="Index" class="mobile-nav-link">Produits</a>
+                    <a asp-controller="Cooperatives" asp-action="Index" class="mobile-nav-link">Coopératives</a>
+                    <a asp-controller="About" asp-action="Index" class="mobile-nav-link">Notre Mission</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>

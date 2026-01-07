@@ -1,0 +1,744 @@
+@model Projet__E_commerce.Models.Client
+@{
+    ViewData["Title"] = "Mon Compte - Souk 212";
+}
+
+<div class="bg-dashboard min-vh-100 py-5 mt-4">
+    <div class="container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <aside class="col-lg-3">
+            <div class="card border-0 shadow-premium rounded-4xl p-2 sticky-top" style="top: 100px; z-index: 100; background-color: #ffffff;">
+                <div class="d-flex align-items-center gap-3 p-2 mb-3">
+                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center overflow-hidden" style="width: 48px; height: 48px;">
+                        <i class="bi bi-person-fill h4 mb-0 text-muted"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0" style="font-size: 0.9rem;">@Model.prenom @Model.nom</h6>
+                        <p class="small text-muted mb-0" style="font-size: 0.75rem;">@Model.Utilisateur.email</p>
+                    </div>
+                </div>
+                
+                <nav class="nav flex-column gap-1 dashboard-nav">
+                    <a class="nav-link active rounded-pill px-3 py-1.5 d-flex align-items-center gap-3" href="#profile"><i class="bi bi-person"></i> Mon profil</a>
+                    <a class="nav-link rounded-pill px-3 py-1.5 d-flex align-items-center gap-3" href="#orders"><i class="bi bi-box"></i> Mes commandes</a>
+                    <a class="nav-link rounded-pill px-3 py-1.5 d-flex align-items-center gap-3" href="#addresses"><i class="bi bi-geo-alt"></i> Mes adresses</a>
+                    <a class="nav-link rounded-pill px-3 py-1.5 d-flex align-items-center gap-3" href="#payment"><i class="bi bi-credit-card"></i> Paiement</a>
+                    <div class="border-top my-1 mx-2"></div>
+                    <a class="nav-link text-danger rounded-pill px-3 py-1.5 d-flex align-items-center gap-3" asp-controller="Auth" asp-action="Logout"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="col-lg-9">
+            <!-- Profile Section -->
+            <div id="profile" class="dashboard-section card border-0 shadow-premium rounded-4xl p-4 p-md-5 mb-4">
+                <h2 class="font-display fw-bold mb-4">Mon Profil</h2>
+                <form asp-controller="Account" asp-action="UpdateProfile" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Prénom</label>
+                            <input type="text" name="prenom" class="form-control profile-input" value="@Model.prenom" readonly required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nom</label>
+                            <input type="text" name="nom" class="form-control profile-input" value="@Model.nom" readonly required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Email</label>
+                            <input type="email" class="form-control" value="@Model.Utilisateur.email" readonly disabled>
+                            <div class="form-text small">L'email ne peut pas être modifié.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Téléphone</label>
+                            <input type="tel" name="telephone" class="form-control profile-input" value="@Model.telephone" readonly>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 mt-2">
+                        <button type="button" id="btnEditProfile" class="btn btn-primary px-5 py-2 rounded-pill fw-bold">
+                            Modifier le profil
+                        </button>
+                        <button type="submit" id="btnSaveProfile" class="btn btn-primary px-5 py-2 rounded-pill fw-bold d-none">
+                            Sauvegarder
+                        </button>
+                        <button type="button" id="btnCancelEdit" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-bold d-none">
+                            Annuler
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Orders Section -->
+            <div id="orders" class="dashboard-section card border-0 shadow-premium rounded-4xl p-4 p-md-5 mb-4 d-none">
+                <h2 class="font-display fw-bold mb-4">Mes Commandes</h2>
+                
+                @if (Model.Commandes == null || !Model.Commandes.Any())
+                {
+                    <div class="text-center py-5">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                            <i class="bi bi-box-seam h2 mb-0 text-muted"></i>
+                        </div>
+                        <h5 class="fw-bold">Aucune commande pour le moment</h5>
+                        <p class="text-muted">Découvrez nos produits et faites votre premier achat !</p>
+                        <a asp-controller="Catalog" asp-action="Index" class="btn btn-primary rounded-pill px-4 mt-2">Voir le catalogue</a>
+                    </div>
+                }
+                else
+                {
+                    <!-- Status Filter Bar -->
+                    <div class="mb-4">
+                        <ul class="nav nav-pills gap-2 flex-wrap order-status-nav justify-content-center" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button type="button" class="nav-link active rounded-pill px-3 py-2" data-status="tous" onclick="filterOrders('tous')">Tous</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button type="button" class="nav-link rounded-pill px-3 py-2" data-status="en_preparation" onclick="filterOrders('en_preparation')">En préparation</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button type="button" class="nav-link rounded-pill px-3 py-2" data-status="en_livraison" onclick="filterOrders('en_livraison')">En livraison</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button type="button" class="nav-link rounded-pill px-3 py-2" data-status="livre" onclick="filterOrders('livre')">Livré</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button type="button" class="nav-link rounded-pill px-3 py-2" data-status="annule" onclick="filterOrders('annule')">Annulé</button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3" id="ordersContainer">
+                        @foreach (var order in Model.Commandes.OrderByDescending(o => o.created_at))
+                        {
+                            string statusLabel = order.statut;
+                            string statusClass = "bg-secondary-subtle text-secondary";
+                            string statusValue = order.statut.ToLower();
+
+                            switch (statusValue)
+                            {
+                                case "en_attente":
+                                    statusLabel = "En attente";
+                                    statusClass = "bg-warning-subtle text-warning";
+                                    break;
+                                case "en_preparation":
+                                    statusLabel = "En préparation";
+                                    statusClass = "bg-info-subtle text-info";
+                                    break;
+                                case "en_livraison":
+                                    statusLabel = "En livraison";
+                                    statusClass = "bg-primary-subtle text-primary";
+                                    break;
+                                case "livre":
+                                case "livree":
+                                    statusLabel = "Livré";
+                                    statusClass = "bg-success-subtle text-success";
+                                    statusValue = "livre";
+                                    break;
+                                case "annule":
+                                case "annulee":
+                                    statusLabel = "Annulé";
+                                    statusClass = "bg-danger-subtle text-danger";
+                                    statusValue = "annule";
+                                    break;
+                            }
+
+                            <div class="card bg-white border-0 shadow-sm rounded-4 p-4 d-flex flex-row justify-content-between align-items-center order-item" data-status="@statusValue">
+                                <div>
+                                    <h6 class="fw-bold mb-1">Commande #@order.idCommande</h6>
+                                    <p class="small text-muted mb-0">@order.created_at.ToString("dd MMM yyyy") • @order.LignesCommande.Count article(s)</p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge rounded-pill @statusClass px-3 py-2 mb-2">@statusLabel</span>
+                                    <h6 class="fw-bold mb-2">@order.prixTotal.ToString("N2") MAD</h6>
+                                    <button onclick="loadOrderDetails(@order.idCommande)" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        Details
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Empty State Message -->
+                    <div id="ordersEmptyState" class="text-center py-5 d-none">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                            <i class="bi bi-inbox h2 mb-0 text-muted"></i>
+                        </div>
+                        <h5 class="fw-bold" id="emptyStateTitle">Aucune commande trouvée</h5>
+                        <p class="text-muted" id="emptyStateMessage">Il n'y a pas de commandes avec ce statut.</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Addresses Section -->
+            <div id="addresses" class="dashboard-section card border-0 shadow-premium rounded-4xl p-4 p-md-5 mb-4 d-none">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="font-display fw-bold mb-0">Mes Adresses</h2>
+                    <button class="btn btn-outline-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addAddressModal">+ Ajouter</button>
+                </div>
+                
+                @if (Model.AdressesLivraison == null || !Model.AdressesLivraison.Any())
+                {
+                    <div class="text-center py-5">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                            <i class="bi bi-geo-alt h2 mb-0 text-muted"></i>
+                        </div>
+                        <h5 class="fw-bold">Aucune adresse enregistrée</h5>
+                        <p class="text-muted">Ajoutez une adresse pour faciliter vos livraisons.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-4">
+                        @foreach (var adresse in Model.AdressesLivraison)
+                        {
+                            <div class="col-md-6">
+                                <div class="card bg-white rounded-3xl p-4 shadow-sm @(adresse.est_par_defaut ? "border-2-primary" : "border-light-subtle")">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        @if (adresse.est_par_defaut)
+                                        {
+                                            <span class="badge" style="background-color: rgba(13, 110, 253, 0.1); color: #0d6efd; font-size: 0.75rem; font-weight: 500; padding: 0.25rem 0.75rem;">Par défaut</span>
+                                        }
+                                        else
+                                        {
+                                            <span></span>
+                                        }
+                                        <div class="dropdown">
+                                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                                                <li><a class="dropdown-item small" href="#" onclick="openEditModal(@adresse.idAdresse, '@adresse.nom_adresse', '@adresse.adresse_complete', '@adresse.ville', '@adresse.code_postal', '@adresse.telephone', @adresse.est_par_defaut.ToString().ToLower())"><i class="bi bi-pencil me-2"></i>Modifier</a></li>
+                                                <li><a class="dropdown-item small text-danger" href="#" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?') && deleteAddress(@adresse.idAdresse)"><i class="bi bi-trash me-2"></i>Supprimer</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <p class="fw-bold mb-1">@(string.IsNullOrEmpty(adresse.nom_adresse) ? "Adresse" : adresse.nom_adresse)</p>
+                                    <p class="text-sm text-muted mb-0">
+                                        @adresse.adresse_complete<br />
+                                        @adresse.ville, @adresse.code_postal<br />
+                                        Maroc
+                                    </p>
+                                    @if (!string.IsNullOrEmpty(adresse.telephone))
+                                    {
+                                        <p class="text-sm text-muted mt-2 mb-0">
+                                            <i class="bi bi-telephone me-1"></i> @adresse.telephone
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Payment Section -->
+            <div id="payment" class="dashboard-section card border-0 shadow-premium rounded-4xl p-4 p-md-5 mb-4 d-none">
+                <h2 class="font-display fw-bold mb-4">Paiement</h2>
+                <div class="text-center py-5">
+                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                        <i class="bi bi-credit-card h2 mb-0 text-muted"></i>
+                    </div>
+                    <h5 class="fw-bold">Aucune méthode de paiement enregistrée</h5>
+                    <p class="text-muted">Ajoutez une carte pour faciliter vos futurs achats.</p>
+                    <button class="btn btn-primary rounded-pill px-4">Ajouter une carte</button>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Modal Ajouter une Adresse -->
+<div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4xl">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold" id="addAddressModalLabel">Ajouter une adresse</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-controller="Account" asp-action="AddAddress" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Nom de l'adresse (ex: Maison, Bureau)</label>
+                        <input type="text" name="nom_adresse" class="form-control rounded-3" placeholder="Maison" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Adresse complète</label>
+                        <textarea name="adresse_complete" class="form-control rounded-3" rows="3" placeholder="123 Rue..." required></textarea>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Ville</label>
+                            <input type="text" name="ville" class="form-control rounded-3" placeholder="Tétouan" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Code postal</label>
+                            <input type="text" name="code_postal" class="form-control rounded-3" placeholder="93000" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Téléphone</label>
+                        <input type="tel" name="telephone" class="form-control rounded-3" placeholder="06XXXXXXXX">
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="est_par_defaut" value="true" id="isDefault">
+                        <label class="form-check-label small" for="isDefault">
+                            Définir comme adresse par défaut
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pb-4 px-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Modifier une Adresse -->
+<div class="modal fade" id="editAddressModal" tabindex="-1" aria-labelledby="editAddressModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4xl">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold" id="editAddressModalLabel">Modifier l'adresse</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-controller="Account" asp-action="UpdateAddress" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="idAdresse" id="editIdAdresse" />
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Nom de l'adresse</label>
+                        <input type="text" name="nom_adresse" id="editNomAdresse" class="form-control rounded-3" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Adresse complète</label>
+                        <textarea name="adresse_complete" id="editAdresseComplete" class="form-control rounded-3" rows="3" required></textarea>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Ville</label>
+                            <input type="text" name="ville" id="editVille" class="form-control rounded-3" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Code postal</label>
+                            <input type="text" name="code_postal" id="editCodePostal" class="form-control rounded-3" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Téléphone</label>
+                        <input type="tel" name="telephone" id="editTelephone" class="form-control rounded-3">
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="est_par_defaut" value="true" id="editIsDefault">
+                        <label class="form-check-label small" for="editIsDefault">
+                            Définir comme adresse par défaut
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pb-4 px-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Order Details -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4xl">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold">Détails de la commande</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="orderDetailsContent">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Noter un Produit -->
+<div class="modal fade" id="ratingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4xl">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold">Noter le produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <img id="ratingProductImage" src="" class="rounded-3 me-3 object-fit-cover" style="width: 60px; height: 60px;" alt="Produit">
+                    <h6 class="fw-bold mb-0" id="ratingProductName">Nom du produit</h6>
+                </div>
+                
+                <form id="ratingForm" onsubmit="return submitReview(event)">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="ratingProductId" name="idProduit">
+                    
+                    <div class="mb-4 text-center">
+                        <label class="form-label small fw-bold d-block mb-2">Votre note</label>
+                        <div class="rating-stars h2 text-warning" style="cursor: pointer;">
+                            <i class="bi bi-star" data-value="1"></i>
+                            <i class="bi bi-star" data-value="2"></i>
+                            <i class="bi bi-star" data-value="3"></i>
+                            <i class="bi bi-star" data-value="4"></i>
+                            <i class="bi bi-star" data-value="5"></i>
+                        </div>
+                        <input type="hidden" id="ratingValue" name="note" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Votre avis (optionnel)</label>
+                        <textarea class="form-control rounded-3" id="ratingComment" name="commentaire" rows="3" placeholder="Partagez votre expérience..."></textarea>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary rounded-pill py-3 fw-bold">Publier l'avis</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f9f8f4 !important;
+    }
+    .dashboard-nav .nav-link { 
+        color: #7f8c8d;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem !important;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+    .dashboard-nav .nav-link:hover { 
+        background-color: rgba(91, 118, 199, 0.05);
+        color: var(--dashboard-blue);
+    }
+    .dashboard-nav .nav-link.active { 
+        background-color: var(--dashboard-blue) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(91, 118, 199, 0.3);
+    }
+    .dashboard-nav .nav-link.text-danger:hover {
+        background-color: rgba(220, 53, 69, 0.05);
+    }
+    .dashboard-nav .nav-link.text-danger.active {
+        background-color: #dc3545 !important;
+    }
+    .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1) !important; }
+    .bg-primary-subtle { background-color: rgba(0, 61, 142, 0.1) !important; }
+    .bg-warning-subtle { background-color: rgba(255, 193, 7, 0.1) !important; }
+    .shadow-premium {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04), 0 4px 8px rgba(0, 0, 0, 0.02);
+    }
+    .rounded-4xl {
+        border-radius: 2rem !important;
+    }
+    .order-status-nav .nav-link {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid transparent;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    .order-status-nav .nav-link:hover {
+        background-color: #e9ecef;
+        color: #495057;
+    }
+    .order-status-nav .nav-link.active {
+        background-color: var(--dashboard-blue);
+        color: white;
+        box-shadow: 0 4px 12px rgba(91, 118, 199, 0.3);
+    }
+</style>
+
+<script>
+    // Logic to toggle between dashboard sections
+    document.querySelectorAll('.dashboard-nav .nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (!href || href === '#' || href.startsWith('/')) return; // Allow normal links like Logout
+
+            const targetId = href.substring(1);
+            if (!targetId) return;
+            
+            e.preventDefault();
+            
+            // Update active link
+            document.querySelectorAll('.dashboard-nav .nav-link').forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Show target section
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                if (section.id === targetId) {
+                    section.classList.remove('d-none');
+                } else {
+                    section.classList.add('d-none');
+                }
+            });
+        });
+    });
+
+    // Profile Edit Mode Toggle
+    const btnEdit = document.getElementById('btnEditProfile');
+    const btnSave = document.getElementById('btnSaveProfile');
+    const btnCancel = document.getElementById('btnCancelEdit');
+    const profileInputs = document.querySelectorAll('.profile-input');
+
+    btnEdit.addEventListener('click', () => {
+        profileInputs.forEach(input => input.removeAttribute('readonly'));
+        btnEdit.classList.add('d-none');
+        btnSave.classList.remove('d-none');
+        btnCancel.classList.remove('d-none');
+    });
+
+    btnCancel.addEventListener('click', () => {
+        profileInputs.forEach(input => input.setAttribute('readonly', true));
+        btnEdit.classList.remove('d-none');
+        btnSave.classList.add('d-none');
+        btnCancel.classList.add('d-none');
+    });
+
+    // Address Management Functions
+    function openEditModal(id, nom, adresse, ville, codePostal, telephone, isDefault) {
+        document.getElementById('editIdAdresse').value = id;
+        document.getElementById('editNomAdresse').value = nom || '';
+        document.getElementById('editAdresseComplete').value = adresse || '';
+        document.getElementById('editVille').value = ville || '';
+        document.getElementById('editCodePostal').value = codePostal || '';
+        document.getElementById('editTelephone').value = telephone || '';
+        document.getElementById('editIsDefault').checked = isDefault;
+        
+        const modal = new bootstrap.Modal(document.getElementById('editAddressModal'));
+        modal.show();
+    }
+
+    async function deleteAddress(idAdresse) {
+        const formData = new FormData();
+        formData.append('idAdresse', idAdresse);
+        formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+
+        try {
+            const response = await fetch('/Account/DeleteAddress', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                location.reload();
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            alert('Une erreur est survenue lors de la suppression.');
+        }
+        return false;
+    }
+
+    // Orders Filter Function
+    function filterOrders(status) {
+        const orderItems = document.querySelectorAll('.order-item');
+        const filterButtons = document.querySelectorAll('.order-status-nav .nav-link');
+        const ordersContainer = document.getElementById('ordersContainer');
+        const emptyState = document.getElementById('ordersEmptyState');
+        
+        // Update active button
+        filterButtons.forEach(btn => {
+            if (btn.getAttribute('data-status') === status) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        // Filter orders
+        let visibleCount = 0;
+        orderItems.forEach(item => {
+            const itemStatus = item.getAttribute('data-status');
+            
+            if (status === 'tous' || itemStatus === status) {
+                item.classList.remove('d-none');
+                item.style.display = 'flex';
+                visibleCount++;
+            } else {
+                item.classList.add('d-none');
+                item.style.display = 'none';
+            }
+        });
+        
+        // Show/hide empty state (only if emptyState element exists)
+        if (emptyState && ordersContainer) {
+            if (visibleCount === 0) {
+                ordersContainer.classList.add('d-none');
+                emptyState.classList.remove('d-none');
+                
+                // Update empty state message based on filter
+                const statusMessages = {
+                    'tous': 'Vous n\'avez aucune commande pour le moment.',
+                    'en_preparation': 'Aucune commande en préparation.',
+                    'en_livraison': 'Aucune commande en livraison.',
+                    'livre': 'Aucune commande livrée.',
+                    'annule': 'Aucune commande annulée.'
+                };
+                
+                const emptyStateMessage = document.getElementById('emptyStateMessage');
+                if (emptyStateMessage) {
+                    emptyStateMessage.textContent = statusMessages[status] || 'Aucune commande trouvée.';
+                }
+            } else {
+                ordersContainer.classList.remove('d-none');
+                emptyState.classList.add('d-none');
+            }
+        }
+        
+        return false;
+    }
+
+    // Order Details Function
+    async function loadOrderDetails(orderId) {
+        const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+        const contentDiv = document.getElementById('orderDetailsContent');
+        
+        // Show loading state
+        contentDiv.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+            </div>
+        `;
+        
+        modal.show();
+
+        try {
+            const response = await fetch(`/Account/OrderDetails/${orderId}`);
+            if (response.ok) {
+                const html = await response.text();
+                contentDiv.innerHTML = html;
+            } else {
+                contentDiv.innerHTML = `
+                    <div class="text-center py-4 text-danger">
+                        <i class="bi bi-exclamation-circle h4 mb-2 d-block"></i>
+                        <p class="mb-0">Impossible de charger les détails.</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            contentDiv.innerHTML = `
+                <div class="text-center py-4 text-danger">
+                    <i class="bi bi-exclamation-circle h4 mb-2 d-block"></i>
+                    <p class="mb-0">Une erreur est survenue.</p>
+                </div>
+            `;
+        }
+    }
+
+
+    // Rating System Logic
+    const stars = document.querySelectorAll('.rating-stars i');
+    const ratingInput = document.getElementById('ratingValue');
+
+    stars.forEach(star => {
+        star.addEventListener('mouseover', function() {
+            const value = this.getAttribute('data-value');
+            highlightStars(value);
+        });
+
+        star.addEventListener('mouseout', function() {
+            const value = ratingInput.value || 0;
+            highlightStars(value);
+        });
+
+        star.addEventListener('click', function() {
+            const value = this.getAttribute('data-value');
+            ratingInput.value = value;
+            highlightStars(value);
+        });
+    });
+
+    function highlightStars(value) {
+        stars.forEach(star => {
+            const starValue = star.getAttribute('data-value');
+            if (starValue <= value) {
+                star.classList.remove('bi-star');
+                star.classList.add('bi-star-fill');
+            } else {
+                star.classList.remove('bi-star-fill');
+                star.classList.add('bi-star');
+            }
+        });
+    }
+
+    function openRatingModal(productId, productName, productImage) {
+        document.getElementById('ratingProductId').value = productId;
+        document.getElementById('ratingProductName').textContent = productName;
+        document.getElementById('ratingProductImage').src = productImage;
+        
+        // Reset form
+        document.getElementById('ratingForm').reset();
+        ratingInput.value = '';
+        highlightStars(0);
+        
+        const modal = new bootstrap.Modal(document.getElementById('ratingModal'));
+        modal.show();
+    }
+
+    async function submitReview(event) {
+        event.preventDefault();
+        
+        if (!ratingInput.value) {
+            alert('Veuillez sélectionner une note.');
+            return false;
+        }
+
+        const formData = new FormData(event.target);
+
+        try {
+            const response = await fetch('/Account/SubmitReview', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('ratingModal'));
+                modal.hide();
+                alert(result.message); // Or use a nicer toast notification
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            alert('Une erreur est survenue.');
+        }
+        
+        return false;
+    }
+</script>

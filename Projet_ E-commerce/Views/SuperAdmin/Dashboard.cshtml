@@ -1,0 +1,56 @@
+@using Projet__E_commerce.Models.ViewModels
+@{
+    Layout = "~/Views/SuperAdmin/_SuperAdminLayout.cshtml";
+    ViewData["Title"] = "Super Admin - Souk 212";
+    var activeTab = ViewBag.ActiveTab ?? "dashboard";
+}
+
+@if (activeTab == "dashboard")
+{
+    var dashboardModel = Model as SuperAdminDashboardViewModel;
+    if (dashboardModel != null)
+    {
+        <partial name="~/Views/SuperAdmin/_DashboardOverview.cshtml" model="dashboardModel" />
+    }
+}
+else if (activeTab == "cooperatives")
+{
+    var coopModel = Model as List<CooperativeStatsViewModel>;
+    if (coopModel != null)
+    {
+        <partial name="~/Views/SuperAdmin/_CooperativesList.cshtml" model="coopModel" />
+    }
+}
+else if (activeTab == "users")
+{
+    var usersModel = Model as List<UserStatsViewModel>;
+    if (usersModel != null)
+    {
+        <partial name="~/Views/SuperAdmin/_UsersList.cshtml" model="usersModel" />
+    }
+}
+else if (activeTab == "analytics")
+{
+    var analyticsModel = Model as AnalyticsViewModel;
+    if (analyticsModel != null)
+    {
+        <partial name="~/Views/SuperAdmin/_AnalyticsView.cshtml" model="analyticsModel" />
+    }
+}
+else if (activeTab == "deliveries_orders")
+{
+    var ordersModel = Model as List<OrderDetailsViewModel>;
+    if (ordersModel != null)
+    {
+        <partial name="~/Views/SuperAdmin/_DeliveriesOrdersList.cshtml" model="ordersModel" />
+    }
+}
+else if (activeTab == "alerts")
+{
+    var alertsModel = Model as List<AlertViewModel>;
+    if (alertsModel != null)
+    {
+        <partial name="~/Views/SuperAdmin/_AlertsList.cshtml" model="alertsModel" />
+    }
+}
+

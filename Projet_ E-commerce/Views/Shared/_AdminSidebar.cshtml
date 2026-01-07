@@ -1,0 +1,35 @@
+@{
+    var activePage = ViewData["ActivePage"] as string ?? "";
+}
+
+<aside class="bg-white border-end vh-100 sticky-top d-none d-lg-block shadow-sm flex-shrink-0" style="width: 280px; z-index: 1000;">
+    <div class="p-4 border-bottom">
+        <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
+             <img src="~/images/logo.png" alt="Souk 212 Logo" style="height: 80px; width: auto;" />
+            <div>
+                <h5 class="fw-bold mb-0 text-dark">Souk 212</h5>
+                <p class="small text-muted mb-0" style="font-size: 11px;">ESPACE ADMIN</p>
+            </div>
+        </a>
+    </div>
+    
+    <nav class="nav flex-column p-3 gap-1">
+        <a class="nav-link @(activePage == "Dashboard" ? "active shadow-sm" : "text-muted hover-effect") rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1" href="@Url.Action("Dashboard", "Admin")">
+            <i class="bi bi-speedometer2"></i> Tableau de bord
+        </a>
+        <a class="nav-link @(activePage == "Products" ? "active shadow-sm" : "text-muted hover-effect") rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1" href="@Url.Action("Products", "Admin")">
+            <i class="bi bi-box-seam"></i> Produits
+        </a>
+        <a class="nav-link @(activePage == "Orders" ? "active shadow-sm" : "text-muted hover-effect") rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1" href="@Url.Action("Orders", "Admin")">
+            <i class="bi bi-cart3"></i> Commandes
+        </a>
+        <a class="nav-link @(activePage == "Profile" ? "active shadow-sm" : "text-muted hover-effect") rounded-3 d-flex align-items-center gap-3 py-2 px-3 mb-1" href="@Url.Action("Profile", "Admin")">
+            <i class="bi bi-gear"></i> Profil
+        </a>
+        <div class="mt-auto pt-4 border-top">
+            <a class="nav-link text-danger rounded-3 d-flex align-items-center gap-3 py-2 px-3 hover-effect" href="@Url.Action("Logout", "Auth")">
+                <i class="bi bi-box-arrow-right"></i> Déconnexion
+            </a>
+        </div>
+    </nav>
+</aside>

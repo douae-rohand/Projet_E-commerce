@@ -1,0 +1,182 @@
+@model Projet__E_commerce.Models.CheckoutViewModel
+@{
+    ViewData["Title"] = "Caisse - Souk 212";
+    var cartItems = ViewBag.CartItems as List<Projet__E_commerce.Models.CartItemViewModel>;
+    decimal total = ViewBag.CartTotal;
+}
+
+<div class="container py-5 mt-4">
+    <div class="row g-5">
+        <!-- Billing Details -->
+        <div class="col-md-7 col-lg-8 animate-fade-in-up">
+            <h2 class="font-display fw-bold mb-4">Détails de livraison</h2>
+            <form asp-action="PlaceOrder" method="post" id="checkout-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                <!-- ADDRESS SELECTION -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold small text-muted">Adresse de livraison</label>
+                    <select asp-for="SelectedAddressId" class="form-select w-100 p-3 mb-3" id="address-selector" onchange="toggleAddressForm()">
+                        @if (Model.ExistingAddresses != null && Model.ExistingAddresses.Any())
+                        {
+                            foreach (var addr in Model.ExistingAddresses)
+                            {
+                                <option value="@addr.idAdresse">@addr.nom_adresse - @addr.ville (@addr.adresse_complete)</option>
+                            }
+                        }
+                        <option value="0">Nouvelle adresse (+)</option>
+                    </select>
+                </div>
+
+                <!-- NEW ADDRESS FORM -->
+                <div id="new-address-form" style="display: @(Model.SelectedAddressId.HasValue && Model.SelectedAddressId > 0 ? "none" : "block")">
+                    <div class="card bg-light border-0 p-4 mb-4 rounded-4">
+                        <h6 class="fw-bold mb-3">Nouvelle adresse</h6>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label asp-for="NewAddressName" class="form-label small fw-bold text-muted">Nom (ex: Maison, Bureau)</label>
+                                <input asp-for="NewAddressName" class="form-control" placeholder="Maison" />
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="Address" class="form-label small fw-bold text-muted">Adesse complète</label>
+                                <input asp-for="Address" class="form-control" placeholder="123 Rue de la Liberté" />
+                                <span asp-validation-for="Address" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="City" class="form-label small fw-bold text-muted">Ville</label>
+                                <input asp-for="City" class="form-control" placeholder="Casablanca" />
+                                <span asp-validation-for="City" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ZipCode" class="form-label small fw-bold text-muted">Code Postal</label>
+                                <input asp-for="ZipCode" class="form-control" placeholder="20000" />
+                                <span asp-validation-for="ZipCode" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="PhoneNumber" class="form-label small fw-bold text-muted">Téléphone</label>
+                                <input asp-for="PhoneNumber" class="form-control" placeholder="+212 6..." />
+                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- DELIVERY MODE -->
+                <h4 class="font-display fw-bold mb-3">Mode de Livraison</h4>
+                <div class="d-flex gap-3 mb-4">
+                    <div class="form-check custom-card-radio flex-fill">
+                        <input asp-for="DeliveryMode" class="form-check-input" type="radio" value="Standard" id="deliveryStandard" checked onchange="updateSummary()">
+                        <label class="form-check-label card p-3 border-2 h-100" for="deliveryStandard">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold">Standard</span>
+                                <span class="badge bg-secondary-subtle text-secondary">30 MAD</span>
+                            </div>
+                            <small class="text-muted">5 jours ouvrables</small>
+                        </label>
+                    </div>
+                    <div class="form-check custom-card-radio flex-fill">
+                        <input asp-for="DeliveryMode" class="form-check-input" type="radio" value="Express" id="deliveryExpress" onchange="updateSummary()">
+                        <label class="form-check-label card p-3 border-2 h-100" for="deliveryExpress">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold">Express</span>
+                                <span class="badge bg-primary-subtle text-primary">50 MAD</span>
+                            </div>
+                            <small class="text-muted">2 jours ouvrables</small>
+                        </label>
+                    </div>
+                </div>
+
+                <h4 class="font-display fw-bold mb-3">Paiement</h4>
+                <div class="form-check custom-radio mb-3">
+                    <input id="credit" name="PaymentMethod" type="radio" class="form-check-input" checked value="COD">
+                    <label class="form-check-label fw-bold" for="credit">Paiement à la livraison (Cash on Delivery)</label>
+                    <p class="small text-muted mb-0">Payez en espèces lorsque vous recevez votre colis.</p>
+                </div>
+
+                <button class="btn btn-primary w-100 btn-lg rounded-pill fw-bold mt-4" type="submit">
+                    Confirmer la commande
+                </button>
+            </form>
+        </div>
+
+        <script>
+            function toggleAddressForm() {
+                var selector = document.getElementById('address-selector');
+                var form = document.getElementById('new-address-form');
+                var inputs = form.getElementsByTagName('input');
+                
+                if (selector.value === '0') {
+                    form.style.display = 'block';
+                    for (var i = 0; i < inputs.length; i++) {
+                        inputs[i].disabled = false;
+                    }
+                } else {
+                    form.style.display = 'none';
+                    for (var i = 0; i < inputs.length; i++) {
+                        inputs[i].disabled = true;
+                    }
+                }
+            }
+            
+            function updateSummary() {
+                var standardRadio = document.getElementById('deliveryStandard');
+                var shippingEl = document.getElementById('shipping-cost');
+                var totalEl = document.getElementById('grand-total');
+                var subtotal = @total;
+                
+                var cost = standardRadio.checked ? 30 : 50;
+                var finalTotal = subtotal + cost;
+                
+                shippingEl.textContent = cost.toFixed(2) + ' MAD';
+                shippingEl.className = 'fw-bold'; // Remove text-success if it was there
+                totalEl.textContent = finalTotal.toFixed(2) + ' MAD';
+            }
+
+            // Initialize on load
+            document.addEventListener('DOMContentLoaded', function() {
+                toggleAddressForm();
+                updateSummary();
+            });
+        </script>
+
+        <!-- Order Summary -->
+        <div class="col-md-5 col-lg-4 animate-fade-in-up stagger-1">
+            <div class="card border-0 shadow-soft rounded-4 p-4 sticky-top" style="top: 100px;">
+                <h4 class="font-display fw-bold mb-4">Votre Commande</h4>
+                <ul class="list-group list-group-flush mb-3">
+                    @if (cartItems != null)
+                    {
+                        foreach (var item in cartItems)
+                        {
+                            <li class="list-group-item d-flex justify-content-between lh-sm px-0 py-3">
+                                <div>
+                                    <h6 class="my-0">@item.Name</h6>
+                                    <small class="text-muted">@item.Quantity x @item.Size / @item.Color</small>
+                                </div>
+                                <span class="text-muted">@((item.Price * item.Quantity).ToString("N2")) MAD</span>
+                            </li>
+                        }
+                    }
+                    <li class="list-group-item d-flex justify-content-between px-0 py-3">
+                        <span>Sous-total</span>
+                        <strong>@total.ToString("N2") MAD</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0 py-3">
+                        <span>Livraison</span>
+                        <span id="shipping-cost" class="fw-bold">30.00 MAD</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0 py-3 border-top-2 border-dark">
+                        <span class="fw-bold fs-5">Total</span>
+                        <span id="grand-total" class="fw-bold fs-5 text-primary">@((total + 30).ToString("N2")) MAD</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

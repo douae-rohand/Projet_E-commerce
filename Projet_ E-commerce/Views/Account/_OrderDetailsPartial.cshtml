@@ -1,0 +1,136 @@
+@model Projet__E_commerce.Models.Commande
+
+<div class="row g-4">
+    <!-- Order Summary -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h6 class="fw-bold mb-1">Commande #@Model.idCommande</h6>
+                <p class="text-muted small mb-0">Passée le @Model.created_at.ToString("dd MMMM yyyy à HH:mm")</p>
+            </div>
+            @{
+                string statusLabel = Model.statut;
+                string statusClass = "bg-secondary-subtle text-secondary";
+                
+                switch (Model.statut.ToLower())
+                {
+                    case "en_attente":
+                        statusLabel = "En attente";
+                        statusClass = "bg-warning-subtle text-warning";
+                        break;
+                    case "en_preparation":
+                        statusLabel = "En préparation";
+                        statusClass = "bg-info-subtle text-info";
+                        break;
+                    case "en_livraison":
+                        statusLabel = "En livraison";
+                        statusClass = "bg-primary-subtle text-primary";
+                        break;
+                    case "livre":
+                    case "livree":
+                        statusLabel = "Livré";
+                        statusClass = "bg-success-subtle text-success";
+                        break;
+                    case "annule":
+                    case "annulee":
+                        statusLabel = "Annulé";
+                        statusClass = "bg-danger-subtle text-danger";
+                        break;
+                }
+            }
+            <span class="badge rounded-pill @statusClass px-3 py-2">@statusLabel</span>
+        </div>
+    </div>
+
+    <!-- Items List -->
+    <div class="col-12">
+        <h6 class="fw-bold mb-3">Articles (@Model.LignesCommande.Count)</h6>
+        <div class="list-group list-group-flush border rounded-4">
+            @foreach (var item in Model.LignesCommande)
+            {
+                <div class="list-group-item border-0 p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 bg-light d-flex align-items-center justify-content-center overflow-hidden" style="width: 60px; height: 60px;">
+                            @if (!string.IsNullOrEmpty(item.Variante?.photo))
+                            {
+                                <img src="@item.Variante.photo" alt="@item.Variante.Produit?.nomP" class="w-100 h-100 object-fit-cover">
+                            }
+                            else
+                            {
+                                <i class="bi bi-image text-muted"></i>
+                            }
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-0 text-truncate">@item.Variante?.Produit?.nomP</h6>
+                            @if (item.Variante != null)
+                            {
+                                <small class="text-muted d-block">
+                                    @if (!string.IsNullOrEmpty(item.Variante.couleur))
+                                    {
+                                        <span class="me-2">Couleur: @item.Variante.couleur</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.Variante.taille))
+                                    {
+                                        <span>Taille: @item.Variante.taille</span>
+                                    }
+                                </small>
+                            }
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <small class="text-muted">Qté: @item.quantite</small>
+                                    <span class="fw-bold text-primary">@((item.prix_unitaire * item.quantite).ToString("N2")) MAD</span>
+                                </div>
+                                @if (Model.statut.ToLower() == "livre" || Model.statut.ToLower() == "livree")
+                                {
+                                    <button onclick="openRatingModal(@item.Variante?.Produit?.idP, '@item.Variante?.Produit?.nomP.Replace("'", "\\'")', '@item.Variante?.photo.Replace("\\", "/")')" 
+                                            class="btn btn-sm btn-outline-warning rounded-pill px-3 mt-2">
+                                        <i class="bi bi-star me-1"></i> Noter
+                                    </button>
+                                }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Shipping Info -->
+    <div class="col-12">
+        <div class="card bg-light border-0 rounded-4 p-3">
+            <h6 class="fw-bold mb-3"><i class="bi bi-geo-alt me-2"></i>Adresse de livraison</h6>
+            @if (Model.Livraison?.AdresseLivraison != null)
+            {
+                var addr = Model.Livraison.AdresseLivraison;
+                <p class="mb-1 fw-medium">@addr.nom_adresse</p>
+                <p class="mb-1 text-muted small">@addr.adresse_complete</p>
+                <p class="mb-1 text-muted small">@addr.ville, @addr.code_postal</p>
+                @if (!string.IsNullOrEmpty(addr.telephone))
+                {
+                    <p class="mb-0 text-muted small"><i class="bi bi-telephone me-1"></i> @addr.telephone</p>
+                }
+            }
+            else
+            {
+                <p class="text-muted mb-0">Information de livraison indisponible.</p>
+            }
+        </div>
+    </div>
+
+    <!-- Total -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-2">
+            <span class="text-muted">Sous-total</span>
+            <span class="fw-bold">@((Model.prixTotal - (Model.Livraison?.frais ?? 0)).ToString("N2")) MAD</span>
+        </div>
+        @if (Model.Livraison != null && Model.Livraison.frais > 0)
+        {
+            <div class="d-flex justify-content-between align-items-center mt-2">
+                <span class="text-muted">Frais de livraison (@Model.Livraison.mode_livraison)</span>
+                <span class="fw-bold text-success">+ @Model.Livraison.frais.ToString("N2") MAD</span>
+            </div>
+        }
+        <div class="d-flex justify-content-between align-items-center mt-2">
+            <span class="fw-bold fs-5">Total TTC</span>
+            <span class="h5 fw-bold text-primary mb-0">@Model.prixTotal.ToString("N2") MAD</span>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,215 @@
+@model IReadOnlyList<ProductViewModel>
+@{
+    ViewData["Title"] = "Catalogue - Artisanat Marocain";
+
+    var categories = ViewBag.Categories as List<Categorie> ?? new List<Categorie>();
+    var cooperatives = ViewBag.Cooperatives as List<Admin> ?? new List<Admin>();
+    int? selectedCategory = ViewBag.SelectedCategory as int?;
+    int? selectedCooperative = ViewBag.SelectedCooperative as int?;
+    string searchTerm = ViewBag.SearchTerm as string;
+    string selectedSort = ViewBag.Sort as string;
+
+}
+
+<!-- Breadcrumb -->
+<div class="bg-light py-3 border-bottom">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Accueil</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Catalogue</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Sidebar Filters -->
+        <aside class="col-lg-3 d-none d-lg-block">
+            <form asp-controller="Catalog" asp-action="Index" method="get" id="filterForm">
+                <div class="sticky-top" style="top: 100px;">
+                    <div class="mb-5">
+                        <h5 class="font-display fw-bold mb-4">Catégories</h5>
+                        <div class="list-group list-group-flush">
+                            @foreach (var cat in categories) {
+                                <label class="list-group-item border-0 px-0 d-flex align-items-center gap-3 bg-transparent cursor-pointer group">
+                                    <input class="form-check-input mt-0 border-majorelle" type="checkbox" @(selectedCategory == cat.idC ? "checked" : "") onclick="window.location.href='@Url.Action("Index", "Catalog", new { category = (selectedCategory == cat.idC ? null : (int?)cat.idC), cooperative = selectedCooperative, search = searchTerm, sort = selectedSort })'">
+                                    <a asp-controller="Catalog" asp-action="Index" asp-route-category="@cat.idC" asp-route-cooperative="@selectedCooperative" asp-route-search="@searchTerm" asp-route-sort="@selectedSort" class="small text-muted group-hover-dark text-decoration-none">@cat.nom</a>
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                <div class="mb-5 border-top pt-4">
+                    <h5 class="font-display fw-bold mb-4">Coopératives</h5>
+                    <div class="list-group list-group-flush">
+                        @foreach (var coop in cooperatives) {
+                            <label class="list-group-item border-0 px-0 d-flex align-items-center gap-3 bg-transparent cursor-pointer group">
+                                <input class="form-check-input mt-0 border-majorelle" type="checkbox" @(selectedCooperative == coop.id ? "checked" : "") onclick="window.location.href='@Url.Action("Index", "Catalog", new { category = selectedCategory, cooperative = (selectedCooperative == coop.id ? null : (int?)coop.id), search = searchTerm, sort = selectedSort })'">
+                                <a asp-controller="Catalog" asp-action="Index" asp-route-category="@selectedCategory" asp-route-cooperative="@coop.id" asp-route-search="@searchTerm" asp-route-sort="@selectedSort" class="small text-muted group-hover-dark text-decoration-none">@coop.nom_cooperative</a>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                </div>
+            </form>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Toolbar -->
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn btn-outline-dark d-lg-none py-2 px-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters">
+                        <i class="bi bi-sliders me-2"></i> Filtres
+                    </button>
+                    <p class="text-muted small mb-0"><span class="fw-bold text-dark">@Model.Count</span> produits trouvés</p>
+                </div>
+
+                <!-- <div class="d-flex align-items-center gap-3">
+                    <select class="form-select form-select-sm border-0 bg-light-subtle rounded-3 py-2 px-3 fw-medium" style="width: 160px;" onchange="window.location.href='@Url.Action("Index", "Catalog", new { category = selectedCategory, cooperative = selectedCooperative, search = searchTerm })' + '&sort=' + this.value">
+                        <option value="popular" selected="@(selectedSort == "popular")">Populaire</option>
+                        <option value="newest" selected="@(selectedSort == "newest")">Nouveautés</option>
+                        <option value="price-asc" selected="@(selectedSort == "price-asc")">Prix croissant</option>
+                        <option value="price-desc" selected="@(selectedSort == "price-desc")">Prix décroissant</option>
+                    </select>
+                </div> -->
+            </div>
+
+            <!-- Active Filters -->
+            @if (selectedCategory.HasValue || selectedCooperative.HasValue || !string.IsNullOrEmpty(searchTerm)) {
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    @if (!string.IsNullOrEmpty(searchTerm)) {
+                        <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle py-2 px-3 d-flex align-items-center gap-2">
+                            Recherche : "@searchTerm" 
+                            <a asp-controller="Catalog" asp-action="Index" asp-route-category="@selectedCategory" asp-route-cooperative="@selectedCooperative" asp-route-sort="@selectedSort" class="text-primary"><i class="bi bi-x-lg" style="font-size: 10px;"></i></a>
+                        </span>
+                    }
+
+                    @if (selectedCategory.HasValue) {
+                        var currentCat = categories.FirstOrDefault(c => c.idC == selectedCategory.Value);
+                        <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle py-2 px-3 d-flex align-items-center gap-2">
+                            @(currentCat?.nom ?? "Catégorie") 
+                            <a asp-controller="Catalog" asp-action="Index" asp-route-cooperative="@selectedCooperative" asp-route-search="@searchTerm" asp-route-sort="@selectedSort" class="text-primary"><i class="bi bi-x-lg" style="font-size: 10px;"></i></a>
+                        </span>
+                    }
+
+                    @if (selectedCooperative.HasValue) {
+                        var currentCoop = cooperatives.FirstOrDefault(c => c.id == selectedCooperative.Value);
+                        <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle py-2 px-3 d-flex align-items-center gap-2">
+                            @(currentCoop?.nom_cooperative ?? "Coopérative") 
+                            <a asp-controller="Catalog" asp-action="Index" asp-route-category="@selectedCategory" asp-route-search="@searchTerm" asp-route-sort="@selectedSort" class="text-primary"><i class="bi bi-x-lg" style="font-size: 10px;"></i></a>
+                        </span>
+                    }
+
+                    <a asp-controller="Catalog" asp-action="Index" class="btn btn-link btn-sm text-muted text-decoration-none">Effacer tout</a>
+                </div>
+            }
+
+            <div class="row g-4 overflow-hidden">
+                @if (Model.Any())
+                {
+                    @foreach (var prod in Model) {
+                        <div class="col-6 col-md-4">
+                            <!-- Helper for Product Card to ensure correct link -->
+                            <div class="card h-100 border-0 shadow-sm-hover transition-all">
+                                <div class="position-relative overflow-hidden">
+                                     @if(prod.IsNew) {
+                                        <span class="badge bg-white text-dark position-absolute top-0 start-0 m-3 rounded-pill px-3 py-2 small shadow-sm z-2">Nouveau</span>
+                                    }
+                                    <a asp-controller="Catalog" asp-action="Detail" asp-route-id="@prod.Id" class="d-block overflow-hidden ratio ratio-1x1 bg-light">
+                                        <img src="@prod.Image" class="object-fit-cover w-100 h-100 transition-transform" alt="@prod.Name">
+                                    </a>
+                                </div>
+                                <div class="card-body pt-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="text-terracotta fw-bold small text-uppercase">@prod.Category</span>
+                                        <div class="d-flex small text-warning gap-1">
+                                            <i class="bi bi-star-fill"></i>
+                                            <span class="text-muted">(@prod.Reviews)</span>
+                                        </div>
+                                    </div>
+                                    <h5 class="card-title font-display fw-bold mb-3">
+                                        <a asp-controller="Catalog" asp-action="Detail" asp-route-id="@prod.Id" class="text-reset text-decoration-none stretched-link">@prod.Name</a>
+                                    </h5>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="h5 fw-bold mb-0">@prod.Price MAD</span>
+                                        <button class="btn btn-light rounded-circle p-2 shadow-sm text-primary" onclick="window.location.href='@Url.Action("Detail", "Catalog", new { id = prod.Id })'">
+                                            <i class="bi bi-cart-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center py-5">
+                        <div class="mb-4">
+                            <i class="bi bi-search display-1 text-muted opacity-25"></i>
+                        </div>
+                        <h3>Aucun produit trouvé</h3>
+                        <p class="text-muted">Essayez de modifier vos filtres.</p>
+                        <a href="@Url.Action("Index")" class="btn btn-outline-dark rounded-pill mt-3 px-4">Voir tout le catalogue</a>
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination (Static for now) -->
+            @if(Model.Count > 12) {
+                <nav class="mt-5 pt-4">
+                    <ul class="pagination justify-content-center gap-2">
+                        <li class="page-item disabled"><a class="page-link rounded-circle border-0 bg-light" href="#"><i class="bi bi-chevron-left"></i></a></li>
+                        <li class="page-item active"><a class="page-link rounded-circle border-0 shadow-soft" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link rounded-circle border-0 bg-light text-dark" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link rounded-circle border-0 bg-light text-dark" href="#"><i class="bi bi-chevron-right"></i></a></li>
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Filters Offcanvas -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasFilters">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title font-display fw-bold">Filtres</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-4">
+        <!-- Reuse filter sections here -->
+        <h6 class="fw-bold mb-3">Catégories</h6>
+        <div class="mb-4">
+            @foreach (var cat in categories) {
+                <label class="d-flex align-items-center gap-3 mb-2 cursor-pointer">
+                    <input class="form-check-input mt-0 border-majorelle" type="checkbox" @(selectedCategory == cat.idC ? "checked" : "") onclick="window.location.href='@Url.Action("Index", "Catalog", new { category = (selectedCategory == cat.idC ? null : (int?)cat.idC), cooperative = selectedCooperative, search = searchTerm, sort = selectedSort })'">
+                    <a asp-controller="Catalog" asp-action="Index" asp-route-category="@cat.idC" asp-route-cooperative="@selectedCooperative" asp-route-search="@searchTerm" asp-route-sort="@selectedSort" class="small text-muted text-decoration-none">@cat.nom</a>
+                </label>
+            }
+        </div>
+
+        <h6 class="fw-bold mb-3 border-top pt-3">Coopératives</h6>
+        <div class="mb-4">
+            @foreach (var coop in cooperatives) {
+                <label class="d-flex align-items-center gap-3 mb-2 cursor-pointer">
+                    <input class="form-check-input mt-0 border-majorelle" type="checkbox" @(selectedCooperative == coop.id ? "checked" : "") onclick="window.location.href='@Url.Action("Index", "Catalog", new { category = selectedCategory, cooperative = (selectedCooperative == coop.id ? null : (int?)coop.id), search = searchTerm, sort = selectedSort })'">
+                    <a asp-controller="Catalog" asp-action="Index" asp-route-category="@selectedCategory" asp-route-cooperative="@coop.id" asp-route-search="@searchTerm" asp-route-sort="@selectedSort" class="small text-muted text-decoration-none">@coop.nom_cooperative</a>
+                </label>
+            }
+        </div>
+
+        <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold mt-4" data-bs-dismiss="offcanvas">Appliquer</button>
+    </div>
+</div>
+
+<style>
+    .group-hover-dark:hover { color: #000 !important; }
+    .page-link { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+    .bg-primary-subtle { background-color: rgba(90, 126, 184, 0.1) !important; }
+    .border-primary-subtle { border-color: rgba(90, 126, 184, 0.2) !important; }
+</style>
+
+

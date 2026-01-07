@@ -1,0 +1,576 @@
+@model List<Projet__E_commerce.Models.ProductListItemViewModel>
+@{
+    Layout = null;
+    ViewData["Title"] = "Produits";
+    ViewData["ActivePage"] = "Products";
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-animation.css" asp-append-version="true" />
+    <style>
+        /* Product Card Styles */
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .low-stock-card {
+            border-left: 4px solid #d00808;
+        }
+
+        .inactive-card {
+            opacity: 0.7;
+        }
+
+        .product-image-container {
+            position: relative;
+            width: 100%;
+            padding-top: 75%; /* 4:3 Aspect Ratio */
+            background: linear-gradient(135deg, #FFF0E6 0%, #F5F5F5 100%);
+            overflow: hidden;
+        }
+
+        .product-carousel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .product-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
+        }
+
+        .product-image.active {
+            opacity: 1;
+        }
+
+        .product-no-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-status-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 10;
+            font-size: 0.75rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .product-card-body {
+            padding: 1.25rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .product-description {
+            font-size: 0.875rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin: 0.75rem 0;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-item i {
+            font-size: 0.9rem;
+        }
+
+        .product-price {
+            border-top: 1px solid #f0f0f0;
+            padding-top: 0.75rem;
+        }
+
+        .price-main {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #5A7EB8;
+        }
+
+        .price-range {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .price-from {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .price-separator {
+            color: #999;
+        }
+
+        .price-to {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #5A7EB8;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        .product-actions .btn {
+            border-radius: 8px;
+            font-size: 0.875rem;
+            padding: 0.5rem 0.75rem;
+        }
+    </style>
+</head>
+<body class="admin-bg">
+    <div class="bg-orb-3"></div>
+    
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <!-- Sidebar -->
+        <partial name="_AdminSidebar" />
+
+        <!-- Main Content -->
+        <main class="flex-grow-1 p-4 p-md-5">
+            <header class="mb-5">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="font-display fw-bold mb-1 text-dark">Mes Produits</h1>
+                        <p class="text-muted mb-0 small">Gérez votre catalogue de produits artisanaux</p>
+                    </div>
+                    <a href="@Url.Action("CreateProduct", "Admin")" class="btn btn-primary rounded-pill px-4 shadow-sm hover-lift">
+                        <i class="bi bi-plus-lg me-2"></i>Nouveau Produit
+                    </a>
+                </div>
+            </header>
+
+            <!-- Products Grid -->
+            <div class="row g-4">
+                @if (Model.Any())
+                {
+                    @foreach (var product in Model)
+                    {
+                        <div class="col-md-6 col-lg-4 col-xl-3">
+                            <div class="product-card @(product.HasLowStock ? "low-stock-card" : "") @(product.Statut == "inactive" ? "inactive-card" : "")" data-product-id="@product.IdP">
+                                <!-- Image Carousel -->
+                                <div class="product-image-container">
+                                    @if (product.VariantPhotos.Any())
+                                    {
+                                        <div class="product-carousel" data-photos='@Json.Serialize(product.VariantPhotos)'>
+                                            @for (int i = 0; i < product.VariantPhotos.Count; i++)
+                                            {
+                                                <img src="@product.VariantPhotos[i]" alt="@product.NomP" class="product-image @(i == 0 ? "active" : "")" />
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="product-no-image">
+                                            <i class="bi bi-image" style="font-size: 3rem; color: var(--muted-foreground);"></i>
+                                        </div>
+                                    }
+                                    
+                                    <!-- Status Badge -->
+                                    @if (product.Statut == "inactive")
+                                    {
+                                        <span class="product-status-badge badge bg-secondary">Inactif</span>
+                                    }
+                                    else if (product.HasLowStock)
+                                    {
+                                        <span class="product-status-badge badge bg-warning text-dark">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>Stock Bas
+                                        </span>
+                                    }
+                                    else if (product.StockTotal == 0)
+                                    {
+                                        <span class="product-status-badge badge bg-danger">Rupture</span>
+                                    }
+                                </div>
+
+                                <!-- Card Body -->
+                                <div class="product-card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="product-title mb-0">@product.NomP</h6>
+                                        <span class="badge bg-light text-dark border">@product.NomCategorie</span>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(product.Description))
+                                    {
+                                        <p class="product-description text-muted small mb-3">@product.Description</p>
+                                    }
+
+                                    <!-- Product Info Grid -->
+                                    <div class="product-info-grid">
+                                        <div class="info-item">
+                                            <i class="bi bi-box-seam text-muted"></i>
+                                            <span class="small">@product.NombreVariantes variante(s)</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="bi bi-stack text-muted"></i>
+                                            <span class="small">
+                                                @if (product.StockTotal == 0)
+                                                {
+                                                    <span class="text-danger fw-bold">0</span>
+                                                }
+                                                else if (product.StockTotal <= product.SeuilAlerte)
+                                                {
+                                                    <span class="text-warning fw-bold">@product.StockTotal</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@product.StockTotal</span>
+                                                }
+                                                en stock
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Price -->
+                                    <div class="product-price mt-3">
+                                        @if (product.PrixMin == product.PrixMax)
+                                        {
+                                            <span class="price-main">@product.PrixMin?.ToString("N2") DH</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="price-range">
+                                                <span class="price-from">@product.PrixMin?.ToString("N0")</span>
+                                                <span class="price-separator">-</span>
+                                                <span class="price-to">@product.PrixMax?.ToString("N0") DH</span>
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <!-- Actions -->
+                                    <div class="product-actions mt-3">
+                                        <a href="@Url.Action("ProductDetails", "Admin", new { id = product.IdP })" 
+                                           class="btn btn-retro btn-retro-outline flex-fill py-2" 
+                                           title="Voir détails">
+                                            <i class="bi bi-eye"></i>
+                                            
+                                        </a>
+                                        <a href="@Url.Action("EditProduct", "Admin", new { id = product.IdP })" 
+                                           class="btn btn-retro btn-retro-primary flex-fill py-2" 
+                                           title="Modifier">
+                                            <i class="bi bi-pencil-fill"></i>
+                                            
+                                        </a>
+                                    <form asp-action="ToggleProductStatus" asp-route-id="@product.IdP" method="post" class="d-inline flex-fill" style="flex: 0 0 auto;">
+                                        @Html.AntiForgeryToken()
+                                        <div class="uiverse-switch-wrapper" title="@(product.Statut == "active" ? "Désactiver" : "Activer")">
+                                            <div class="uiverse-switch">
+                                                <div class="switch-body">
+                                                    <div class="switch-content">
+                                                        <div class="switch-circle"></div>
+                                                        <label class="switch-paddle">
+                                                            <input type="checkbox" name="status" class="switch-input" onchange="this.form.submit()" @(product.Statut == "active" ? "checked" : "") />
+                                                            <div class="paddle-body">
+                                                                <div class="paddle-top">
+                                                                    <div class="paddle-highlight"></div>
+                                                                </div>
+                                                                <div class="paddle-side-1"></div>
+                                                                <div class="paddle-side-2"></div>
+                                                            </div>
+                                                        </label>
+                                                        <div class="switch-bar"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    <style>
+                                        /* Scoped toggle styles */
+                                        .uiverse-switch-wrapper {
+                                            width: 60px;
+                                            height: 34px;
+                                            overflow: hidden;
+                                            position: relative;
+                                            border-radius: 8px;
+                                        }
+
+                                        .uiverse-switch {
+                                            transform: scale(0.31);
+                                            transform-origin: top left;
+                                            position: absolute;
+                                            top: 0;
+                                            left: 0;
+                                        }
+
+                                        /* Converted and simplified CSS */
+                                        .switch-body {
+                                            width: 12rem; /* w-48 */
+                                            aspect-ratio: 16/9;
+                                            border-radius: 0.75rem; /* rounded-xl */
+                                            background-color: #FFF0E6; /* var(--blush) */
+                                            border: 4px solid #40322c; /* var(--foreground) */
+                                            transition: background-color 0.3s;
+                                        }
+
+                                        /* Checkbox state handling */
+                                        .switch-body:has(.switch-input:checked) {
+                                            background-color: #5A7EB8; /* var(--majorelle) */
+                                        }
+
+                                        .switch-content {
+                                            display: flex;
+                                            height: 100%;
+                                            width: 100%;
+                                            padding: 0 0.5rem; /* px-2 */
+                                            align-items: center;
+                                            gap: 0.5rem; /* gap-x-2 */
+                                        }
+
+                                        .switch-circle {
+                                            width: 1.5rem; /* w-6 */
+                                            height: 1.5rem; /* h-6 */
+                                            flex-shrink: 0;
+                                            border-radius: 9999px; /* rounded-full */
+                                            border: 4px solid #40322c;
+                                        }
+
+                                        .switch-paddle {
+                                            width: 100%;
+                                            height: 2.5rem; /* h-10 */
+                                            border: 4px solid #40322c;
+                                            border-radius: 0.25rem; /* rounded */
+                                            cursor: pointer;
+                                            position: relative;
+                                            overflow: hidden;
+                                        }
+
+                                        /* Flip the paddle when checked */
+                                        .switch-body:has(.switch-input:checked) .switch-paddle {
+                                            transform: scaleX(-1);
+                                        }
+
+                                        .switch-input {
+                                            display: none;
+                                        }
+
+                                        .paddle-body {
+                                            width: 100%;
+                                            height: 100%;
+                                            background-color: #D87A4F; /* var(--terracotta) */
+                                            position: relative;
+                                        }
+
+                                        .paddle-top {
+                                            width: 0;
+                                            height: 0;
+                                            position: relative;
+                                            z-index: 20;
+                                            border-left: 24px solid transparent;
+                                            border-right: 24px solid transparent;
+                                            border-top: 20px solid #40322c;
+                                        }
+
+                                        .paddle-highlight {
+                                            width: 0;
+                                            height: 0;
+                                            position: absolute;
+                                            border-left: 18px solid transparent;
+                                            border-right: 18px solid transparent;
+                                            border-top: 15px solid #E5C888; /* var(--sable) */
+                                            top: -20px; /* -top-5 */
+                                            left: -18px; /* -left-[18px] */
+                                        }
+
+                                        .paddle-side-1 {
+                                            width: 24px;
+                                            height: 2.25rem; /* h-9 */
+                                            z-index: 10;
+                                            position: absolute;
+                                            top: 9px;
+                                            left: 0;
+                                            background-color: #D87A4F; /* var(--terracotta) */
+                                            border-right: 2px solid #40322c;
+                                            border-bottom: 4px solid #40322c;
+                                            transform: skewY(39deg);
+                                        }
+
+                                        .paddle-side-2 {
+                                            width: 25px;
+                                            height: 2.25rem; /* h-9 */
+                                            z-index: 10;
+                                            position: absolute;
+                                            top: 9px;
+                                            left: 24px;
+                                            background-color: #B06543; /* Darker terracotta */
+                                            border-right: 4px solid #40322c;
+                                            border-left: 2px solid #40322c; /* border-l-2 */
+                                            border-bottom: 4px solid #40322c;
+                                            transform: skewY(-39deg);
+                                        }
+
+                                        .switch-bar {
+                                            width: 1.5rem; /* w-6 */
+                                            height: 0.25rem; /* h-1 */
+                                            flex-shrink: 0;
+                                            background-color: #40322c;
+                                            border-radius: 9999px;
+                                        }
+
+                                        /* New Retro Button Styles */
+                                        .btn-retro {
+                                            border: 3px solid #40322c;
+                                            border-radius: 8px;
+                                            font-weight: 700;
+                                            text-transform: uppercase;
+                                            font-size: 0.75rem;
+                                            letter-spacing: 0.5px;
+                                            position: relative;
+                                            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                                            box-shadow: 2px 2px 0px #40322c;
+                                            display: inline-flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            
+                                            /* Fixed Size to match Switch */
+                                            width: 60px;
+                                            height: 38px; /* 34px + 4px border roughly, visually matching the switch wrapper height */
+                                            padding: 0; /* Remove padding to center icon */
+                                        }
+
+                                        .btn-retro i {
+                                            font-size: 1.1rem;
+                                        }
+
+                                        .btn-retro:active {
+                                            transform: translate(2px, 2px);
+                                            box-shadow: 0px 0px 0px #40322c;
+                                        }
+
+                                        .btn-retro-primary {
+                                            background-color: #5A7EB8; /* Majorelle */
+                                            color: white;
+                                        }
+                                        
+                                        .btn-retro-primary:hover {
+                                            background-color: #4a6da3;
+                                            color: white;
+                                        }
+
+                                        .btn-retro-outline {
+                                            background-color: #FFF0E6; /* Blush */
+                                            color: #40322c;
+                                        }
+
+                                        .btn-retro-outline:hover {
+                                            background-color: #E5C888; /* Sand highlight */
+                                            color: #40322c;
+                                        }
+                                    </style>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12">
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox" style="font-size: 4rem; color: var(--muted-foreground);"></i>
+                            <p class="text-muted mt-3">Aucun produit pour le moment.</p>
+                            <a href="@Url.Action("CreateProduct", "Admin")" class="btn btn-primary mt-2">
+                                <i class="bi bi-plus-lg me-2"></i>Créer un produit
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function confirmDelete(e, productName) {
+            e.preventDefault();
+            if (confirm(`Êtes-vous sûr de vouloir désactiver le produit "${productName}" ?`)) {
+                e.target.closest('form').submit();
+            }
+            return false;
+        }
+
+        // Image Carousel Auto-rotation
+        document.addEventListener('DOMContentLoaded', function() {
+            const carousels = document.querySelectorAll('.product-carousel');
+            
+            carousels.forEach(carousel => {
+                const images = carousel.querySelectorAll('.product-image');
+                if (images.length <= 1) return; // Skip if only one image
+                
+                let currentIndex = 0;
+                images[currentIndex].classList.add('active');
+                
+                // Rotate every 6 seconds
+                setInterval(() => {
+                    images[currentIndex].classList.remove('active');
+                    currentIndex = (currentIndex + 1) % images.length;
+                    images[currentIndex].classList.add('active');
+                }, 6000);
+            });
+        });
+    </script>
+</body>
+</html>

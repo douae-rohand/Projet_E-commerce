@@ -1,0 +1,67 @@
+@using Projet__E_commerce.Models.ViewModels
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Souk 212</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    @RenderSection("Styles", required: false)
+</head>
+<body class="bg-dark shadow-inset overflow-hidden vh-100">
+    @Html.AntiForgeryToken()
+    @{
+        var activeTab = ViewBag.ActiveTab ?? "dashboard";
+    }
+    <div class="d-flex w-100 vh-100 overflow-hidden">
+        <!-- Sidebar Partial -->
+        <partial name="_SidebarPartial" />
+
+        <!-- Main Content -->
+        <main class="flex-grow-1 bg-white rounded-start-5 shadow-lg position-relative overflow-y-auto" style="margin-top: 10px; margin-bottom: 10px; margin-right: 10px; min-width: 0;">
+            <div class="p-4 p-md-5">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <style>
+        .rounded-start-5 { border-top-left-radius: 2.5rem !important; border-bottom-left-radius: 2.5rem !important; }
+        .admin-nav .nav-link { color: rgba(255,255,255,0.6) !important; font-weight: 500; transition: 0.3s; }
+        .admin-nav .nav-link:hover { color: white !important; background: rgba(255,255,255,0.05); }
+        .admin-nav .nav-link.active { color: white !important; background: var(--terracotta); box-shadow: 0 4px 15px rgba(216, 122, 79, 0.4); }
+        .shadow-inset { box-shadow: inset 0 0 100px rgba(0,0,0,0.5); }
+
+        @@media print {
+            .vh-100 { height: auto !important; overflow: visible !important; }
+            .overflow-hidden { overflow: visible !important; }
+            .overflow-y-auto { overflow: visible !important; }
+            main { margin: 0 !important; border-radius: 0 !important; overflow: visible !important; width: 100% !important; }
+            #sidebar, .sidebar, nav, .d-print-none { display: none !important; }
+            .p-4, .p-md-5 { padding: 0 !important; }
+            body { background: white !important; }
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

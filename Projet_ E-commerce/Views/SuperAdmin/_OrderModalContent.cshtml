@@ -1,0 +1,195 @@
+@model Projet__E_commerce.Models.ViewModels.OrderDetailsViewModel
+
+<div id="printableOrder" class="p-1">
+    <!-- Header: Visible in Print and View -->
+    <div class="row align-items-center mb-4 border-bottom pb-4">
+        <div class="col-7">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary rounded-3 d-flex align-items-center justify-content-center d-print-none" style="width: 50px; height: 50px;">
+                    <i class="bi bi-truck text-white fs-3"></i>
+                </div>
+                <div>
+                    <h2 class="fw-bold mb-0 text-dark font-display">BORDEREAU DE LIVRAISON</h2>
+                    <div class="text-primary fw-semibold ls-1">RÉFÉRENCE : #@Model.IdCommande-@DateTime.Now.Year</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-5 text-end">
+            <div class="d-print-none mb-2">
+                <button type="button" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm" onclick="window.print()">
+                    <i class="bi bi-printer-fill me-2"></i>Imprimer le Document
+                </button>
+            </div>
+            <div class="small text-muted">Date: @Model.DateCommande.ToString("dd/MM/yyyy HH:mm")</div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <!-- Client Info -->
+        <div class="col-6">
+            <div class="h-100 p-4 border rounded-4 bg-light bg-opacity-25 print-border">
+                <h6 class="text-uppercase text-secondary small fw-bold mb-3 border-bottom pb-2">
+                    <i class="bi bi-person-badge me-2"></i>Destinataire
+                </h6>
+                <div class="fw-bold fs-4 text-dark mb-2">@Model.ClientPrenom @Model.ClientNom</div>
+                <div class="text-dark">
+                    <div class="mb-1"><i class="bi bi-geo-alt-fill text-danger me-2"></i>@Model.AdresseLivraison</div>
+                    <div class="mb-3 ms-4 fw-medium">@Model.CodePostalLivraison, @Model.VilleLivraison</div>
+                    <div class="small"><i class="bi bi-telephone-fill text-muted me-2"></i>@Model.ClientTelephone</div>
+                    <div class="small"><i class="bi bi-envelope-fill text-muted me-2"></i>@Model.ClientEmail</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Metadata -->
+        <div class="col-6">
+            <div class="h-100 p-4 border rounded-4 bg-light bg-opacity-25 print-border">
+                <h6 class="text-uppercase text-secondary small fw-bold mb-3 border-bottom pb-2">
+                    <i class="bi bi-box-seam me-2"></i>Détails Logistique
+                </h6>
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="text-muted">Transporteur :</span>
+                    <span class="fw-bold text-dark">SERVICE INTERNE</span>
+                </div>
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="text-muted">Type de colis :</span>
+                    <span class="fw-bold text-dark">Standard</span>
+                </div>
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="text-muted">Nombre d'articles :</span>
+                    <span class="fw-bold text-dark">@Model.Items.Sum(i => i.Quantite)</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="text-muted">Statut :</span>
+                    <span class="badge rounded-pill px-3 py-2 @(Model.Statut == "livre" ? "bg-success" : (Model.Statut == "annule" ? "bg-danger" : "bg-warning text-dark"))">
+                        @Model.Statut.ToUpper()
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Articles Table -->
+    <div class="mb-5">
+        <table class="table table-bordered align-middle print-table">
+            <thead class="bg-dark text-white">
+                <tr class="text-center small text-uppercase fw-bold">
+                    <th class="py-3" style="width: 45%;">Désignation du Produit</th>
+                    <th class="py-3" style="width: 25%;">Origine</th>
+                    <th class="py-3" style="width: 10%;">Qté</th>
+                    <th class="py-3" style="width: 20%;">P.U (DH)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td class="ps-3">
+                            <div class="fw-bold text-dark">@item.NomProduit</div>
+                            <div class="small text-muted italic">
+                                @if (!string.IsNullOrEmpty(item.Taille)) { <span>Taille: @item.Taille</span> }
+                                @if (!string.IsNullOrEmpty(item.Couleur)) { <span> - @item.Couleur</span> }
+                                @if (!string.IsNullOrEmpty(item.Poids)) { <span> - @item.Poids</span> }
+                            </div>
+                        </td>
+                        <td class="text-center small">@item.NomCooperative</td>
+                        <td class="text-center fw-bold">@item.Quantite</td>
+                        <td class="text-end pe-3">@item.PrixUnitaire.ToString("N2")</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot class="bg-light">
+                <tr>
+                    <td colspan="3" class="text-end fw-bold py-3 text-uppercase">Total à Percevoir (TTC)</td>
+                    <td class="text-end pe-3 fw-bold text-primary fs-5 py-3">@Model.MontantTotal.ToString("N2") DH</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Notes Section -->
+    @if (!string.IsNullOrEmpty(Model.Notes))
+    {
+        <div class="mb-5 p-3 border-start border-4 border-warning bg-light print-notes">
+            <h6 class="fw-bold mb-2 small text-uppercase text-dark"><i class="bi bi-info-circle me-2"></i>Instructions Spéciales :</h6>
+            <p class="mb-0 text-dark">@Model.Notes</p>
+        </div>
+    }
+
+    <!-- Signature Boxes -->
+    <div class="mt-5 pb-5">
+        <div class="row text-center g-4 mt-4">
+            <div class="col-4">
+                <div class="signature-box p-3 border rounded-3 print-border">
+                    <div class="small fw-bold text-muted text-uppercase mb-5">Cachet & Signature Expéditeur</div>
+                    <div class="mt-4 border-bottom w-75 mx-auto"></div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="signature-box p-3 border rounded-3 print-border">
+                    <div class="small fw-bold text-muted text-uppercase mb-5">Visa Transporteur</div>
+                    <div class="mt-4 border-bottom w-75 mx-auto"></div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="signature-box p-3 border rounded-3 print-border">
+                    <div class="small fw-bold text-muted text-uppercase mb-5">Bon pour Accord Client</div>
+                    <div class="mt-4 border-bottom w-75 mx-auto"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Footer -->
+    <div class="mt-5 text-center text-muted small border-top pt-3">
+        Plateforme Souk 212 - Un lien direct entre coopératives et consommateurs.<br>
+        Document édité le @DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss") - Page 1/1
+    </div>
+</div>
+
+<style>
+    /* View Styles */
+    .print-border { border: 1px solid #dee2e6 !important; }
+    .ls-1 { letter-spacing: 1px; }
+    .font-display { font-family: 'Playfair Display', serif; }
+    
+    /* Print Customization */
+    @@media print {
+        @@page {
+            size: A4;
+            margin: 1.5cm;
+        }
+        
+        body { 
+            background: white !important; 
+            color: black !important;
+            font-size: 11pt !important;
+        }
+        
+        #printableOrder { 
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+        }
+
+        .modal-dialog { max-width: 100% !important; margin: 0 !important; }
+        .modal-content { border: none !important; box-shadow: none !important; }
+        .modal-header, .modal-footer, .btn-close, .d-print-none { display: none !important; }
+        
+        .print-border { border: 1.5px solid #333 !important; }
+        .print-table { border: 1.5px solid #333 !important; }
+        .print-table th { background-color: #333 !important; color: white !important; -webkit-print-color-adjust: exact; }
+        .print-notes { background-color: #fff9db !important; border-left: 5px solid #fcc419 !important; -webkit-print-color-adjust: exact; }
+        
+        .bg-light { background-color: transparent !important; }
+        .badge { border: 1px solid #333 !important; color: black !important; }
+        
+        .signature-box { min-height: 150px; }
+        
+        /* Ensure columns are side-by-side in print */
+        .col-6 { width: 50% !important; float: left !important; }
+        .row { display: block !important; }
+        .row::after { content: ""; display: table; clear: both; }
+        .col-4 { width: 33.33% !important; float: left !important; }
+    }
+</style>

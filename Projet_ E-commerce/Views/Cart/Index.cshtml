@@ -1,0 +1,130 @@
+@model List<CartItemViewModel>
+@{
+    ViewData["Title"] = "Mon Panier - Souk 212";
+    var cartItems = Model ?? new List<CartItemViewModel>();
+    decimal subtotal = 0;
+    foreach(var item in cartItems) subtotal += item.Price * item.Quantity;
+    decimal shipping = subtotal >= 500 ? 0 : 50;
+    decimal total = subtotal + shipping;
+}
+
+<div class="container py-5 mt-4">
+    <h1 class="font-display display-5 fw-bold mb-5">Mon Panier</h1>
+
+    @if (TempData["CartError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["CartError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-5">
+        <!-- Cart Items -->
+        <div class="col-lg-8">
+            @if (cartItems.Count == 0) {
+                <div class="text-center py-5 bg-light rounded-4">
+                    <i class="bi bi-bag-x display-1 text-muted mb-4 d-block"></i>
+                    <h2 class="h4 fw-bold mb-3">Votre panier est vide</h2>
+                    <p class="text-muted mb-4">Découvrez nos produits et commencez votre shopping</p>
+                    <a href="@Url.Action("Index", "Catalog")" class="btn btn-primary btn-lg rounded-3 px-5 fw-bold">Explorer le catalogue</a>
+                </div>
+            } else {
+                <div class="d-flex flex-column gap-4">
+                    @foreach (var item in cartItems) {
+                        <div class="card border-0 shadow-soft rounded-4 overflow-hidden">
+                            <div class="row g-0 align-items-center">
+                                <div class="col-4 col-md-3">
+                                    <img src="@item.Image" class="img-fluid object-fit-cover w-100" style="aspect-ratio: 1/1;" alt="@item.Name">
+                                </div>
+                                <div class="col-8 col-md-9">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between gap-3 mb-3">
+                                            <div>
+                                                <h5 class="fw-bold mb-1">@item.Name</h5>
+                                                <p class="small text-muted mb-0">
+                                                    @if(!string.IsNullOrEmpty(item.Size)) { <span>@item.Size</span> }
+                                                    @if(!string.IsNullOrEmpty(item.Color)) { <span> • @item.Color</span> }
+                                                    @if(!string.IsNullOrEmpty(item.Weight)) { <span> • @item.Weight</span> }
+                                                </p>
+                                            </div>
+                                            <form asp-controller="Cart" asp-action="RemoveFromCart" method="post" class="d-inline">
+                                                <input type="hidden" name="variantId" value="@item.VariantId" />
+                                                <button type="submit" class="btn btn-link text-muted p-0 hover-danger"><i class="bi bi-trash h5"></i></button>
+                                            </form>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center">
+                                             <div class="d-flex align-items-center gap-3 bg-light rounded-pill px-3 py-2 border">
+                                                 <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" class="d-inline">
+                                                     <input type="hidden" name="variantId" value="@item.VariantId" />
+                                                     <input type="hidden" name="change" value="-1" />
+                                                     <button type="submit" class="btn btn-link text-dark p-0" style="width: 20px; line-height: 1;"><i class="bi bi-dash fw-bold"></i></button>
+                                                 </form>
+                                                 
+                                                 <span class="fw-bold small">@item.Quantity</span>
+                                                 
+                                                 <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" class="d-inline">
+                                                     <input type="hidden" name="variantId" value="@item.VariantId" />
+                                                     <input type="hidden" name="change" value="1" />
+                                                     <button type="submit" class="btn btn-link text-dark p-0" style="width: 20px; line-height: 1;"><i class="bi bi-plus fw-bold"></i></button>
+                                                 </form>
+                                             </div>
+                                             <p class="h5 fw-bold mb-0">@((item.Price * item.Quantity).ToString("N2")) MAD</p>
+                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-soft rounded-4 p-4 sticky-top" style="top: 100px;">
+                <h2 class="h4 fw-bold mb-4 font-display">Récapitulatif</h2>
+
+                <div class="d-flex justify-content-between mb-3 small">
+                    <span class="text-muted">Sous-total</span>
+                    <span class="fw-bold">@subtotal.ToString("N2") MAD</span>
+                </div>
+                <div class="d-flex justify-content-between mb-4 small pb-3 border-bottom">
+                    <span class="text-muted">Livraison</span>
+                    <span class="fw-bold">@(shipping == 0 ? "Gratuite" : shipping.ToString("N2") + " MAD")</span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="h5 fw-bold">Total</span>
+                    <span class="h5 fw-bold text-dark">@total.ToString("N2") MAD</span>
+                </div>
+
+                @if (shipping > 0) {
+                    <div class="alert alert-light border-0 rounded-3 small d-flex align-items-center gap-2 mb-4 bg-light">
+                        <i class="bi bi-truck text-muted"></i>
+                        <span>Livraison gratuite dès <strong>500 MAD</strong></span>
+                    </div>
+                }
+
+                @if(cartItems.Count > 0) {
+                    <a href="/Checkout" class="btn btn-primary btn-lg w-100 rounded-3 shadow-soft py-3 fw-bold d-flex align-items-center justify-content-center gap-3">
+                        Passer la commande <i class="bi bi-arrow-right"></i>
+                    </a>
+                } else {
+                     <button disabled class="btn btn-secondary btn-lg w-100 rounded-3 py-3 fw-bold d-flex align-items-center justify-content-center gap-3">
+                        Panier vide
+                    </button>
+                }
+
+                <div class="mt-4 text-center opacity-50 small">
+                    <p class="mb-0 text-muted"><i class="bi bi-shield-lock-fill me-1"></i> Paiement 100% sécurisé</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-danger:hover { color: var(--bs-danger) !important; }
+</style>

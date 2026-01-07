@@ -1,0 +1,498 @@
+@model Projet__E_commerce.Models.DashboardStats
+@{
+    ViewData["Title"] = "Notre Mission";
+}
+
+<div class="about-page overflow-hidden">
+    <!-- Hero Section -->
+    <section class="relative py-5 md-py-32 overflow-hidden gradient-hero min-vh-75 d-flex align-items-center">
+        <div class="background-decor">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2" style="animation-delay: 2s"></div>
+            <div class="blob blob-3" style="animation-delay: 4s"></div>
+        </div>
+        
+        <div class="container position-relative z-1 text-center">
+            <div class="max-w-4xl mx-auto">
+                <span class="inline-flex-badge mb-4 animate-fade-in-up">
+                    <i class="bi bi-target me-2"></i>
+                    Notre Mission
+                </span>
+                <h1 class="display-3 font-display fw-bold mb-4 animate-fade-in-up stagger-1">
+                    Connecter les trésors du Maroc
+                    <span class="text-terracotta d-block mt-2">au monde entier</span>
+                </h1>
+                <p class="lead-lg text-muted max-w-3xl mx-auto mb-5 animate-fade-in-up stagger-2">
+                    Souk 212 est né d'une conviction : les coopératives marocaines produisent des merveilles 
+                    qui méritent d'être connues. Notre mission est de créer un pont entre ces artisans 
+                    exceptionnels et des consommateurs en quête d'authenticité.
+                </p>
+                <div class="d-flex flex-wrap gap-3 justify-content-center animate-fade-in-up stagger-3">
+                    <a asp-controller="Cooperatives" asp-action="Index" class="btn btn-hero btn-lg px-5 rounded-pill shadow-sm transition-all hover-lift">
+                        Découvrir nos partenaires
+                        <i class="bi bi-arrow-right ms-2 mt-1"></i>
+                    </a>
+                    <a asp-controller="Catalog" asp-action="Index" class="btn btn-glass btn-lg px-5 rounded-pill shadow-sm transition-all hover-lift">
+                        Explorer les produits
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-5 bg-white border-y border-light position-relative z-10 stats-section-overlap">
+        <div class="container">
+            <div class="row g-4 text-center">
+                <div class="col-6 col-md-3 animate-fade-in-up">
+                    <div class="stat-icon-box bg-terracotta-10 text-terracotta mx-auto mb-3">
+                        <i class="bi bi-people h4 mb-0"></i>
+                    </div>
+                    <div class="h2 font-display fw-bold mb-1">@Model.TotalCooperatives+</div>
+                    <div class="small text-muted text-uppercase tracking-wider">Coopératives</div>
+                </div>
+                <div class="col-6 col-md-3 animate-fade-in-up stagger-1">
+                    <div class="stat-icon-box bg-primary-10 text-primary mx-auto mb-3">
+                        <i class="bi bi-box-seam h4 mb-0"></i>
+                    </div>
+                    <div class="h2 font-display fw-bold mb-1">@Model.TotalProducts+</div>
+                    <div class="small text-muted text-uppercase tracking-wider">Produits</div>
+                </div>
+                <div class="col-6 col-md-3 animate-fade-in-up stagger-2">
+                    <div class="stat-icon-box bg-sable-20 text-sable mx-auto mb-3">
+                        <i class="bi bi-cart-check h4 mb-0"></i>
+                    </div>
+                    <div class="h2 font-display fw-bold mb-1">@Model.TotalOrders+</div>
+                    <div class="small text-muted text-uppercase tracking-wider">Commandes</div>
+                </div>
+                <div class="col-6 col-md-3 animate-fade-in-up stagger-3">
+                    <div class="stat-icon-box bg-ciel-30 text-ciel mx-auto mb-3">
+                        <i class="bi bi-stars h4 mb-0"></i>
+                    </div>
+                    <div class="h2 font-display fw-bold mb-1">@(Model.TotalClients > 1000 ? (Model.TotalClients / 1000) + "K" : Model.TotalClients.ToString())+</div>
+                    <div class="small text-muted text-uppercase tracking-wider">Clients</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vision Section -->
+    <section class="py-15 bg-light-soft">
+        <div class="container">
+            <div class="row g-5 align-items-center">
+                <div class="col-lg-6">
+                    <span class="inline-flex-badge-terracotta mb-4 animate-on-scroll">
+                        <i class="bi bi-globe me-2"></i>
+                        Notre Vision
+                    </span>
+                    <h2 class="display-5 font-display fw-bold mb-4 animate-on-scroll">
+                        Un commerce qui change les vies
+                    </h2>
+                    <div class="space-y-4 text-muted animate-on-scroll">
+                        <p class="lead-sm">
+                            Au Maroc, des milliers de femmes et d'hommes perpétuent des savoir-faire ancestraux 
+                            au sein de coopératives. Huile d'argan, safran, eau de rose, miel de thym... 
+                            Ces produits d'exception sont le fruit d'un travail minutieux et d'une connaissance 
+                            transmise de génération en génération.
+                        </p>
+                        <p class="lead-sm">
+                            Pourtant, ces artisans restent souvent invisibles, leurs produits vendus à des prix 
+                            dérisoires par des intermédiaires. Souk 212 renverse ce modèle en connectant 
+                            directement les coopératives aux consommateurs du monde entier.
+                        </p>
+                        <p class="h5 fw-bold text-dark italic mt-4">
+                            "Notre promesse : chaque achat fait une vraie différence dans la vie de ceux 
+                             qui créent ces trésors."
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="row g-4">
+                        <div class="col-6 mt-5">
+                            <img src="~/images/artisanat_about.jpg" 
+                                 class="img-fluid rounded-6 shadow-lg transition-all hover-scale w-100 object-fit-cover" 
+                                 style="height: 280px;" alt="Artisanat">
+                        </div>
+                        <div class="col-6">
+                            <img src="~/images/categories/cosmetique.jpg" 
+                                 class="img-fluid rounded-6 shadow-lg transition-all hover-scale w-100 object-fit-cover" 
+                                 style="height: 280px;" alt="Cosmétique">
+                        </div>
+                        <div class="col-6 mt-n4">
+                            <img src="~/images/categories/alimentaire.jpg" 
+                                 class="img-fluid rounded-6 shadow-lg transition-all hover-scale w-100 object-fit-cover" 
+                                 style="height: 280px;" alt="Alimentaire">
+                        </div>
+                        <div class="col-6 mt-2">
+                            <img src="~/images/categories/artisanat.jpg" 
+                                 class="img-fluid rounded-6 shadow-lg transition-all hover-scale w-100 object-fit-cover" 
+                                 style="height: 280px;" alt="Artisanat">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="py-15 bg-white">
+        <div class="container">
+            <div class="text-center max-w-2xl mx-auto mb-10">
+                <span class="inline-flex-badge-primary mb-3">
+                    <i class="bi bi-shield-check me-2"></i>
+                    Nos Valeurs
+                </span>
+                <h2 class="display-6 font-display fw-bold mb-4">Ce qui nous guide chaque jour</h2>
+                <p class="text-muted">Quatre piliers fondamentaux qui définissent notre façon de travailler avec les coopératives et de servir nos clients.</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="value-card p-4 pb-5 rounded-7 border-0 shadow-soft transition-all h-100 bg-white">
+                        <div class="value-icon-box bg-terracotta-10 mb-4">
+                            <i class="bi bi-people text-terracotta h4 mb-0"></i>
+                        </div>
+                        <h3 class="font-display fw-bold mb-3 h4">Commerce Équitable</h3>
+                        <p class="small text-muted mb-0 leading-relaxed">Nous garantissons des prix justes pour les producteurs. 70% du prix de vente revient directement aux coopératives, sans intermédiaires.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="value-card p-4 pb-5 rounded-7 border-0 shadow-soft transition-all h-100 bg-white">
+                        <div class="value-icon-box bg-primary-10 mb-4">
+                            <i class="bi bi-flower1 text-majorelle h4 mb-0"></i>
+                        </div>
+                        <h3 class="font-display fw-bold mb-3 h4">Durabilité</h3>
+                        <p class="small text-muted mb-0 leading-relaxed">Nous privilégions les méthodes de production traditionnelles et écologiques qui respectent l'environnement et les ressources locales.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="value-card p-4 pb-5 rounded-7 border-0 shadow-soft transition-all h-100 bg-white">
+                        <div class="value-icon-box bg-sable-20 mb-4">
+                            <i class="bi bi-heart text-sable h4 mb-0"></i>
+                        </div>
+                        <h3 class="font-display fw-bold mb-3 h4">Impact Social</h3>
+                        <p class="small text-muted mb-0 leading-relaxed">Chaque achat contribue à l'autonomisation des femmes rurales et au développement économique des communautés isolées.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="value-card p-4 pb-5 rounded-7 border-0 shadow-soft transition-all h-100 bg-white">
+                        <div class="value-icon-box bg-dark-10 mb-4">
+                            <i class="bi bi-shield-check text-dark h4 mb-0"></i>
+                        </div>
+                        <h3 class="font-display fw-bold mb-3 h4">Authenticité</h3>
+                        <p class="small text-muted mb-0 leading-relaxed">Nous certifions l'origine et la qualité de chaque produit. Traçabilité complète de la coopérative à votre domicile.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline Section -->
+    <section class="py-10 bg-light-soft">
+        <div class="container">
+            <div class="text-center max-w-2xl mx-auto mb-10">
+                <span class="inline-flex-badge-sable mb-3">
+                    <i class="bi bi-graph-up-arrow me-2"></i>
+                    Notre Parcours
+                </span>
+                <h2 class="display-6 font-display fw-bold mb-4">Une aventure humaine</h2>
+                <p class="text-muted">De l'idée à la réalité, retracez les étapes clés de notre histoire.</p>
+            </div>
+            
+            <div class="timeline-container max-w-4xl mx-auto py-5">
+                <!-- 2022 -->
+                <div class="timeline-item left animate-fade-in-up">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <span class="timeline-badge mb-2">2022</span>
+                        <h4 class="font-display fw-bold mb-3 h3 text-dark">La genèse</h4>
+                        <p class="text-muted leading-relaxed">Naissance de l'idée lors d'un voyage dans les coopératives de l'Atlas. Rencontre avec des femmes artisanes extraordinaires.</p>
+                    </div>
+                </div>
+
+                <!-- 2023 -->
+                <div class="timeline-item right animate-fade-in-up stagger-1">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <span class="timeline-badge mb-2">2023</span>
+                        <h4 class="font-display fw-bold mb-3 h3 text-dark">Premier partenariat</h4>
+                        <p class="text-muted leading-relaxed">Signature avec 3 coopératives d'argan dans la région de Souss-Massa. Lancement de notre première collection.</p>
+                    </div>
+                </div>
+
+                <!-- 2024 -->
+                <div class="timeline-item left animate-fade-in-up stagger-2">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <span class="timeline-badge mb-2">2024</span>
+                        <h4 class="font-display fw-bold mb-3 h3 text-dark">Expansion nationale</h4>
+                        <p class="text-muted leading-relaxed">Extension à 10 coopératives couvrant safran, roses, miel et dattes. Plus de 200 artisans nous rejoignent.</p>
+                    </div>
+                </div>
+
+                <!-- 2025 -->
+                <div class="timeline-item right animate-fade-in-up stagger-3 mb-0">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <span class="timeline-badge mb-2">2025</span>
+                        <h4 class="font-display fw-bold mb-3 h3 text-dark">Reconnaissance</h4>
+                        <p class="text-muted leading-relaxed">Certification commerce équitable. Livraison dans 15 pays. Impact mesuré : +45% de revenus.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="py-15 bg-white">
+        <div class="container text-center">
+            <div class="max-w-2xl mx-auto mb-10">
+                <span class="inline-flex-badge-terracotta mb-3">
+                    <i class="bi bi-people me-2"></i>
+                    L'Équipe
+                </span>
+                <h2 class="display-6 font-display fw-bold mb-4">Les visages derrière Souk 212</h2>
+            </div>
+            
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-3 col-sm-6 animate-fade-in-up">
+                    <div class="team-card">
+                        <div class="team-img-wrapper mb-3">
+                            <img src="~/images/team/douae.jpg" class="rounded-circle shadow-sm" alt="Douae Rohand">
+                        </div>
+                        <h4 class="font-display fw-bold mb-1">Douae Rohand</h4>
+                        <p class="text-pastel-blue small fw-bold mb-2">Fondatrice & CEO</p>
+                        <p class="small text-muted italic px-2">"L'authenticité marocaine au service du monde moderne"</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 animate-fade-in-up stagger-1">
+                    <div class="team-card">
+                        <div class="team-img-wrapper mb-3">
+                            <img src="~/images/team/raihana.jpg" class="rounded-circle shadow-sm" alt="Raihana Mohito">
+                        </div>
+                        <h4 class="font-display fw-bold mb-1">Raihana Mohito</h4>
+                        <p class="text-pastel-blue small fw-bold mb-2">Directrice Développement</p>
+                        <p class="small text-muted italic px-2">"Construire des ponts durables avec nos coopératives"</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 animate-fade-in-up stagger-2">
+                    <div class="team-card">
+                        <div class="team-img-wrapper mb-3">
+                            <img src="~/images/team/abdellatif.jpg" class="rounded-circle shadow-sm" alt="Abdellatif Omehla">
+                        </div>
+                        <h4 class="font-display fw-bold mb-1">Abdellatif Omehla</h4>
+                        <p class="text-pastel-blue small fw-bold mb-2">Directeur Logistique</p>
+                        <p class="small text-muted italic px-2">"Garantir l'excellence de la coopérative à votre table"</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 animate-fade-in-up stagger-3">
+                    <div class="team-card">
+                        <div class="team-img-wrapper mb-3">
+                            <img src="~/images/team/oumaima.jpg" class="rounded-circle shadow-sm" alt="Oumaima Amziane">
+                        </div>
+                        <h4 class="font-display fw-bold mb-1">Oumaima Amziane</h4>
+                        <p class="text-pastel-blue small fw-bold mb-2">Responsable Marketing</p>
+                        <p class="small text-muted italic px-2">"Sublimer le savoir-faire de nos artisans passionnés"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-10 bg-terracotta-10">
+        <div class="container text-center">
+            <h2 class="display-6 font-display fw-bold mb-4">Rejoignez le mouvement</h2>
+            <p class="lead text-muted max-w-2xl mx-auto mb-8">
+                Que vous soyez consommateur à la recherche d'authenticité ou coopérative 
+                souhaitant élargir votre audience, Souk 212 est là pour vous.
+            </p>
+            <div class="d-flex flex-wrap gap-3 justify-content-center">
+                <a asp-controller="Catalog" asp-action="Index" class="btn btn-hero btn-lg px-5 rounded-pill shadow-sm transition-all hover-lift">
+                    Explorer nos produits
+                </a>
+                <a href="/Auth/Register?type=admin" class="btn btn-hero btn-lg px-5 rounded-pill shadow-sm transition-all hover-lift">
+                    Devenir partenaire
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .gradient-hero {
+        background: radial-gradient(circle at 10% 20%, rgba(192, 85, 34, 0.03) 0%, transparent 40%),
+                    radial-gradient(circle at 90% 80%, rgba(129, 178, 154, 0.03) 0%, transparent 40%),
+                    #fdfbf7;
+    }
+
+    .inline-flex-badge {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(129, 178, 154, 0.1);
+        color: var(--majorelle);
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .inline-flex-badge-terracotta {
+        background: rgba(192, 85, 34, 0.1);
+        color: var(--terracotta);
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px;
+        font-weight: 600;
+    }
+
+    .inline-flex-badge-primary {
+        background: rgba(129, 178, 154, 0.1);
+        color: var(--majorelle);
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px;
+        font-weight: 600;
+    }
+
+    .inline-flex-badge-sable {
+        background: rgba(255, 179, 91, 0.2);
+        color: #b37400;
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px;
+        font-weight: 600;
+    }
+
+    .stat-icon-box {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .stats-section-overlap {
+        margin-top: -30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        border-radius: 20px;
+    }
+
+    .bg-light-soft { background-color: #f9fbfc; }
+    
+    .hover-scale:hover {
+        transform: scale(1.05);
+    }
+
+    .value-card {
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    .value-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08) !important;
+    }
+
+    .value-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    /* Timeline Vertical Line */
+    .timeline-container {
+        position: relative;
+        padding: 2rem 0;
+    }
+
+    .timeline-container::before {
+        content: '';
+        position: absolute;
+        width: 2px;
+        background: #f0e6da; /* Couleur terre douce */
+        top: 36px;
+        bottom: 36px;
+        left: 50%;
+        margin-left: -1px;
+        z-index: 1;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 4rem;
+        width: 100%;
+        display: flex;
+        z-index: 2;
+    }
+
+    .timeline-item.left { justify-content: flex-start; text-align: right; }
+    .timeline-item.right { justify-content: flex-end; text-align: left; }
+
+    .timeline-dot {
+        position: absolute;
+        left: 50%;
+        top: 24px;
+        transform: translateX(-50%);
+        width: 24px;
+        height: 24px;
+        background: #eef4ff;
+        border: 2px solid white;
+        border-radius: 50%;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .timeline-dot::after {
+        content: '';
+        width: 10px;
+        height: 10px;
+        background: #5B9BD5;
+        border-radius: 50%;
+    }
+
+    .timeline-content {
+        width: 42%;
+        position: relative;
+        z-index: 1;
+    }
+
+    .timeline-badge {
+        display: inline-block;
+        background: #eef4ff;
+        color: #5B9BD5;
+        padding: 4px 16px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .team-img-wrapper img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border: 4px solid white;
+    }
+
+    .btn-outline-terracotta {
+        border: 2px solid var(--terracotta);
+        color: var(--terracotta);
+        background: transparent;
+        font-weight: 600;
+    }
+    
+    .btn-outline-terracotta:hover {
+        background: var(--terracotta);
+        color: white;
+    }
+
+    @@media (max-width: 768px) {
+        .timeline-container::after { left: 20px; }
+        .timeline-item { justify-content: flex-start !important; padding-left: 45px; }
+        .timeline-content { width: 100%; }
+        .timeline-year { left: 20px; transform: translateX(-50%); }
+    }
+</style>

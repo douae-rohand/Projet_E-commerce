@@ -1,0 +1,367 @@
+@model List<Projet__E_commerce.Models.ViewModels.UserStatsViewModel>
+
+<header class="d-flex justify-content-between align-items-center mb-4 pb-4 border-bottom">
+    <div>
+        <h1 class="font-display fw-bold h3 mb-0">Gestion de la Communauté</h1>
+        <p class="text-muted mb-0">@Model.Count membres actifs et partenaires</p>
+    </div>
+</header>
+
+<!-- Search and Filters -->
+<div class="card border-0 shadow-soft rounded-4 mb-4 bg-light bg-opacity-50">
+    <div class="card-body p-4">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                    <span class="input-group-text bg-white border-0 ps-3">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" class="form-control border-0 py-2" id="searchInput" placeholder="Chercher un membre...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select border-0 shadow-sm py-2" id="filterRole">
+                    <option value="">Tous les types</option>
+                    <option value="CLIENT">Clients</option>
+                    <option value="ADMIN">Coopératives</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select border-0 shadow-sm py-2" id="filterStatus">
+                    <option value="">Tous les états</option>
+                    <option value="true">Actifs</option>
+                    <option value="false">Suspendus</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select border-0 shadow-sm py-2" id="sortBy">
+                    <option value="date">Plus récents</option>
+                    <option value="nom">Alphabétique</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4" id="usersList">
+    @foreach (var user in Model)
+    {
+        <div class="col-md-6 col-xl-4 user-card"
+             data-email="@user.Email.ToLower()"
+             data-nom="@(user.Nom?.ToLower() ?? "")"
+             data-prenom="@(user.Prenom?.ToLower() ?? "")"
+             data-role="@user.Role"
+             data-status="@user.EstActif.ToString().ToLower()">
+            <div class="card border-0 shadow-soft rounded-4 h-100 transition-base @(user.EstActif ? "" : "bg-light bg-opacity-50 grayscale")">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start gap-3 mb-4">
+                        <div class="avatar-container position-relative">
+                            <div class="avatar-circle @(user.Role == "ADMIN" ? "bg-majorelle-gradient" : "bg-terracotta-gradient") text-white d-flex align-items-center justify-content-center rounded-circle shadow-soft"
+                                 style="width: 56px; height: 56px; font-size: 1.3rem; font-weight: 700;">
+                                @(string.IsNullOrEmpty(user.Prenom) ? user.Email.Substring(0, 1).ToUpper() : user.Prenom.Substring(0, 1).ToUpper())
+                            </div>
+                            <span class="position-absolute bottom-0 end-0 p-1 @(user.EstActif ? "bg-success" : "bg-secondary") border border-2 border-white rounded-circle" style="width: 14px; height: 14px;"></span>
+                        </div>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <h6 class="card-title mb-1 fw-bold text-truncate">
+                                @if (!string.IsNullOrEmpty(user.Prenom) && !string.IsNullOrEmpty(user.Nom))
+                                {
+                                    @user.Prenom @user.Nom
+                                }
+                                else if (user.Role == "ADMIN")
+                                {
+                                    @user.NomCooperative
+                                }
+                                else
+                                {
+                                    @user.Email
+                                }
+                            </h6>
+                            <p class="text-muted small mb-2 text-truncate">@user.Email</p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge @(user.Role == "SUPER_ADMIN" ? "bg-dark" : user.Role == "ADMIN" ? "bg-majorelle-subtle text-majorelle" : "bg-terracotta-subtle text-terracotta") rounded-pill px-3 py-1 font-monospace smaller-text fw-bold">
+                                    @(user.Role == "ADMIN" ? "COOPÉRATIVE" : user.Role)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <div class="small text-muted">
+                            <i class="bi bi-calendar3 me-1"></i> @user.CreatedAt.ToString("MMM yyyy")
+                        </div>
+                        <div class="d-flex gap-2">
+                             <button class="btn btn-icon-round btn-light shadow-sm" onclick="viewUserDetails(@user.Id)" title="Voir détails">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            @if (user.EstActif)
+                            {
+                                <button class="btn btn-icon-round btn-soft-danger shadow-sm" onclick="toggleUserStatus(@user.Id, false)" title="Désactiver">
+                                    <i class="bi bi-person-x"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-icon-round btn-soft-success shadow-sm" onclick="toggleUserStatus(@user.Id, true)" title="Activer">
+                                    <i class="bi bi-person-check"></i>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-people display-1 text-muted mb-3"></i>
+        <h5 class="text-muted">Aucun utilisateur trouvé</h5>
+        <p class="text-muted">Les utilisateurs apparaîtront ici une fois qu'ils se seront inscrits.</p>
+    </div>
+}
+
+<!-- Custom Confirmation Modal -->
+<div class="modal fade" id="confirmStatusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-body p-5 text-center">
+                <div class="mb-4">
+                    <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-exclamation-triangle text-warning display-4"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bold mb-2 font-display">Confirmation du statut</h4>
+                <p class="text-secondary mb-4" id="confirmStatusMessage">Êtes-vous sûr de vouloir modifier le statut de cet utilisateur ?</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-terracotta rounded-pill px-4" id="btnConfirmStatus">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --majorelle: #5A7EB8;
+        --terracotta: #D87A4F;
+    }
+    
+    .bg-majorelle-gradient {
+        background: linear-gradient(135deg, #7A9BCF 0%, #5A7EB8 100%);
+    }
+    
+    .bg-terracotta-gradient {
+        background: linear-gradient(135deg, #E58C65 0%, #D87A4F 100%);
+    }
+    
+    .bg-majorelle-subtle {
+        background-color: rgba(90, 126, 184, 0.1);
+    }
+    
+    .text-majorelle {
+        color: #5A7EB8;
+    }
+    
+    .bg-terracotta-subtle {
+        background-color: rgba(216, 122, 79, 0.1);
+    }
+    
+    .text-terracotta {
+        color: #D87A4F;
+    }
+    
+    .smaller-text {
+        font-size: 0.7rem;
+        letter-spacing: 0.05em;
+    }
+    
+    .btn-icon-round {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        border: none;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-soft-danger {
+        background-color: #fee2e2;
+        color: #ef4444;
+    }
+    
+    .btn-soft-danger:hover {
+        background-color: #ef4444;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .btn-soft-success {
+        background-color: #d1fae5;
+        color: #10b981;
+    }
+    
+    .btn-soft-success:hover {
+        background-color: #10b981;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .transition-base {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .transition-base:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.08) !important;
+    }
+    
+    .grayscale {
+        filter: grayscale(0.8);
+        opacity: 0.7;
+    }
+</style>
+
+<script>
+    let pendingUserId = null;
+    let pendingStatus = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // ... (existing search and filter code) ...
+        const searchInput = document.getElementById('searchInput');
+        const filterRole = document.getElementById('filterRole');
+        const filterStatus = document.getElementById('filterStatus');
+        const sortBy = document.getElementById('sortBy');
+        const usersList = document.getElementById('usersList');
+        const userCards = usersList.querySelectorAll('.user-card');
+
+        function filterUsers() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const roleFilter = filterRole.value;
+            const statusFilter = filterStatus.value;
+
+            userCards.forEach(card => {
+                const email = card.dataset.email;
+                const nom = card.dataset.nom;
+                const prenom = card.dataset.prenom;
+                const role = card.dataset.role;
+                const status = card.dataset.status;
+
+                const matchesSearch = email.includes(searchTerm) ||
+                                    nom.includes(searchTerm) ||
+                                    prenom.includes(searchTerm);
+                const matchesRole = !roleFilter || role === roleFilter;
+                const matchesStatus = !statusFilter || status === statusFilter;
+
+                card.style.display = matchesSearch && matchesRole && matchesStatus ? '' : 'none';
+            });
+        }
+
+        function sortUsers() {
+            const sortValue = sortBy.value;
+            const cardsArray = Array.from(userCards);
+
+            cardsArray.sort((a, b) => {
+                switch(sortValue) {
+                    case 'nom':
+                        const nameA = (a.dataset.prenom + ' ' + a.dataset.nom).trim().toLowerCase();
+                        const nameB = (b.dataset.prenom + ' ' + b.dataset.nom).trim().toLowerCase();
+                        return nameA.localeCompare(nameB);
+                    case 'email':
+                        return a.dataset.email.localeCompare(b.dataset.email);
+                    default:
+                        return 0;
+                }
+            });
+
+            cardsArray.forEach(card => usersList.appendChild(card));
+        }
+
+        searchInput.addEventListener('input', filterUsers);
+        filterRole.addEventListener('change', filterUsers);
+        filterStatus.addEventListener('change', filterUsers);
+        sortBy.addEventListener('change', sortUsers);
+
+        // Confirm Action Button
+        document.getElementById('btnConfirmStatus').addEventListener('click', function() {
+            if (pendingUserId !== null) {
+                executeToggleStatus(pendingUserId, pendingStatus);
+            }
+        });
+    });
+
+    // Function to trigger the custom confirmation modal
+    function toggleUserStatus(userId, newStatus) {
+        pendingUserId = userId;
+        pendingStatus = newStatus;
+        
+        const message = newStatus 
+            ? "Cet utilisateur pourra à nouveau se connecter et accéder à ses services." 
+            : "L'utilisateur sera immédiatement déconnecté et ne pourra plus accéder à son compte.";
+        
+        document.getElementById('confirmStatusMessage').innerText = message;
+        
+        const modal = new bootstrap.Modal(document.getElementById('confirmStatusModal'));
+        modal.show();
+    }
+
+    // Actual execution after confirmation
+    function executeToggleStatus(userId, newStatus) {
+        fetch('/SuperAdmin/ToggleUserStatus', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+            },
+            body: JSON.stringify({ userId: userId, isActive: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erreur: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue lors de la modification du statut.');
+        });
+    }
+
+    // Function to view user details
+    function viewUserDetails(userId) {
+        fetch(`/SuperAdmin/UserDetailsModal/${userId}`)
+            .then(response => response.text())
+            .then(html => {
+                let modalContainer = document.getElementById('userDetailsModalContainer');
+                if (!modalContainer) {
+                    modalContainer = document.createElement('div');
+                    modalContainer.id = 'userDetailsModalContainer';
+                    modalContainer.innerHTML = `
+                        <div class="modal fade" id="userDetailsModal" tabindex="-1">
+                            <div class="modal-dialog modal-xl">
+                                <div class="modal-content border-0 shadow-lg rounded-4">
+                                    <div id="userDetailsModalContent"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modalContainer);
+                }
+
+                document.getElementById('userDetailsModalContent').innerHTML = html;
+                const modal = new bootstrap.Modal(document.getElementById('userDetailsModal'));
+                modal.show();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Une erreur est survenue lors du chargement des détails.');
+            });
+    }
+</script>

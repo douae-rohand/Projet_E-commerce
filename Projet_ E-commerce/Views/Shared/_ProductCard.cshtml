@@ -1,0 +1,65 @@
+@model ProductViewModel?
+@{
+    var productId = Model?.Id ?? (int)(ViewData["Id"] ?? 0);
+    var productName = Model?.Name ?? (string)(ViewData["Name"] ?? "Produit");
+
+    var price = Model?.Price ?? (ViewData["Price"] as decimal? ?? System.Convert.ToDecimal(ViewData["Price"] ?? 0));
+    var originalPrice = Model?.OriginalPrice ?? (ViewData["OriginalPrice"] as decimal? ?? System.Convert.ToDecimal(ViewData["OriginalPrice"] ?? 0));
+
+    var image = Model?.Image ?? (string)(ViewData["Image"] ?? "");
+    var rating = Model?.Rating ?? (double)(ViewData["Rating"] ?? 0.0);
+    var reviews = Model?.Reviews ?? (int)(ViewData["Reviews"] ?? 0);
+    var category = Model?.Category ?? (string)(ViewData["Category"] ?? "");
+    var cooperative = Model?.Cooperative ?? (string)(ViewData["Cooperative"] ?? "");
+    var isBestSeller = Model?.IsBestSeller ?? (bool)(ViewData["IsBestSeller"] ?? false);
+    var isNew = Model?.IsNew ?? (bool)(ViewData["IsNew"] ?? false);
+    var hasDiscount = originalPrice > 0;
+}
+
+
+<a asp-controller="Catalog" asp-action="Detail" asp-route-id="@productId" class="product-card">
+    <div class="product-card-image-wrapper">
+        <img src="@image" alt="@productName" class="product-card-image" />
+        
+        @if (isBestSeller || isNew)
+        {
+            <span class="product-badge @(isBestSeller ? "product-badge-bestseller" : "product-badge-new")">
+                @(isBestSeller ? "Best Seller" : "Nouveau")
+            </span>
+        }
+
+
+    </div>
+
+    <div class="product-card-content">
+        <div class="product-card-category">@category</div>
+        <h3 class="product-card-title">@productName</h3>
+        <div class="product-card-cooperative">
+            <i class="bi bi-geo-alt"></i>
+            <span>@cooperative</span>
+        </div>
+
+        <div class="product-card-rating">
+            <div class="product-stars">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <i class="bi bi-star-fill @(i <= Math.Floor(rating) ? "star-filled" : "star-empty")"></i>
+                }
+            </div>
+            <span class="product-reviews">(@reviews)</span>
+        </div>
+
+        <div class="product-card-footer">
+            <div class="product-price-wrapper">
+                <span class="product-price">@price DH</span>
+                @if (hasDiscount)
+                {
+                    <span class="product-price-original">@originalPrice DH</span>
+                }
+            </div>
+            <span class="product-add-btn" role="button" tabindex="0" onclick="event.preventDefault(); window.location.href='@Url.Action("Detail", "Catalog", new { id = productId })';">
+                <i class="bi bi-cart-plus"></i>
+            </span>
+        </div>
+    </div>
+</a>

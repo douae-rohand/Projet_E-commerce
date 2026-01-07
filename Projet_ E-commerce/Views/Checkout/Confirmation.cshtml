@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Confirmation - Souk 212";
+}
+
+<div class="container py-5 mt-5 text-center min-vh-50 d-flex flex-column align-items-center justify-content-center animate-fade-in-up">
+    <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+        <i class="bi bi-check-lg display-4"></i>
+    </div>
+    
+    <h1 class="display-5 font-display fw-bold mb-3">Merci pour votre commande !</h1>
+    <p class="lead text-muted mb-4" style="max-width: 600px;">
+        Votre commande a été enregistrée avec succès. Vous recevrez bientôt un email de confirmation avec les détails de la livraison.
+    </p>
+
+    <div class="d-flex gap-3 justify-content-center">
+        <a asp-controller="Account" asp-action="UserDashboard" class="btn btn-primary px-4 py-2 rounded-pill fw-bold">
+            Voir mes commandes
+        </a>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-bold">
+            Retour à l'accueil
+        </a>
+    </div>
+</div>

@@ -1,0 +1,311 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Connexion - Souk 212";
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Moroccan Palette */
+        :root {
+            --ciel: #A3C6D3;
+            --sable: #FFB35B;
+            --blush: #FDE2D2;
+            --terracotta: #C05522;
+            --majorelle: #003D8E;
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --text-muted: #6c757d;
+        }
+
+        /* Animations */
+        @@keyframes fadeInUp {
+            from { opacity: 0; transform: translate3d(0, 40px, 0); }
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+
+       @@keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out both; }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, var(--ciel) 0%, var(--sable) 50%, var(--terracotta) 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Decorative elements */
+        .shape-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.1;
+        }
+
+        .bg-ciel-30 { background-color: rgba(163, 198, 211, 0.3); }
+        .bg-sable-30 { background-color: rgba(255, 179, 91, 0.3); }
+        .bg-terracotta-10 { background-color: rgba(192, 85, 34, 0.1); }
+
+        /* Moroccan pattern */
+        .moroccan-pattern-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            z-index: 0;
+        }
+
+        .moroccan-pattern-bg svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .container-fluid-custom {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .auth-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            padding: 2rem 1.5rem;
+            max-width: 450px;
+            width: 100%;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .logo-section img {
+            height: 80px;
+            width: auto;
+            margin-bottom: 0.5rem;
+        }
+
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .text-terracotta {
+            color: var(--terracotta) !important;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-control:focus {
+            border-color: var(--terracotta);
+            box-shadow: 0 0 0 3px rgba(192, 85, 34, 0.1);
+            background: white;
+        }
+
+        .input-group-text {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #e9ecef;
+            border-right: none;
+            color: var(--text-muted);
+        }
+
+        .form-control:focus + .input-group-text {
+            border-color: var(--terracotta);
+        }
+
+        .btn-auth {
+            background: linear-gradient(135deg, var(--terracotta) 0%, #A0441A 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(192, 85, 34, 0.3);
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(192, 85, 34, 0.4);
+            color: white;
+        }
+
+        .divider {
+            position: relative;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e9ecef, transparent);
+        }
+
+        .divider span {
+            background: var(--glass-bg);
+            padding: 0 1rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .auth-links {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .auth-links a {
+            color: var(--terracotta);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .auth-links a:hover {
+            color: #A0441A;
+            text-decoration: underline;
+        }
+
+        .alert {
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+
+        .form-control:focus {
+            border-color: var(--terracotta);
+            box-shadow: 0 0 0 4px rgba(192, 85, 34, 0.1);
+            background: white;
+            transform: scale(1.01);
+        }
+
+        .btn-auth:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <!-- Decorative elements -->
+    <div class="shape-blob bg-ciel-30 blur-3xl" style="top: 10%; right: 10%; width: 200px; height: 200px;"></div>
+    <div class="shape-blob bg-sable-30 blur-3xl" style="bottom: 10%; left: 10%; width: 250px; height: 250px;"></div>
+    <div class="shape-blob bg-terracotta-10 blur-3xl" style="top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px;"></div>
+
+    <!-- Moroccan pattern -->
+    <div class="moroccan-pattern-bg">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+            <pattern id="moroccan-pattern" patternUnits="userSpaceOnUse" width="20" height="20">
+                <path d="M10 0 L20 10 L10 20 L0 10 Z" fill="currentColor" />
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#moroccan-pattern)" />
+        </svg>
+    </div>
+
+    <!-- Back to Home Button -->
+    <a href="/" class="btn btn-light rounded-pill shadow-sm position-fixed top-0 start-0 m-4 px-4 py-2 fw-semibold animate-fade-in-up" 
+       style="z-index: 1000; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.1);">
+        <i class="bi bi-arrow-left me-2 text-terracotta"></i> Retour à l'accueil
+    </a>
+
+    <div class="container-fluid-custom">
+        <div class="auth-card">
+            <!-- Logo Section -->
+            <div class="logo-section animate-fade-in-up">
+                <img src="~/images/logo.png" alt="Souk 212 Logo" class="animate-float" />
+                <h1 class="font-display fw-bold h3 mb-2">
+                    Souk<span class="text-terracotta"> 212</span>
+                </h1>
+                <p class="text-muted small mb-0">Trésors des Coopératives</p>
+            </div>
+
+            <h2 class="text-center font-display fw-bold mb-4 animate-fade-in-up stagger-1">
+                Bienvenue
+            </h2>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success animate-fade-in-up stagger-2">
+                    <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger animate-fade-in-up stagger-2">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i>@TempData["ErrorMessage"]
+                </div>
+            }
+
+            <form asp-controller="Auth" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="animate-fade-in-up stagger-3">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" class="form-control" name="email" placeholder="votre@email.com" required />
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Mot de passe</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control" name="password" placeholder="Votre mot de passe" required />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-auth mb-3">
+                    Se connecter
+                </button>
+            </form>
+
+            <div class="auth-links animate-fade-in-up stagger-3">
+                <p class="mb-0">Nouveau ici ? <a href="/Auth/Register">Créer un compte</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

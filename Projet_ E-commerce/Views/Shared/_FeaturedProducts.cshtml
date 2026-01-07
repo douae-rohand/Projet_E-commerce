@@ -1,0 +1,37 @@
+@model List<Projet__E_commerce.Models.ProductViewModel>
+
+<section class="py-5 bg-white">
+    <div class="container">
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row align-items-md-end justify-content-md-between gap-3 mb-5">
+            <div>
+                <span class="small fw-medium text-terracotta mb-2 d-block">Sélection du Terroir</span>
+                <h2 class="display-5 font-display fw-bold mb-3">
+                    Produits des Coopératives
+                </h2>
+                <p class="text-muted" style="max-width: 500px;">
+                    Découvrez les meilleurs produits artisanaux, certifiés et traçables de nos coopératives partenaires
+                </p>
+            </div>
+            <a asp-controller="Catalog" asp-action="Index" class="category-link-all">
+                Voir tous les produits
+                <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="row g-3 g-md-4">
+            @{ 
+                int index = 0;
+            }
+
+            @foreach (var product in Model)
+            {
+                <div class="col-6 col-md-4 col-lg-3 animate-fade-in-up" style="animation-delay: @(index * 0.05)s;">
+                    <partial name="_ProductCard" model="product" />
+                </div>
+                index++;
+            }
+        </div>
+    </div>
+</section>
