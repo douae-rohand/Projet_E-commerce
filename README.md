@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 style="font-family: 'Playfair Display', serif; color: #D87A4F; font-size: 3em;">CoopMaroc Platform</h1>
+  <h1 style="font-family: 'Playfair Display', serif; color: #D87A4F; font-size: 3em;">SOOK212 Platform</h1>
   <p style="font-size: 1.2em; color: #555;">La solution digitale premium pour l'essor des coopératives marocaines</p>
   
   <p>
