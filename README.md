@@ -108,5 +108,4 @@ Une expérience E-commerce complète.
 
 
 ## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
